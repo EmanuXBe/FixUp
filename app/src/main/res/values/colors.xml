@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- FixUp Palette -->
+    <color name="graphite">#FF2D2E31</color>
+    <color name="grey_olive">#FF9A948D</color>
+    <color name="soft_fawn">#FFCEAC78</color>
+    <color name="bright_snow">#FFF8F8F8</color>
+    <color name="charcoal_brown">#FF423D32</color>
+</resources>
