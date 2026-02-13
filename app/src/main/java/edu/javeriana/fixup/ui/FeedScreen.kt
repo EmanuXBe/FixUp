@@ -50,7 +50,7 @@ fun FeedScreen() {
                     onValueChange = {},
                     placeholder = { Text("Ingresa tu nueva idea aqui") },
                     leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = null)
+                        Icon(Icons.Default.Search, contentDescription = "Barra de navegacion")
                     },
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -70,7 +70,7 @@ fun FeedScreen() {
             item {
                 Image(
                     painter = painterResource(R.drawable.featured_image),
-                    contentDescription = null,
+                    contentDescription = "imagen destacada de la semana",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -110,7 +110,7 @@ fun FeedScreen() {
 
                             Image(
                                 painter = painterResource(category.first),
-                                contentDescription = null,
+                                contentDescription = "barra de categorias",
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .size(80.dp)
@@ -160,7 +160,7 @@ fun FeedScreen() {
 
                                 Image(
                                     painter = painterResource(publication.first),
-                                    contentDescription = null,
+                                    contentDescription = "Publicaciones",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .fillMaxWidth()
