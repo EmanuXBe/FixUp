@@ -2,13 +2,26 @@
 FixUp es una aplicación en la cual un susuario podra rentar y remodelar apartamentos, tendra una gran variedad de categorias que podra seleccionar para solicitar servicios de remodelacion. A su misma vez dispondra de gran variedad de publicaciones de otros usuarios para que pueda encontrar la mejor opcion para dormir.
 
 ## Descripción
-FixUp dispondra a los usuarios los siguientes servicios:
+FixUp es una aplicación que conecta usuarios que buscan apartamentos en renta con servicios de remodelación, permitiendo gestionar todo el proceso desde una sola aplicación. La app ofrece funcionalidades diferenciadas para clientes y administradores.
 
-- Registrarse e iniciar sesion.
-- Buscar apartamentos disponibles en renta.
-- Solicitar servicios de remodelaión.
-- Gestionar spolicitudes y estados de servicios.
-- 
+- Registrarse e iniciar sesion como cliente o administrador.
+- Buscar apartamentos disponibles en renta (Cliente).
+- Solicitar servicios de remodelaión (Cliente).
+- Gestionar solicitudes y estados de servicios (Adminitrador).
+- Publicar servicios de remodelacion como categorias; Exteriores, baños, cocinas, tejados, pisos, paredes, tuberias, energias limpias, mascotas. (Administrador).
+- Publicar apartamentos en renta, en el cual estara la descrpcion del apartamento, calificaciones anteriores, precio (Administrador).
+- Calificar el arrendamiento solicitado (Cliente)
+- Gestionar gananciar por rentar apartamentos. (Administrador).
+- Acceso a un mapinterno en la App para ver cual apartamento que mas se ajusta a as necesidades. (Cliente).
+
+
+### ¿Por que somos diferentes?
+FixUp integra en una sola plataforma la renta de apartamentos y la solicitud de servicios de remodelación, ofreciendo una solución completa y eficiente tanto para clientes como para administradores.
+
+- Los usuarios pueden encontrar apartamentos que se ajusten a sus necesidades específicas, visualizar fotos, reseñas, comentarios y precios antes de tomar una decisión. Esto les permite comparar opciones y elegir la mejor alternativa de forma rápida y segura. Ademas, la posibilidad de solicitar servicios de remodelación dentro de la misma aplicación garantiza que el espacio pueda adaptarse completamente a sus preferencias.
+
+- Los administradores pueden publicar apartamentos y servicios de remodelación, gestionar solicitudes y llevar un control de las ganancias generadas. FixUp ofrece una plataforma segura y organizada para ampliar la visibilidad de sus servicios y optimizar su gestión.
+
 Repositorio inicial para el proyecto FixUp con dos áreas principales:
 
 - `docs/`: estructura para la documentación que se publicará en la wiki.
