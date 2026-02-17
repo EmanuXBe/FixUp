@@ -1,5 +1,5 @@
 # *FixUp*
-FixUp es una aplicación en la cual un susuario podra rentar y remodelar apartamentos, tendra una gran variedad de categorias que podra seleccionar para solicitar servicios de remodelacion. A su misma vez dispondra de gran variedad de publicaciones de otros usuarios para que pueda encontrar la mejor opcion para dormir.
+FixUp es una aplicación en la cual un susuario podra rentar y remodelar apartamentos, tendra una gran variedad de categorias que podra seleccionar para solicitar servicios de remodelacion. A su misma vez dispondra de gran variedad de publicaciones de otros usuarios para que pueda encontrar la mejor opcion para dormir..
 
 ## Descripción
 FixUp es una aplicación que conecta usuarios que buscan apartamentos en renta con servicios de remodelación, permitiendo gestionar todo el proceso desde una sola aplicación. La app ofrece funcionalidades diferenciadas para clientes y administradores.
