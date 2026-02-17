@@ -1,4 +1,4 @@
-# FixUp
+# *FixUp*
 
 Repositorio inicial para el proyecto FixUp con dos áreas principales:
 
