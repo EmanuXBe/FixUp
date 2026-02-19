@@ -21,10 +21,15 @@ Repositorio inicial para el proyecto FixUp con dos áreas principales:
 - `docs/`: estructura para la documentación que se publicará en la wiki.
 - `flutter_app/`: estructura base para el código fuente de la app en Flutter.
 
-## Estructura sugerida
+#### Estructura de FixUp
 
 ```
 .
+├── .idea/
+│   └── *.xml
+├── app/
+│   ├── build.gradle.kts
+│   └── src/
 ├── docs/
 │   ├── branding/
 │   ├── diagrams/
@@ -33,15 +38,26 @@ Repositorio inicial para el proyecto FixUp con dos áreas principales:
 │   ├── figma/
 │   ├── requirements/
 │   └── wiki/
-└── flutter_app/
-    ├── assets/
-    ├── lib/
-    └── test/
+├── flutter_app/
+│   ├── assets/
+│   ├── lib/
+│   └── test/
+├── gradle/
+│   └── wrapper/
+├── build.gradle.kts
+├── gradle.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle.kts
+└── README.md
+
 ```
 
-## Ramas
+##### Ramas
 
-- **docs/wiki**: mantener aquí la documentación que se sincronizará con la wiki.
-- **main** (o `flutter`): mantener aquí el código fuente de Flutter.
-
-> Puedes mover la carpeta `docs/` a la rama de documentación y dejar `flutter_app/` en la rama de código.
+- **main** (o `flutter`): Mantener aquí el código fuente de Flutter.
+- Es toda la rama del proyecto, mantiene la version estable y lista para producción.
+- **Develop**: Rama de integración, aca se unen todas las funcionalidades antes de pasar al main.
+- **Feature**: Rama para desarrollar nuevas funcionalidades como el login
+- **docs/wiki**: Mantener aquí la documentación que se sincronizará con la wiki.
+Se puede mover la carpeta `docs/` a la rama de documentación y dejar `flutter_app/` en la rama de código.
