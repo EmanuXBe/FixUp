@@ -64,3 +64,17 @@ Repositorio inicial para el proyecto FixUp con dos áreas principales:
 - **Feature**: Rama para desarrollar nuevas funcionalidades como el login
 - **docs/wiki**: Mantener aquí la documentación que se sincronizará con la wiki.
 Se puede mover la carpeta `docs/` a la rama de documentación y dejar `flutter_app/` en la rama de código.
+
+## Tecnologias
+- Flotter (Android Studio)
+- Kotlin
+- Gradle
+- Figma
+
+## Equipo
+- Juan Sebastian Rodriguez Pabon
+- Emmanuel
+- Violeta
+
+
+FixUp no es solo una aplicación, es una solución diseñada para simplificar procesos y mejorar la experiencia del usuario. Estamos construyendo una plataforma escalable, moderna y enfocada en la eficiencia.
