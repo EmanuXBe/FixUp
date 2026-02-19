@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/84ea4d47-cc9e-4342-a1e1-df4e50397cee" width="300"/>
+  <img src="https://github.com/user-attachments/assets/84ea4d47-cc9e-4342-a1e1-df4e50397cee" width="800"/>
 </div>
 
 FixUp es una aplicación en la cual un susuario podra rentar y remodelar apartamentos, tendra una gran variedad de categorias que podra seleccionar para solicitar servicios de remodelacion. A su misma vez dispondra de gran variedad de publicaciones de otros usuarios para que pueda encontrar la mejor opcion para dormir..
