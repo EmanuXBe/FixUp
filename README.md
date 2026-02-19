@@ -3,17 +3,10 @@ FixUp es una aplicación en la cual un susuario podra rentar y remodelar apartam
 
 ## Descripción
 FixUp es una aplicación que conecta usuarios que buscan apartamentos en renta con servicios de remodelación, permitiendo gestionar todo el proceso desde una sola aplicación. La app ofrece funcionalidades diferenciadas para clientes y administradores.
-<img width="1049" height="735" alt="image" src="https://github.com/user-attachments/assets/0dd3ca73-66ac-443d-8283-d5958985a3c1" />
 
- Registrarse e iniciar sesion como cliente o administrador.
-- Buscar apartamentos disponibles en renta (Cliente).
-- Solicitar servicios de remodelaión (Cliente).
-- Gestionar solicitudes y estados de servicios (Adminitrador).
-- Publicar servicios de remodelacion como categorias; Exteriores, baños, cocinas, tejados, pisos, paredes, tuberias, energias limpias, mascotas. (Administrador).
-- Publicar apartamentos en renta, en el cual estara la descrpcion del apartamento, calificaciones anteriores, precio (Administrador).
-- Calificar el arrendamiento solicitado (Cliente)
-- Gestionar gananciar por rentar apartamentos. (Administrador).
-- Acceso a un mapinterno en la App para ver cual apartamento que mas se ajusta a as necesidades. (Cliente).
+Registrarse e iniciar sesion como cliente o administrador.
+
+<img width="1049" height="735" alt="image" src="https://github.com/user-attachments/assets/0dd3ca73-66ac-443d-8283-d5958985a3c1" />
 
 
 ### ¿Por que somos diferentes?
