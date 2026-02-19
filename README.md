@@ -76,5 +76,5 @@ Se puede mover la carpeta `docs/` a la rama de documentación y dejar `flutter_a
 - Emmanuel
 - Violeta
 
-
-FixUp no es solo una aplicación, es una solución diseñada para simplificar procesos y mejorar la experiencia del usuario. Estamos construyendo una plataforma escalable, moderna y enfocada en la eficiencia.
+# ANIMATE CAMARADA
+INSTALA YAAA FixUp, no es solo una aplicación, es una solución diseñada para simplificar procesos y mejorar la experiencia del usuario. Estamos construyendo una plataforma escalable, moderna y enfocada en la eficiencia.
