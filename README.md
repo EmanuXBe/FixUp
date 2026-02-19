@@ -1,4 +1,3 @@
-# *FixUp*
 <div align="center">
   <img src="https://github.com/user-attachments/assets/84ea4d47-cc9e-4342-a1e1-df4e50397cee" width="300"/>
 </div>
