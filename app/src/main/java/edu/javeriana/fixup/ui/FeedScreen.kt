@@ -1,7 +1,6 @@
 package edu.javeriana.fixup.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -10,13 +9,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +25,124 @@ import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
+
+@Composable
+fun SearchBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text("Ingresa tu nueva idea aqui") },
+        leadingIcon = {
+            Icon(Icons.Default.Search, contentDescription = "Barra de navegacion")
+        },
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun SectionTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+    showArrow: Boolean = false,
+    autoMirrored: Boolean = false
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = text,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+        if (showArrow) {
+            if (autoMirrored) {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+            } else {
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
+            }
+        }
+    }
+}
+
+@Composable
+fun FeaturedImage(
+    imageRes: Int,
+    modifier: Modifier = Modifier
+) {
+    Image(
+        painter = painterResource(imageRes),
+        contentDescription = "imagen destacada de la semana",
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(200.dp)
+            .clip(RoundedCornerShape(18.dp))
+    )
+}
+
+@Composable
+fun CategoryItem(
+    imageRes: Int,
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(imageRes),
+            contentDescription = "barra de categorias",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = title)
+    }
+}
+
+@Composable
+fun PublicationCard(
+    imageRes: Int,
+    title: String,
+    price: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        modifier = modifier.width(220.dp)
+    ) {
+        Column {
+            Image(
+                painter = painterResource(imageRes),
+                contentDescription = "Publicaciones",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp)
+            )
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = price,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun FeedScreen() {
@@ -45,15 +162,10 @@ fun FeedScreen() {
 
             //SEARCH BAR
             item {
-                OutlinedTextField(
+                SearchBar(
                     value = "",
                     onValueChange = {},
-                    placeholder = { Text("Ingresa tu nueva idea aqui") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Barra de navegacion")
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
                 )
             }
 
@@ -68,30 +180,20 @@ fun FeedScreen() {
 
             //IMAGEN DESTACADA
             item {
-                Image(
-                    painter = painterResource(R.drawable.featured_image),
-                    contentDescription = "imagen destacada de la semana",
-                    contentScale = ContentScale.Crop,
+                FeaturedImage(
+                    imageRes = R.drawable.featured_image,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(18.dp))
                 )
             }
 
             //TITULO CATEGORIAS
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Categorias",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null)
-                }
+                SectionTitle(
+                    text = "Categorias",
+                    showArrow = true,
+                    autoMirrored = true,
+                    modifier = Modifier
+                )
             }
 
             //CATEGORIAS
@@ -106,38 +208,22 @@ fun FeedScreen() {
 
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(categories) { category ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-                            Image(
-                                painter = painterResource(category.first),
-                                contentDescription = "barra de categorias",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .size(80.dp)
-                                    .clip(CircleShape)
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(text = category.second)
-                        }
+                        CategoryItem(
+                            imageRes = category.first,
+                            title = category.second
+                        )
                     }
                 }
             }
 
             //TITULO PUBLICACIONES
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Publicaciones",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Icon(Icons.Default.KeyboardArrowRight, null)
-                }
+                SectionTitle(
+                    text = "Publicaciones",
+                    showArrow = true,
+                    autoMirrored = false,
+                    modifier = Modifier
+                )
             }
 
             //PUBLICACIONES
@@ -151,38 +237,11 @@ fun FeedScreen() {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     items(publications) { publication ->
 
-                        Card(
-                            shape = RoundedCornerShape(18.dp),
-                            modifier = Modifier.width(220.dp)
-                        ) {
-
-                            Column {
-
-                                Image(
-                                    painter = painterResource(publication.first),
-                                    contentDescription = "Publicaciones",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(140.dp)
-                                )
-
-                                Column(modifier = Modifier.padding(12.dp)) {
-
-                                    Text(
-                                        text = publication.second,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-
-                                    Spacer(modifier = Modifier.height(4.dp))
-
-                                    Text(
-                                        text = publication.third,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                        }
+                        PublicationCard(
+                            imageRes = publication.first,
+                            title = publication.second,
+                            price = publication.third
+                        )
                     }
                 }
             }
@@ -194,9 +253,13 @@ fun FeedScreen() {
 
 //BOTTOM NAV
 @Composable
-fun BottomNavBar() {
+fun BottomNavBar(
+    modifier: Modifier = Modifier
+) {
 
-    NavigationBar {
+    NavigationBar(
+        modifier = modifier
+    ) {
 
         NavigationBarItem(
             selected = true,
@@ -207,7 +270,7 @@ fun BottomNavBar() {
         NavigationBarItem(
             selected = false,
             onClick = {},
-            icon = { Icon(Icons.Default.List, null) }
+            icon = { Icon(Icons.AutoMirrored.Filled.List, null) }
         )
 
         NavigationBarItem(
