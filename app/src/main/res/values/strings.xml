@@ -27,6 +27,7 @@
 
 <!-- Icons -->
 <string name="google_icon">G</string>
+    <string name="name">name</string>
 
 
 </resources>
