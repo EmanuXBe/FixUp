@@ -12,7 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.R
-import edu.javeriana.fixup.core.designsystem.*
+import edu.javeriana.fixup.componentsUtils.*
 import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 

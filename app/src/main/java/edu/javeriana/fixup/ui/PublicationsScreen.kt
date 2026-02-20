@@ -1,4 +1,5 @@
 package edu.javeriana.fixup.ui
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -25,10 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.componentsUtils.SearchBar
 import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
-
-
 
 @Composable //tarjeta de publicacion
 fun PublicationGridCard(
@@ -40,10 +40,11 @@ fun PublicationGridCard(
 ) {
     Card(
         shape = RoundedCornerShape(14.dp), // Esquinas redondeadas
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
-
             // Imagen superior de la tarjeta
             Image(
                 painter = painterResource(imageRes),
@@ -55,11 +56,9 @@ fun PublicationGridCard(
                     .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp))
             )
 
-
             Column(
                 modifier = Modifier.padding(10.dp)
             ) {
-
                 // Texto de categoría
                 Text(
                     text = category,
@@ -101,7 +100,6 @@ fun PublicationGridCard(
     }
 }
 
-
 @Composable //titulo de seccion
 fun SectionTitleSimple(
     text: String,
@@ -126,15 +124,16 @@ fun SectionTitleSimple(
     }
 }
 
-
 @Composable //boton de navigation bar
 fun PublicationsBottomNavBar(
     selectedIndex: Int, // Índice seleccionado actualmente
     onItemSelected: (Int) -> Unit, // Función que se ejecuta al seleccionar un item
     modifier: Modifier = Modifier
 ) {
-    NavigationBar(modifier = modifier) {
-
+    NavigationBar(
+        modifier = modifier,
+        containerColor = Color.White
+    ) {
         // Item 0 - Home
         NavigationBarItem(
             selected = selectedIndex == 0,
@@ -172,28 +171,24 @@ fun PublicationsBottomNavBar(
     }
 }
 
-
 @Composable
 fun PublicationsScreen(
     modifier: Modifier = Modifier
 ) {
-
-
     // Guarda el texto que el usuario escribe en el buscador
     var searchQuery by remember { mutableStateOf("") }
 
     // Guarda qué item del bottom nav está seleccionado
     var selectedNavItem by remember { mutableStateOf(1) }
 
-
     // Lista estática de publicaciones
     val publications = listOf(
-        listOf(R.drawable.sala, "Salas", "Salas a tu medida", "Desde \$300.000"),
-        listOf(R.drawable.comedor, "Comedores", "¡Arma tu comedor!", "Desde \$450.000"),
-        listOf(R.drawable.pisos, "Pisos y paredes", "Cambia pisos y paredes", "Desde \$150.000"),
-        listOf(R.drawable.pisos2, "Pisos y paredes", "Remodela tu piso", "Desde \$90.000"),
-        listOf(R.drawable.luz, "Iluminación", "Ilumina tu hogar", "Desde \$200.000"),
-        listOf(R.drawable.cocina, "Cocina", "Renueva tu cocina", "Desde \$500.000")
+        listOf(R.drawable.sala, "Salas", "Salas a tu medida", "Desde $300.000"),
+        listOf(R.drawable.comedor, "Comedores", "¡Arma tu comedor!", "Desde $450.000"),
+        listOf(R.drawable.pisos, "Pisos y paredes", "Cambia pisos y paredes", "Desde $150.000"),
+        listOf(R.drawable.pisos2, "Pisos y paredes", "Remodela tu piso", "Desde $90.000"),
+        listOf(R.drawable.luz, "Iluminación", "Ilumina tu hogar", "Desde $200.000"),
+        listOf(R.drawable.cocina, "Cocina", "Renueva tu cocina", "Desde $500.000")
     )
 
     //filtro de busqueda
@@ -201,7 +196,6 @@ fun PublicationsScreen(
         (it[2] as String).contains(searchQuery, ignoreCase = true) ||
                 (it[1] as String).contains(searchQuery, ignoreCase = true)
     }
-
 
     Scaffold(
         containerColor = BrightSnow, // Color de fondo
@@ -213,7 +207,6 @@ fun PublicationsScreen(
             )
         }
     ) { paddingValues ->
-
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -221,7 +214,6 @@ fun PublicationsScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Barra de búsqueda (se actualiza el estado)
@@ -243,10 +235,8 @@ fun PublicationsScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-
                 // Por cada publicación filtrada se crea una tarjeta
                 items(filteredPublications) { publication ->
-
                     PublicationGridCard(
                         imageRes = publication[0] as Int,
                         category = publication[1] as String,
@@ -258,7 +248,6 @@ fun PublicationsScreen(
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
