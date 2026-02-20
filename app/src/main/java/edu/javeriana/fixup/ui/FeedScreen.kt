@@ -11,16 +11,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.componentsUtils.*
 import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
-fun FeedScreen() {
+fun FeedScreen(navController: NavController) {
     Scaffold(
         containerColor = BrightSnow,
-        bottomBar = { BottomNavBar() }
+        bottomBar = { BottomNavigationBar(navController = navController) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -116,6 +118,6 @@ fun FeedScreen() {
 @Composable
 fun FeedScreenPreview() {
     FixUpTheme(darkTheme = false) {
-        FeedScreen()
+        FeedScreen(rememberNavController())
     }
 }

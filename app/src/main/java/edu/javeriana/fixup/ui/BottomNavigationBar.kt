@@ -23,24 +23,41 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.navigation.AppScreens
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(navController: NavController) {
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry.value?.destination
+
     NavigationBar(
         containerColor = Color.White
     ) {
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
-            selected = false,
-            onClick = { /*TODO*/ }
+            selected = currentDestination?.route == AppScreens.Feed.route,
+            onClick = { 
+                navController.navigate(AppScreens.Feed.route) {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Search, contentDescription = "Search") },
-            selected = false,
-            onClick = { /*TODO*/ }
+            selected = currentDestination?.route == AppScreens.Rent.route,
+            onClick = { 
+                navController.navigate(AppScreens.Rent.route) {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.AddBox, contentDescription = "Add", modifier = Modifier.size(28.dp)) },
@@ -53,7 +70,7 @@ fun BottomNavigationBar() {
                     Icon(Icons.Outlined.Notifications, contentDescription = "Notifications")
                 }
             },
-            selected = true,
+            selected = false, // Update with notification screen route
             onClick = { /*TODO*/ }
         )
         NavigationBarItem(
@@ -67,8 +84,13 @@ fun BottomNavigationBar() {
                     contentScale = ContentScale.Crop
                 )
             },
-            selected = false,
-            onClick = { /*TODO*/ }
+            selected = currentDestination?.route == AppScreens.Profile.route,
+            onClick = { 
+                navController.navigate(AppScreens.Profile.route) {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
     }
 }
@@ -77,6 +99,6 @@ fun BottomNavigationBar() {
 @Composable
 fun BottomNavigationBarPreview() {
     FixUpTheme {
-        BottomNavigationBar()
+        BottomNavigationBar(rememberNavController())
     }
 }

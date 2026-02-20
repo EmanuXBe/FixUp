@@ -8,5 +8,6 @@ enum class AppScreens(val route: String) {
     LogIn("login"),
     Register("register"),
     Feed("feed"),
-    Profile("profile")
+    Profile("profile"),
+    Rent("rent")
 }

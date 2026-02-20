@@ -6,7 +6,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import edu.javeriana.fixup.ui.FeedScreen
 import edu.javeriana.fixup.ui.LogInScreen
+import edu.javeriana.fixup.ui.ProfileScreen
 import edu.javeriana.fixup.ui.RegisterScreen
+import edu.javeriana.fixup.ui.view.RentScreen
 
 @Composable
 fun AppNavigation() {
@@ -40,11 +42,19 @@ fun AppNavigation() {
             )
         }
 
-        // Feed placeholder screen
+        // Feed screen
         composable(AppScreens.Feed.route) {
-            FeedScreen()
+            FeedScreen(navController = navController)
         }
 
-        // Profile: declared in AppScreens enum but not yet wired
+        // Rent screen
+        composable(AppScreens.Rent.route) {
+            RentScreen(navController = navController)
+        }
+
+        // Profile screen
+        composable(AppScreens.Profile.route) {
+            ProfileScreen(navController = navController)
+        }
     }
 }
