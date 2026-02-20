@@ -27,29 +27,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.componentsUtils.SearchBar
+import edu.javeriana.fixup.ui.model.PublicationUiModel
 import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
-@Composable //tarjeta de publicacion
+
+@Composable
 fun PublicationGridCard(
-    imageRes: Int,
-    category: String,
-    title: String,
-    price: String,
+    publication: PublicationUiModel,
     modifier: Modifier = Modifier
 ) {
     Card(
-        shape = RoundedCornerShape(14.dp), // Esquinas redondeadas
+        shape = RoundedCornerShape(14.dp),
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
-            // Imagen superior de la tarjeta
             Image(
-                painter = painterResource(imageRes),
-                contentDescription = title,
-                contentScale = ContentScale.Crop, //ajusta la imagen recortándola si es necesario
+                painter = painterResource(publication.imageRes),
+                contentDescription = publication.title,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
@@ -59,37 +57,34 @@ fun PublicationGridCard(
             Column(
                 modifier = Modifier.padding(10.dp)
             ) {
-                // Texto de categoría
                 Text(
-                    text = category,
+                    text = publication.category,
                     fontSize = 12.sp,
                     color = Color(0x80000000)
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                //titulo del producto
                 Text(
-                    text = title,
+                    text = publication.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    maxLines = 2, // Máximo 2 líneas
-                    overflow = TextOverflow.Ellipsis // Si es largo, agrega "..."
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // precio
                 Text(
                     text = buildAnnotatedString {
                         val prefix = "Desde "
-                        if (price.startsWith(prefix, ignoreCase = true)) {
+                        if (publication.price.startsWith(prefix, ignoreCase = true)) {
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append(prefix)
                             }
-                            append(price.substring(prefix.length))
+                            append(publication.price.substring(prefix.length))
                         } else {
-                            append(price)
+                            append(publication.price)
                         }
                     },
                     fontSize = 16.sp,
@@ -100,23 +95,22 @@ fun PublicationGridCard(
     }
 }
 
-@Composable //titulo de seccion
+
+@Composable
 fun SectionTitleSimple(
     text: String,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween // Separa texto e icono
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Texto del título
         Text(
             text = text,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
         )
 
-        // Icono de flecha
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null
@@ -124,45 +118,41 @@ fun SectionTitleSimple(
     }
 }
 
-@Composable //boton de navigation bar
+
+@Composable
 fun PublicationsBottomNavBar(
-    selectedIndex: Int, // Índice seleccionado actualmente
-    onItemSelected: (Int) -> Unit, // Función que se ejecuta al seleccionar un item
+    selectedIndex: Int,
+    onItemSelected: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavigationBar(
         modifier = modifier,
         containerColor = Color.White
     ) {
-        // Item 0 - Home
         NavigationBarItem(
             selected = selectedIndex == 0,
             onClick = { onItemSelected(0) },
             icon = { Icon(Icons.Default.Home, null) }
         )
 
-        // Item 1 - Lista
         NavigationBarItem(
             selected = selectedIndex == 1,
             onClick = { onItemSelected(1) },
             icon = { Icon(Icons.AutoMirrored.Filled.List, null) }
         )
 
-        // Item 2 - Carrito
         NavigationBarItem(
             selected = selectedIndex == 2,
             onClick = { onItemSelected(2) },
             icon = { Icon(Icons.Default.ShoppingCart, null) }
         )
 
-        // Item 3 - Notificaciones
         NavigationBarItem(
             selected = selectedIndex == 3,
             onClick = { onItemSelected(3) },
             icon = { Icon(Icons.Default.Notifications, null) }
         )
 
-        // Item 4 - Perfil
         NavigationBarItem(
             selected = selectedIndex == 4,
             onClick = { onItemSelected(4) },
@@ -175,38 +165,35 @@ fun PublicationsBottomNavBar(
 fun PublicationsScreen(
     modifier: Modifier = Modifier
 ) {
-    // Guarda el texto que el usuario escribe en el buscador
-    var searchQuery by remember { mutableStateOf("") }
 
-    // Guarda qué item del bottom nav está seleccionado
+    var searchQuery by remember { mutableStateOf("") }
     var selectedNavItem by remember { mutableStateOf(1) }
 
-    // Lista estática de publicaciones
+    // 🔹 Datos quemados usando entidad de UI
     val publications = listOf(
-        listOf(R.drawable.sala, "Salas", "Salas a tu medida", "Desde $300.000"),
-        listOf(R.drawable.comedor, "Comedores", "¡Arma tu comedor!", "Desde $450.000"),
-        listOf(R.drawable.pisos, "Pisos y paredes", "Cambia pisos y paredes", "Desde $150.000"),
-        listOf(R.drawable.pisos2, "Pisos y paredes", "Remodela tu piso", "Desde $90.000"),
-        listOf(R.drawable.luz, "Iluminación", "Ilumina tu hogar", "Desde $200.000"),
-        listOf(R.drawable.cocina, "Cocina", "Renueva tu cocina", "Desde $500.000")
+        PublicationUiModel(R.drawable.sala, "Salas", "Salas a tu medida", "Desde $300.000"),
+        PublicationUiModel(R.drawable.comedor, "Comedores", "¡Arma tu comedor!", "Desde $450.000"),
+        PublicationUiModel(R.drawable.pisos, "Pisos y paredes", "Cambia pisos y paredes", "Desde $150.000"),
+        PublicationUiModel(R.drawable.pisos2, "Pisos y paredes", "Remodela tu piso", "Desde $90.000"),
+        PublicationUiModel(R.drawable.luz, "Iluminación", "Ilumina tu hogar", "Desde $200.000"),
+        PublicationUiModel(R.drawable.cocina, "Cocina", "Renueva tu cocina", "Desde $500.000")
     )
 
-    //filtro de busqueda
     val filteredPublications = publications.filter {
-        (it[2] as String).contains(searchQuery, ignoreCase = true) ||
-                (it[1] as String).contains(searchQuery, ignoreCase = true)
+        it.title.contains(searchQuery, ignoreCase = true) ||
+                it.category.contains(searchQuery, ignoreCase = true)
     }
 
     Scaffold(
-        containerColor = BrightSnow, // Color de fondo
+        containerColor = BrightSnow,
         bottomBar = {
-            // Barra inferior
             PublicationsBottomNavBar(
                 selectedIndex = selectedNavItem,
                 onItemSelected = { selectedNavItem = it }
             )
         }
     ) { paddingValues ->
+
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -214,34 +201,27 @@ fun PublicationsScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Barra de búsqueda (se actualiza el estado)
             SearchBar(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier
+                onValueChange = { searchQuery = it }
             )
 
-            // Título de sección
             SectionTitleSimple(
                 text = "Publicaciones"
             )
 
-            // Grid de publicaciones (2 columnas)
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                // Por cada publicación filtrada se crea una tarjeta
                 items(filteredPublications) { publication ->
                     PublicationGridCard(
-                        imageRes = publication[0] as Int,
-                        category = publication[1] as String,
-                        title = publication[2] as String,
-                        price = publication[3] as String
+                        publication = publication
                     )
                 }
             }
