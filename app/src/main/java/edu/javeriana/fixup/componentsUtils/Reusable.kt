@@ -52,7 +52,8 @@ fun FixUpTextField(
     placeholder: String,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     OutlinedTextField(
         value = value,
@@ -67,6 +68,7 @@ fun FixUpTextField(
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         visualTransformation = visualTransformation,
+        trailingIcon = trailingIcon,
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = SoftFawn,
@@ -84,14 +86,18 @@ fun FixUpTextField(
 fun FixUpButton(
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         shape = RoundedCornerShape(14.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = SoftFawn,
-            contentColor = Color.White
+            contentColor = Color.White,
+            disabledContainerColor = SoftFawn.copy(alpha = 0.5f),
+            disabledContentColor = Color.White.copy(alpha = 0.7f)
         ),
         modifier = modifier
             .fillMaxWidth()
