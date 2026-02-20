@@ -1,32 +1,38 @@
 <resources>
-<string name="app_name">FixUp</string>
-<string name="app_name_title">FixUp</string>
+    <string name="app_name">FixUp</string>
+    <string name="app_name_title">FixUp</string>
 
-<!-- Navigation Tabs -->
-<string name="tab_login">Iniciar Sesión</string>
-<string name="tab_register">Registrarse</string>
-<string name="tab_separator">/</string>
+    <!-- Terms of Service -->
+    <string name="terms_service_prefix">Al hacer clic en continuar, aceptas nuestros </string>
+    <string name="terms_service_link">Términos de Servicio</string>
+    <string name="privacy_policy_mid"> y nuestra </string>
+    <string name="privacy_policy_link">Política de Privacidad</string>
 
-<!-- Input Fields -->
-<string name="email_placeholder">email@domain.com</string>
-<string name="cedula_placeholder">C.C.</string>
-<string name="password_placeholder">Contraseña</string>
+    <!-- Navigation Tabs -->
+    <string name="tab_login">Iniciar Sesión</string>
+    <string name="tab_register">Registrarse</string>
+    <string name="tab_separator">/</string>
 
-<!-- Role Selection -->
-<string name="role_label">Selecciona tu rol:</string>
-<string name="role_fixer">Fixer</string>
-<string name="role_cliente">Cliente</string>
+    <!-- Input Fields -->
+    <string name="email_placeholder">email@domain.com</string>
+    <string name="password_placeholder">Contraseña</string>
 
-<!-- Buttons -->
-<string name="btn_register">Registrarse</string>
-<string name="btn_google">Registrarse con Google</string>
-<string name="btn_apple">Registrarse con Apple</string>
+    <!-- Buttons -->
+    <string name="btn_continue">Continuar</string>
+    <string name="btn_google">Continuar con Google</string>
+    <string name="btn_apple">Continuar con Apple</string>
 
-<!-- Divider -->
-<string name="divider_or">o</string>
+    <!-- Divider -->
+    <string name="divider_or">o</string>
 
-<!-- Icons -->
-<string name="google_icon">G</string>
+    <!-- Icons -->
+    <string name="google_icon">G</string>
+    <string name="apple_icon">\uF8FF</string>
 
-
+    <!-- Register specific (kept from previous version if needed) -->
+    <string name="cedula_placeholder">C.C.</string>
+    <string name="role_label">Selecciona tu rol:</string>
+    <string name="role_fixer">Fixer</string>
+    <string name="role_cliente">Cliente</string>
+    <string name="btn_register">Registrarse</string>
 </resources>
