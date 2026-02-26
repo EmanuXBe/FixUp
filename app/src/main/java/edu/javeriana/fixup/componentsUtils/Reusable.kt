@@ -32,6 +32,9 @@ import edu.javeriana.fixup.ui.theme.CharcoalBrown
 import edu.javeriana.fixup.ui.theme.GreyOlive
 import edu.javeriana.fixup.ui.theme.Inter
 import edu.javeriana.fixup.ui.theme.SoftFawn
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.foundation.layout.fillMaxWidth
 
 @Composable
 fun FixUpTitle(modifier: Modifier = Modifier) {
@@ -48,29 +51,22 @@ fun FixUpTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
-    visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: @Composable (() -> Unit)? = null
+    isPassword: Boolean = false,  // ← AGREGAR ESTA LÍNEA
+    isError: Boolean = false,      // ← AGREGAR ESTA LÍNEA
+    modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = {
-            Text(
-                text = placeholder,
-                style = MaterialTheme.typography.bodyMedium,
-                color = GreyOlive
-            )
-        },
-        singleLine = true,
+        placeholder = { Text(text = placeholder) },
+        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,  // ← USAR isPassword AQUÍ
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        visualTransformation = visualTransformation,
-        trailingIcon = trailingIcon,
         shape = RoundedCornerShape(12.dp),
+        isError = isError,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = SoftFawn,
-            unfocusedBorderColor = GreyOlive.copy(alpha = 0.4f),
+            focusedBorderColor = if (isError) Color.Red else SoftFawn,
+            unfocusedBorderColor = if (isError) Color.Red.copy(alpha = 0.4f) else GreyOlive.copy(alpha = 0.4f),
             cursorColor = SoftFawn,
             focusedTextColor = CharcoalBrown,
             unfocusedTextColor = CharcoalBrown

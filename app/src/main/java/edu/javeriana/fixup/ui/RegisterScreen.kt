@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.javeriana.fixup.R
@@ -26,12 +26,66 @@ import edu.javeriana.fixup.componentsUtils.*
 import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
+
+// pantalla de registro, solo recibe datos
+@Composable
+fun RegisterForm(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    cedula: String,
+    onCedulaChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    selectedRole: String,
+    onRoleSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        FixUpTextField(
+            value = email,
+            onValueChange = onEmailChange,
+            placeholder = stringResource(R.string.email_placeholder),
+            keyboardType = KeyboardType.Email,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        FixUpTextField(
+            value = cedula,
+            onValueChange = onCedulaChange,
+            placeholder = stringResource(R.string.cedula_placeholder),
+            keyboardType = KeyboardType.Number,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        FixUpTextField(
+            value = password,
+            onValueChange = onPasswordChange,
+            placeholder = stringResource(R.string.password_placeholder),
+            keyboardType = KeyboardType.Password,
+            isPassword = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        RoleSelector(
+            selectedRole = selectedRole,
+            onRoleSelected = onRoleSelected,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+// pantalla principal con estado (padre) y se lo pasa al hijo
+
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit = {},
     onContinueClick: () -> Unit = {}
 ) {
+    // estado del padre
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var cedula by remember { mutableStateOf("") }
@@ -46,65 +100,47 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        FixUpTitle()
+        FixUpTitle(modifier = Modifier)
 
         Spacer(modifier = Modifier.height(20.dp))
 
         AuthTabs(
             isLoginSelected = false,
             onLoginClick = onBackClick,
-            onRegisterClick = {}
+            onRegisterClick = {},
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        FixUpTextField(
-            value = email,
-            onValueChange = { email = it },
-            placeholder = stringResource(R.string.email_placeholder),
-            keyboardType = KeyboardType.Email
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        FixUpTextField(
-            value = cedula,
-            onValueChange = { cedula = it },
-            placeholder = stringResource(R.string.cedula_placeholder),
-            keyboardType = KeyboardType.Number
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        FixUpTextField(
-            value = password,
-            onValueChange = { password = it },
-            placeholder = stringResource(R.string.password_placeholder),
-            keyboardType = KeyboardType.Password,
-            visualTransformation = PasswordVisualTransformation()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        RoleSelector(
+        // y pasamos el estado al hijo
+        RegisterForm(
+            email = email,
+            onEmailChange = { email = it },
+            cedula = cedula,
+            onCedulaChange = { cedula = it },
+            password = password,
+            onPasswordChange = { password = it },
             selectedRole = selectedRole,
-            onRoleSelected = { selectedRole = it }
+            onRoleSelected = { selectedRole = it },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(24.dp))
 
         FixUpButton(
             text = stringResource(R.string.btn_register),
-            onClick = onContinueClick
+            onClick = onContinueClick,
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        AuthDivider()
+        AuthDivider(modifier = Modifier.fillMaxWidth())
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        SocialAuthButtons()
+        SocialAuthButtons(modifier = Modifier.fillMaxWidth())
 
         Spacer(modifier = Modifier.height(32.dp))
     }
