@@ -76,33 +76,40 @@ fun NewRequestsScreen() {
         )
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
-    ) {
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Tus nuevas solicitudes",
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 20.dp)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        FilterChips()
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 20.dp)
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar()
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(Color(0xFFF5F5F5))
         ) {
-            items(requests) { request ->
-                RequestRow(request)
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Text(
+                text = "Tus nuevas solicitudes",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FilterChips()
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 20.dp)
+            ) {
+                items(requests) { request ->
+                    RequestRow(request)
+                }
             }
         }
     }

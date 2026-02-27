@@ -1,4 +1,3 @@
-
 package edu.javeriana.fixup.ui
 
 import androidx.compose.foundation.Image
@@ -26,10 +25,16 @@ import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
-fun RentScreen() {
-
+fun RentScreen(
+    onSelectClick: () -> Unit,
+    onHomeClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {}
+) {
     Scaffold(
-        bottomBar = { BottomNavigationBar() }
+        bottomBar = {
+            BottomNavigationBar()  
+        }
     ) { padding ->
 
         LazyColumn(
@@ -47,7 +52,7 @@ fun RentScreen() {
                 Spacer(modifier = Modifier.height(12.dp))
                 MapSection()
                 Spacer(modifier = Modifier.height(16.dp))
-                PropertyCard()
+                PropertyCard(onSelectClick = onSelectClick)
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
@@ -133,7 +138,7 @@ fun MapSection() {
 }
 
 @Composable
-fun PropertyCard() {
+fun PropertyCard(onSelectClick: () -> Unit) {
 
     Card(
         shape = RoundedCornerShape(20.dp),
@@ -195,7 +200,7 @@ fun PropertyCard() {
                     )
 
                     Button(
-                        onClick = {},
+                        onClick = onSelectClick,
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color.Black
@@ -213,6 +218,6 @@ fun PropertyCard() {
 @Composable
 fun RentScreenPreview() {
     FixUpTheme {
-        RentScreen()
+        RentScreen(onSelectClick = {})
     }
 }

@@ -27,7 +27,8 @@ import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 
-// pantalla de registro, solo recibe datos
+// COMPOSABLE STATELESS, recibe datos y funciones
+
 @Composable
 fun RegisterForm(
     email: String,
@@ -77,15 +78,16 @@ fun RegisterForm(
     }
 }
 
-// pantalla principal con estado (padre) y se lo pasa al hijo
+
+// PANTALLA PRINCIPAL (STATEFUL), usa LAMBDAS para acciones
 
 @Composable
 fun RegisterScreen(
     modifier: Modifier = Modifier,
-    onBackClick: () -> Unit = {},
-    onContinueClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},      // lambda para volver
+    onContinueClick: () -> Unit = {}   // lambda para continuar
 ) {
-    // estado del padre
+    // estado en el padre
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var cedula by remember { mutableStateOf("") }
@@ -106,14 +108,14 @@ fun RegisterScreen(
 
         AuthTabs(
             isLoginSelected = false,
-            onLoginClick = onBackClick,
+            onLoginClick = onBackClick,  // lambda
             onRegisterClick = {},
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        // y pasamos el estado al hijo
+        // pasa el estado al hijo
         RegisterForm(
             email = email,
             onEmailChange = { email = it },
@@ -130,7 +132,7 @@ fun RegisterScreen(
 
         FixUpButton(
             text = stringResource(R.string.btn_register),
-            onClick = onContinueClick,
+            onClick = onContinueClick,  // tmb usa lambda
             modifier = Modifier.fillMaxWidth()
         )
 

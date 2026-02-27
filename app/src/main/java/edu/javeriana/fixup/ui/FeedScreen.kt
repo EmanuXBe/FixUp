@@ -17,10 +17,17 @@ import edu.javeriana.fixup.ui.theme.BrightSnow
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
-fun FeedScreen() {
+fun FeedScreen(
+    onHomeClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    onPublicationClick: () -> Unit = {}
+) {
     Scaffold(
         containerColor = BrightSnow,
-        bottomBar = { BottomNavBar() }
+        bottomBar = {
+            BottomNavigationBar()
+        }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -101,7 +108,8 @@ fun FeedScreen() {
                         PublicationCard(
                             imageRes = publication.first,
                             title = publication.second,
-                            price = publication.third
+                            price = publication.third,
+                            onClick = onPublicationClick
                         )
                     }
                 }
