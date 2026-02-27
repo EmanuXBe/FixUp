@@ -24,124 +24,137 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.componentsUtils.BottomNavBar
 import edu.javeriana.fixup.ui.theme.GreyOlive
 import edu.javeriana.fixup.ui.theme.SoftFawn
 
 @Composable
-fun ProfileScreen(sp: SharedPreferences) {
+fun ProfileScreen(
+    sp: SharedPreferences,
+    onHomeClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {}
+) {
 
     val name = sp.getString("name", "Gabo peñuela") ?: ""
     val address = sp.getString("address", "Calle 1 # 1-99 conjunto Alegre") ?: ""
     val phone = sp.getString("phone", "3002001010") ?: ""
     val email = sp.getString("email", "jhondoe@siemprealegre.com") ?: ""
 
-    ProfileScreenContent(name, address, phone, email)
-}
-
-@Composable
-fun ProfileScreenContent(name: String, address: String, phone: String, email: String) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        // ── Status Bar ──────────────────────────────────────────
-        StatusBar()
-
-        // Espacio extra para bajar el contenido
-        Spacer(modifier = Modifier.height(60.dp))
-
-        // ── Foto de perfil ──────────────────────────────────────
-        Box(
-            modifier = Modifier
-                .size(130.dp)
-                .clip(RoundedCornerShape(20.dp))
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.profile_photo),
-                contentDescription = "Foto de perfil",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                onHomeClick = onHomeClick,
+                onSearchClick = onSearchClick,
+                onProfileClick = onProfileClick,
+                currentScreen = "profile"
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = name,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Normal,
-            color = SoftFawn,
-            letterSpacing = 0.5.sp
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = "Cliente estrella",
-            fontSize = 14.sp,
-            color = Color(0xFF888888)
-        )
-
-        Spacer(modifier = Modifier.height(36.dp))
-
-        // ── Campos de información ───────────────────────────────
+    ) { padding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxSize()
+                .padding(padding)
+                .background(Color.White)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            InfoRow(icon = Icons.Outlined.LocationOn, value = address)
-            InfoRow(icon = Icons.Outlined.Phone, value = phone)
-            InfoRow(icon = Icons.Outlined.Email, value = email)
-        }
 
-        Spacer(modifier = Modifier.height(28.dp))
+            // ── Status Bar ──────────────────────────────────────────
+            StatusBar()
 
-        // ── Botones de acción 2x2 ───────────────────────────────
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            // Espacio extra para bajar el contenido
+            Spacer(modifier = Modifier.height(60.dp))
+
+            // ── Foto de perfil ──────────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .size(130.dp)
+                    .clip(RoundedCornerShape(20.dp))
             ) {
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.Home,
-                    text = "Mis casas guardadas"
-                )
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.CreditCard,
-                    text = "Pagos"
+                Image(
+                    painter = painterResource(id = R.drawable.profile_photo),
+                    contentDescription = "Foto de perfil",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.Settings,
-                    text = "Ajustes"
-                )
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.Refresh,
-                    text = "Tus remodelaciones"
-                )
-            }
-        }
 
-        Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = name,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Normal,
+                color = SoftFawn,
+                letterSpacing = 0.5.sp
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "Cliente estrella",
+                fontSize = 14.sp,
+                color = Color(0xFF888888)
+            )
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            // ── Campos de información ───────────────────────────────
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                InfoRow(icon = Icons.Outlined.LocationOn, value = address)
+                InfoRow(icon = Icons.Outlined.Phone, value = phone)
+                InfoRow(icon = Icons.Outlined.Email, value = email)
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // ── Botones de acción 2x2 ───────────────────────────────
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ActionButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.Home,
+                        text = "Mis casas guardadas"
+                    )
+                    ActionButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.CreditCard,
+                        text = "Pagos"
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ActionButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.Settings,
+                        text = "Ajustes"
+                    )
+                    ActionButton(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Outlined.Refresh,
+                        text = "Tus remodelaciones"
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+        }
     }
 }
 
@@ -254,4 +267,111 @@ fun ProfileScreenPreview() {
         phone = "3002001010",
         email = "jhondoe@siemprealegre.com"
     )
+}
+
+@Composable
+fun ProfileScreenContent(name: String, address: String, phone: String, email: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        // ── Status Bar ──────────────────────────────────────────
+        StatusBar()
+
+        // Espacio extra para bajar el contenido
+        Spacer(modifier = Modifier.height(60.dp))
+
+        // ── Foto de perfil ──────────────────────────────────────
+        Box(
+            modifier = Modifier
+                .size(130.dp)
+                .clip(RoundedCornerShape(20.dp))
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.profile_photo),
+                contentDescription = "Foto de perfil",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = name,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Normal,
+            color = SoftFawn,
+            letterSpacing = 0.5.sp
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Cliente estrella",
+            fontSize = 14.sp,
+            color = Color(0xFF888888)
+        )
+
+        Spacer(modifier = Modifier.height(36.dp))
+
+        // ── Campos de información ───────────────────────────────
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            InfoRow(icon = Icons.Outlined.LocationOn, value = address)
+            InfoRow(icon = Icons.Outlined.Phone, value = phone)
+            InfoRow(icon = Icons.Outlined.Email, value = email)
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // ── Botones de acción 2x2 ───────────────────────────────
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.Home,
+                    text = "Mis casas guardadas"
+                )
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.CreditCard,
+                    text = "Pagos"
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.Settings,
+                    text = "Ajustes"
+                )
+                ActionButton(
+                    modifier = Modifier.weight(1f),
+                    icon = Icons.Outlined.Refresh,
+                    text = "Tus remodelaciones"
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
+    }
 }
