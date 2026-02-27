@@ -1,6 +1,5 @@
 package edu.javeriana.fixup.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,18 +11,24 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.ui.model.MockPropertyRepository
 import edu.javeriana.fixup.ui.theme.FixUpTheme
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun PropertyDetailScreen(
@@ -31,6 +36,29 @@ fun PropertyDetailScreen(
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit
 ) {
+    // Buscamos la propiedad por ID. Si no se encuentra o el ID es nulo, usamos un valor por defecto o manejamos el error.
+    val property = remember(propertyId) {
+        MockPropertyRepository.getProperties().find { it.id == propertyId }
+    }
+
+    val currencyFormat = remember {
+        NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
+            maximumFractionDigits = 0
+        }
+    }
+
+    if (property == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Propiedad no encontrada")
+                Button(onClick = onBackClick) {
+                    Text("Volver")
+                }
+            }
+        }
+        return
+    }
+
     Scaffold(
         bottomBar = {
             BottomAppBar(
@@ -44,7 +72,7 @@ fun PropertyDetailScreen(
                 ) {
                     Column {
                         Text(
-                            text = "1.250.000 $",
+                            text = "${currencyFormat.format(property.price)} $",
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -73,11 +101,15 @@ fun PropertyDetailScreen(
         ) {
             // Header with Image and Back button
             Box(modifier = Modifier.height(300.dp)) {
-                Image(
-                    painter = painterResource(id = R.drawable.chapi),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(property.imageUrl)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = "Property Image",
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(R.drawable.chapi)
                 )
                 IconButton(
                     onClick = onBackClick,
@@ -113,31 +145,24 @@ fun PropertyDetailScreen(
 
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Apartamento en chapinero",
+                    text = property.title,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Chapinero, Bogotá",
+                    text = "Bogotá, Colombia", // Podrías agregar ubicación al modelo si fuera necesario
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
                 
-                // Mostrar el ID si existe para propósitos de depuración o carga
-                if (propertyId != null) {
-                    Text(
-                        text = "ID de propiedad: $propertyId",
-                        fontSize = 12.sp,
-                        color = Color.LightGray
-                    )
-                }
-                
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    PropertyFeature(text = "3 Habitaciones")
-                    PropertyFeature(text = "2 Baños")
-                    PropertyFeature(text = "1 Parqueadero")
+                    PropertyFeature(text = "${property.bedrooms} Habitaciones")
+                    PropertyFeature(text = "${property.bathrooms} Baños")
+                    if (property.hasParking) {
+                        PropertyFeature(text = "1 Parqueadero")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -149,7 +174,7 @@ fun PropertyDetailScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Hermoso apartamento totalmente remodelado, ubicado en el corazón de Chapinero. Cuenta con excelentes acabados, iluminación natural y una vista espectacular de los cerros orientales.",
+                    text = property.description,
                     fontSize = 14.sp,
                     color = Color.DarkGray
                 )
@@ -161,6 +186,12 @@ fun PropertyDetailScreen(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
+                
+                // Aquí podrías listar amenidades adicionales si el modelo las tuviera
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("• Cocina integral", fontSize = 14.sp)
+                Text("• Wifi de alta velocidad", fontSize = 14.sp)
+                Text("• Zona de lavandería", fontSize = 14.sp)
             }
         }
     }
@@ -185,6 +216,6 @@ fun PropertyFeature(text: String) {
 @Composable
 fun PropertyDetailScreenPreview() {
     FixUpTheme {
-        PropertyDetailScreen(onBackClick = {}, onReserveClick = {})
+        PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {})
     }
 }
