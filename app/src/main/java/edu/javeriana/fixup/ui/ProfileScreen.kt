@@ -24,7 +24,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.R
-import edu.javeriana.fixup.componentsUtils.BottomNavBar
 import edu.javeriana.fixup.ui.theme.GreyOlive
 import edu.javeriana.fixup.ui.theme.SoftFawn
 
@@ -43,12 +42,7 @@ fun ProfileScreen(
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(
-                onHomeClick = onHomeClick,
-                onSearchClick = onSearchClick,
-                onProfileClick = onProfileClick,
-                currentScreen = "profile"
-            )
+            BottomNavigationBar()
         }
     ) { padding ->
         Column(
@@ -215,16 +209,7 @@ fun ActionButton(modifier: Modifier = Modifier, icon: ImageVector, text: String)
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    ProfileScreenContent(
-        name = "Gabo peñuela",
-        address = "Calle 1 # 1-99 conjunto Alegre",
-        phone = "3002001010",
-        email = "jhondoe@siemprealegre.com"
-    )
-}
+
 
 @Composable
 fun ProfileScreenContent(name: String, address: String, phone: String, email: String) {
@@ -235,8 +220,6 @@ fun ProfileScreenContent(name: String, address: String, phone: String, email: St
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-
 
         // Espacio extra para bajar el contenido
         Spacer(modifier = Modifier.height(60.dp))
@@ -330,4 +313,16 @@ fun ProfileScreenContent(name: String, address: String, phone: String, email: St
 
         Spacer(modifier = Modifier.height(40.dp))
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Preview(showBackground = true)
+@Composable
+fun ProfileScreenPreview() {
+    ProfileScreenContent(
+        name = "Gabo peñuela",
+        address = "Calle 1 # 1-99 conjunto Alegre",
+        phone = "3002001010",
+        email = "jhondoe@siemprealegre.com"
+    )
 }

@@ -26,12 +26,7 @@ fun FeedScreen(
     Scaffold(
         containerColor = BrightSnow,
         bottomBar = {
-            BottomNavBar(
-                onHomeClick = onHomeClick,
-                onSearchClick = onSearchClick,
-                onProfileClick = onProfileClick,
-                currentScreen = "home"
-            )
+            BottomNavigationBar()
         }
     ) { padding ->
         LazyColumn(

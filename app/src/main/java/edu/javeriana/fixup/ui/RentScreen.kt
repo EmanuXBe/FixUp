@@ -53,12 +53,7 @@ fun RentScreen(
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(
-                onHomeClick = onHomeClick,
-                onSearchClick = onSearchClick,
-                onProfileClick = onProfileClick,
-                currentScreen = "search"
-            )
+            BottomNavigationBar()  
         }
     ) { padding ->
         Column(
