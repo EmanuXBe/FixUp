@@ -7,13 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,19 +21,25 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(
+    selectedItem: Int = 0,
+    onHomeClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {}
+) {
     NavigationBar(
         containerColor = Color.White
     ) {
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
-            selected = false,
-            onClick = { /*TODO*/ }
+            selected = selectedItem == 0,
+            onClick = onHomeClick
         )
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Search, contentDescription = "Search") },
-            selected = false,
-            onClick = { /*TODO*/ }
+            selected = selectedItem == 1,
+            onClick = onSearchClick
         )
         NavigationBarItem(
             icon = {
@@ -47,8 +47,8 @@ fun BottomNavigationBar() {
                     Icon(Icons.Outlined.Notifications, contentDescription = "Notifications")
                 }
             },
-            selected = true,
-            onClick = { /*TODO*/ }
+            selected = selectedItem == 2,
+            onClick = onNotificationsClick
         )
         NavigationBarItem(
             icon = {
@@ -61,8 +61,8 @@ fun BottomNavigationBar() {
                     contentScale = ContentScale.Crop
                 )
             },
-            selected = false,
-            onClick = { /*TODO*/ }
+            selected = selectedItem == 3,
+            onClick = onProfileClick
         )
     }
 }

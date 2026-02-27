@@ -34,7 +34,12 @@ data class RequestItem(
 )
 
 @Composable
-fun NewRequestsScreen() {
+fun NewRequestsScreen(
+    onHomeClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {}
+) {
 
     val requests = listOf(
         RequestItem(
@@ -78,7 +83,13 @@ fun NewRequestsScreen() {
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(
+                selectedItem = 2,
+                onHomeClick = onHomeClick,
+                onSearchClick = onSearchClick,
+                onNotificationsClick = onNotificationsClick,
+                onProfileClick = onProfileClick
+            )
         }
     ) { padding ->
         Column(

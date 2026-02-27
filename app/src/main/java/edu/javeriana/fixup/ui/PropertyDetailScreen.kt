@@ -27,6 +27,7 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
 fun PropertyDetailScreen(
+    propertyId: String? = null,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit
 ) {
@@ -121,6 +122,15 @@ fun PropertyDetailScreen(
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
+                
+                // Mostrar el ID si existe para propósitos de depuración o carga
+                if (propertyId != null) {
+                    Text(
+                        text = "ID de propiedad: $propertyId",
+                        fontSize = 12.sp,
+                        color = Color.LightGray
+                    )
+                }
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 

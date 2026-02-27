@@ -20,10 +20,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(
+    onHomeClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {}
+) {
 
     Scaffold(
-        bottomBar = { BottomNavigationBar() }
+        bottomBar = { 
+            BottomNavigationBar(
+                selectedItem = 0, // O el que corresponda al Dashboard
+                onHomeClick = onHomeClick,
+                onSearchClick = onSearchClick,
+                onNotificationsClick = onNotificationsClick,
+                onProfileClick = onProfileClick
+            ) 
+        }
     ) { padding ->
 
         LazyColumn(

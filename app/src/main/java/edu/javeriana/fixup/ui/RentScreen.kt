@@ -31,7 +31,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import edu.javeriana.fixup.R
-import edu.javeriana.fixup.componentsUtils.BottomNavBar
 import edu.javeriana.fixup.ui.model.PropertyModel
 import edu.javeriana.fixup.ui.model.RentUiState
 import edu.javeriana.fixup.ui.theme.CharcoalBrown
@@ -47,13 +46,20 @@ fun RentScreen(
     onSelectClick: (String) -> Unit,
     onHomeClick: () -> Unit = {},
     onSearchClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         bottomBar = {
-            BottomNavigationBar()  
+            BottomNavigationBar(
+                selectedItem = 1,
+                onHomeClick = onHomeClick,
+                onSearchClick = onSearchClick,
+                onNotificationsClick = onNotificationsClick,
+                onProfileClick = onProfileClick
+            )
         }
     ) { padding ->
         Column(

@@ -20,13 +20,20 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 fun FeedScreen(
     onHomeClick: () -> Unit = {},
     onSearchClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {},
     onProfileClick: () -> Unit = {},
     onPublicationClick: () -> Unit = {}
 ) {
     Scaffold(
         containerColor = BrightSnow,
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(
+                selectedItem = 0,
+                onHomeClick = onHomeClick,
+                onSearchClick = onSearchClick,
+                onNotificationsClick = onNotificationsClick,
+                onProfileClick = onProfileClick
+            )
         }
     ) { padding ->
         LazyColumn(

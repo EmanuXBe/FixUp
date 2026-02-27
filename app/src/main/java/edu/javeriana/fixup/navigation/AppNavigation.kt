@@ -3,22 +3,16 @@ package edu.javeriana.fixup.navigation
 import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import edu.javeriana.fixup.ui.CheckoutScreen
-import edu.javeriana.fixup.ui.FeedScreen
-import edu.javeriana.fixup.ui.LogInScreen
-import edu.javeriana.fixup.ui.ProfileScreen
-import edu.javeriana.fixup.ui.PropertyDetailScreen
-import edu.javeriana.fixup.ui.PublicationScreen
-import edu.javeriana.fixup.ui.RegisterScreen
-import edu.javeriana.fixup.ui.RentScreen
+import androidx.navigation.navArgument
+import edu.javeriana.fixup.ui.*
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val context = LocalContext.current
 
     NavHost(
         navController = navController,
@@ -48,40 +42,59 @@ fun AppNavigation() {
             )
         }
 
-        // Feed placeholder screen
+        // Feed screen
         composable(AppScreens.Feed.route) {
             FeedScreen(
                 onHomeClick = { /* Ya estamos en home */ },
                 onSearchClick = { navController.navigate(AppScreens.Rent.route) },
+                onNotificationsClick = { navController.navigate(AppScreens.Notifications.route) },
                 onProfileClick = { navController.navigate(AppScreens.Profile.route) },
                 onPublicationClick = { navController.navigate(AppScreens.Publication.route) }
             )
         }
 
+        // Rent screen
         composable(AppScreens.Rent.route) {
             RentScreen(
-                onSelectClick = { navController.navigate(AppScreens.PropertyDetail.route) },
+                onSelectClick = { id -> 
+                    navController.navigate(AppScreens.PropertyDetail.route + "/$id") 
+                },
                 onHomeClick = { navController.navigate(AppScreens.Feed.route) },
                 onSearchClick = { /* Ya estamos en rent */ },
+                onNotificationsClick = { navController.navigate(AppScreens.Notifications.route) },
                 onProfileClick = { navController.navigate(AppScreens.Profile.route) }
             )
         }
 
-        composable(AppScreens.PropertyDetail.route) {
-            PropertyDetailScreen(
-                onBackClick = { navController.popBackStack() },
-                onReserveClick = { navController.navigate(AppScreens.Checkout.route) }
+        // Notifications screen
+        composable(AppScreens.Notifications.route) {
+            NewRequestsScreen(
+                onHomeClick = { navController.navigate(AppScreens.Feed.route) },
+                onSearchClick = { navController.navigate(AppScreens.Rent.route) },
+                onNotificationsClick = { /* Ya estamos en notificaciones */ },
+                onProfileClick = { navController.navigate(AppScreens.Profile.route) }
             )
         }
 
         // Profile screen
         composable(AppScreens.Profile.route) {
-            val sharedPrefs = context.getSharedPreferences("fixup_prefs", Context.MODE_PRIVATE)
             ProfileScreen(
-                sp = sharedPrefs,
                 onHomeClick = { navController.navigate(AppScreens.Feed.route) },
                 onSearchClick = { navController.navigate(AppScreens.Rent.route) },
+                onNotificationsClick = { navController.navigate(AppScreens.Notifications.route) },
                 onProfileClick = { /* Ya estamos en perfil */ }
+            )
+        }
+
+        composable(
+            route = AppScreens.PropertyDetail.route + "/{propertyId}",
+            arguments = listOf(navArgument("propertyId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val propertyId = backStackEntry.arguments?.getString("propertyId")
+            PropertyDetailScreen(
+                propertyId = propertyId,
+                onBackClick = { navController.popBackStack() },
+                onReserveClick = { navController.navigate(AppScreens.Checkout.route) }
             )
         }
 
