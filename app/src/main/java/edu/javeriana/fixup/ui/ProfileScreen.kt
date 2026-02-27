@@ -60,8 +60,6 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // ── Status Bar ──────────────────────────────────────────
-            StatusBar()
 
             // Espacio extra para bajar el contenido
             Spacer(modifier = Modifier.height(60.dp))
@@ -159,47 +157,6 @@ fun ProfileScreen(
 }
 
 @Composable
-fun StatusBar() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "9:41",
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
-        )
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.SignalCellularAlt,
-                contentDescription = "Señal",
-                modifier = Modifier.size(18.dp),
-                tint = Color.Black
-            )
-            Icon(
-                imageVector = Icons.Outlined.Wifi,
-                contentDescription = "Wifi",
-                modifier = Modifier.size(18.dp),
-                tint = Color.Black
-            )
-            Icon(
-                imageVector = Icons.Outlined.BatteryFull,
-                contentDescription = "Batería",
-                modifier = Modifier.size(18.dp),
-                tint = Color.Black
-            )
-        }
-    }
-}
-
-@Composable
 fun InfoRow(icon: ImageVector, value: String) {
     Row(
         modifier = Modifier
@@ -279,8 +236,7 @@ fun ProfileScreenContent(name: String, address: String, phone: String, email: St
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        // ── Status Bar ──────────────────────────────────────────
-        StatusBar()
+
 
         // Espacio extra para bajar el contenido
         Spacer(modifier = Modifier.height(60.dp))

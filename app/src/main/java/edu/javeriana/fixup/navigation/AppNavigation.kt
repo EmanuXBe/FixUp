@@ -6,6 +6,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import edu.javeriana.fixup.ui.CheckoutScreen
 import edu.javeriana.fixup.ui.FeedScreen
 import edu.javeriana.fixup.ui.LogInScreen
 import edu.javeriana.fixup.ui.ProfileScreen
@@ -67,7 +68,10 @@ fun AppNavigation() {
         }
 
         composable(AppScreens.PropertyDetail.route) {
-            PropertyDetailScreen(onBackClick = { navController.popBackStack() })
+            PropertyDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onReserveClick = { navController.navigate(AppScreens.Checkout.route) }
+            )
         }
 
         // Profile screen
@@ -83,7 +87,15 @@ fun AppNavigation() {
 
         // Publication screen
         composable(AppScreens.Publication.route) {
-            PublicationScreen(onBackClick = { navController.popBackStack() })
+            PublicationScreen(
+                onBackClick = { navController.popBackStack() },
+                onContactClick = { navController.navigate(AppScreens.Checkout.route) }
+            )
+        }
+
+        // Checkout screen
+        composable(AppScreens.Checkout.route) {
+            CheckoutScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }

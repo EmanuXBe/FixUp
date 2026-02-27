@@ -11,5 +11,6 @@ enum class AppScreens(val route: String) {
     Profile("profile"),
     Rent("rent"),
     PropertyDetail("property_detail"),
-    Publication("publication")
+    Publication("publication"),
+    Checkout("checkout")
 }

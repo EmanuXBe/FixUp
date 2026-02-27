@@ -33,6 +33,7 @@ data class CheckoutItemUiModel(
 
 @Composable
 fun CheckoutScreen(
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -66,7 +67,7 @@ fun CheckoutScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
-        CheckoutHeader()
+        CheckoutHeader(onBackClick = onBackClick)
 
         CheckoutOptionRow(
             label = "Direccion",
@@ -111,19 +112,24 @@ fun CheckoutScreen(
 
 @Composable
 fun CheckoutHeader(
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Back",
+        IconButton(
+            onClick = onBackClick,
             modifier = Modifier.align(Alignment.CenterStart)
-        )
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
         Text(
             text = "Pantalla de pago",
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().align(Alignment.Center)
         )
     }
 }
@@ -280,6 +286,6 @@ fun SummaryRow(
 @Composable
 fun CheckoutScreenPreview() {
     FixUpTheme {
-        CheckoutScreen()
+        CheckoutScreen(onBackClick = {})
     }
 }

@@ -10,22 +10,24 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublicationScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onContactClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -97,7 +99,7 @@ fun PublicationScreen(
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 Button(
-                    onClick = { },
+                    onClick = onContactClick,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)
@@ -108,5 +110,13 @@ fun PublicationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PublicationScreenPreview() {
+    FixUpTheme {
+        PublicationScreen(onBackClick = {}, onContactClick = {})
     }
 }

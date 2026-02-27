@@ -26,7 +26,10 @@ import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
-fun PropertyDetailScreen(onBackClick: () -> Unit) {
+fun PropertyDetailScreen(
+    onBackClick: () -> Unit,
+    onReserveClick: () -> Unit
+) {
     Scaffold(
         bottomBar = {
             BottomAppBar(
@@ -51,7 +54,7 @@ fun PropertyDetailScreen(onBackClick: () -> Unit) {
                         )
                     }
                     Button(
-                        onClick = { /* TODO: Implement booking */ },
+                        onClick = onReserveClick,
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
                     ) {
@@ -172,6 +175,6 @@ fun PropertyFeature(text: String) {
 @Composable
 fun PropertyDetailScreenPreview() {
     FixUpTheme {
-        PropertyDetailScreen(onBackClick = {})
+        PropertyDetailScreen(onBackClick = {}, onReserveClick = {})
     }
 }
