@@ -5,7 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,6 +24,8 @@ fun FeedScreen(
     onProfileClick: () -> Unit = {},
     onPublicationClick: () -> Unit = {}
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+
     Scaffold(
         containerColor = BrightSnow,
         bottomBar = {
@@ -46,8 +48,8 @@ fun FeedScreen(
             // SEARCH BAR
             item {
                 SearchBar(
-                    value = "",
-                    onValueChange = {},
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
                     modifier = Modifier.padding(top = 16.dp)
                 )
             }

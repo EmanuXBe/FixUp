@@ -9,8 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -370,39 +368,6 @@ fun PublicationCard(
     }
 }
 
-@Composable
-fun BottomNavBar(
-    onHomeClick: () -> Unit = {},
-    onSearchClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {},
-    currentScreen: String = "home",
-    modifier: Modifier = Modifier
-) {
-    NavigationBar(
-        containerColor = Color.White,
-        tonalElevation = 8.dp,
-        modifier = modifier
-    ) {
-        NavigationBarItem(
-            selected = currentScreen == "home",
-            onClick = onHomeClick,
-            icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.nav_home)) },
-            label = { Text(stringResource(R.string.nav_home)) }
-        )
-        NavigationBarItem(
-            selected = currentScreen == "search",
-            onClick = onSearchClick,
-            icon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.nav_search)) },
-            label = { Text(stringResource(R.string.nav_search)) }
-        )
-        NavigationBarItem(
-            selected = currentScreen == "profile",
-            onClick = onProfileClick,
-            icon = { Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.nav_profile)) },
-            label = { Text(stringResource(R.string.nav_profile)) }
-        )
-    }
-}
 
 @Composable
 fun RoleSelector(
