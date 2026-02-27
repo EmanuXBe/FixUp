@@ -66,7 +66,7 @@ Repositorio inicial para el proyecto FixUp con dos áreas principales:
 Se puede mover la carpeta `docs/` a la rama de documentación y dejar `flutter_app/` en la rama de código.
 
 ## Tecnologias
-- Flotter (Android Studio)
+- Flutter (Android Studio)
 - Kotlin
 - Gradle
 - Figma
