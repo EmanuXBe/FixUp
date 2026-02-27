@@ -4,215 +4,397 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.componentsUtils.BottomNavBar
+import edu.javeriana.fixup.ui.model.PropertyModel
+import edu.javeriana.fixup.ui.model.RentUiState
+import edu.javeriana.fixup.ui.theme.CharcoalBrown
 import edu.javeriana.fixup.ui.theme.FixUpTheme
+import edu.javeriana.fixup.ui.theme.GreyOlive
+import edu.javeriana.fixup.ui.viewmodel.RentViewModel
+import java.text.NumberFormat
+import java.util.*
 
 @Composable
 fun RentScreen(
-    onSelectClick: () -> Unit,
+    viewModel: RentViewModel = viewModel(),
+    onSelectClick: (String) -> Unit,
     onHomeClick: () -> Unit = {},
     onSearchClick: () -> Unit = {},
     onProfileClick: () -> Unit = {}
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         bottomBar = {
             BottomNavigationBar()  
         }
     ) { padding ->
-
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 16.dp)
         ) {
-
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
-                SearchSection()
-                Spacer(modifier = Modifier.height(12.dp))
-                FilterSection()
-                Spacer(modifier = Modifier.height(12.dp))
-                MapSection()
-                Spacer(modifier = Modifier.height(16.dp))
-                PropertyCard(onSelectClick = onSelectClick)
-                Spacer(modifier = Modifier.height(20.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun SearchSection() {
-    Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = Color(0xFFF0F0F0),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Outlined.Search, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text("Arriendos", fontWeight = FontWeight.SemiBold)
-                Text(
-                    "3 habitaciones · 2 baños · parqueadero",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FilterSection() {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-
-            AssistChip(
-                onClick = {},
-                label = { Text("Filtro") }
-            )
-
-            AssistChip(
-                onClick = {},
-                label = { Text("Clasificar") }
-            )
-        }
-
-        Text(
-            "99 resultados",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
-    }
-}
-
-@Composable
-fun MapSection() {
-
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = Color(0xFFE6E6E6),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.map),
-            contentDescription = "Mapa de la ubicación",
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(16.dp)),
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-
-@Composable
-fun PropertyCard(onSelectClick: () -> Unit) {
-
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
-    ) {
-
-        Column {
-
-            Image(
-                painter = painterResource(id = R.drawable.chapi),
-                contentDescription = "Foto del inmueble",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp),
-                contentScale = ContentScale.Crop
-            )
-
-            Column(modifier = Modifier.padding(16.dp)) {
-
-                Text(
-                    "Apartamento en chapinero",
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Text(
-                    "Remodelado con nosotros",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    "3 habitaciones",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-
-                Text(
-                    "2 baños",
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Text(
-                        "1.250.000 $ /Mes",
-                        fontWeight = FontWeight.Bold
+            RentHeader()
+            
+            when (val state = uiState) {
+                is RentUiState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is RentUiState.Success -> {
+                    RentContent(
+                        properties = state.properties,
+                        onPropertySelected = { id ->
+                            viewModel.onPropertySelected(id)
+                            onSelectClick(id)
+                        }
                     )
-
-                    Button(
-                        onClick = onSelectClick,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black
-                        )
-                    ) {
-                        Text("Seleccionar", color = Color.White)
+                }
+                is RentUiState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = state.message, color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
         }
     }
 }
+
+@Composable
+fun RentContent(
+    properties: List<PropertyModel>,
+    onPropertySelected: (String) -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            FilterControls(resultCount = properties.size)
+        }
+        
+        item {
+            MapAreaPlaceholder(
+                properties = properties,
+                selectedPropertyId = null,
+                modifier = Modifier.height(240.dp)
+            )
+        }
+        
+        items(properties) { property ->
+            PropertyCard(
+                property = property,
+                onSelectClick = { onPropertySelected(property.id) },
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun RentHeader(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = Color(0xFFF5F5F5),
+        shadowElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Search,
+                contentDescription = null,
+                tint = GreyOlive
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = "Arriendos",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = CharcoalBrown
+                )
+                Text(
+                    text = "3 habitaciones ⋅ 2 baños ⋅ parqueadero",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = GreyOlive
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun FilterControls(modifier: Modifier = Modifier, resultCount: Int) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterButton(text = "Filtro", icon = Icons.Outlined.Tune)
+            FilterButton(text = "Clasificar", icon = Icons.Outlined.SwapVert)
+        }
+        Text(
+            text = "$resultCount resultados",
+            style = MaterialTheme.typography.bodySmall,
+            color = GreyOlive
+        )
+    }
+}
+
+@Composable
+private fun FilterButton(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    Surface(
+        shape = RoundedCornerShape(8.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray),
+        color = Color.White
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = CharcoalBrown)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text, style = MaterialTheme.typography.labelLarge, color = CharcoalBrown)
+            Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp), tint = CharcoalBrown)
+        }
+    }
+}
+
+@Composable
+fun PropertyCard(
+    property: PropertyModel,
+    onSelectClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
+        maximumFractionDigits = 0
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
+                val pagerState = rememberPagerState(pageCount = { 3 })
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(property.imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                        placeholder = painterResource(R.drawable.sala)
+                    )
+                }
+
+                if (property.isFeatured) {
+                    Surface(
+                        modifier = Modifier.padding(12.dp).align(Alignment.TopStart),
+                        color = Color.White,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = "Destacado",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Surface(
+                    modifier = Modifier.padding(12.dp).align(Alignment.TopEnd).size(36.dp),
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.8f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.FavoriteBorder, contentDescription = null, modifier = Modifier.size(20.dp))
+                    }
+                }
+
+                Row(
+                    Modifier
+                        .height(20.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(3) { iteration ->
+                        val color = if (iteration == 0) Color.White else Color.White.copy(alpha = 0.5f)
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                                .size(6.dp)
+                        )
+                    }
+                }
+            }
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = property.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = CharcoalBrown
+                )
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.StarBorder, contentDescription = null, modifier = Modifier.size(16.dp), tint = GreyOlive)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Remodelado con nosotros",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = GreyOlive
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    PropertyFeatureItem(icon = Icons.Outlined.Bed, text = "${property.bedrooms} hab.")
+                    PropertyFeatureItem(icon = Icons.Outlined.Bathtub, text = "${property.bathrooms} baños")
+                    if (property.hasParking) {
+                        PropertyFeatureItem(icon = Icons.Outlined.DirectionsCar, text = "Parqueadero")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${currencyFormat.format(property.price)} $ /Mes",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = CharcoalBrown
+                    )
+                    Button(
+                        onClick = onSelectClick,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(48.dp)
+                    ) {
+                        Text("Seleccionar", fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PropertyFeatureItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = GreyOlive)
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(text, style = MaterialTheme.typography.bodySmall, color = GreyOlive)
+    }
+}
+
+@Composable
+fun MapAreaPlaceholder(
+    properties: List<PropertyModel>,
+    selectedPropertyId: String?,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color(0xFFE0E7FF))
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.map),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds,
+            alpha = 0.5f
+        )
+        
+        PriceTag(price = 1500000.0, isSelected = false, modifier = Modifier.offset(x = 50.dp, y = 80.dp))
+        PriceTag(price = 2100000.0, isSelected = false, modifier = Modifier.offset(x = 200.dp, y = 50.dp))
+        PriceTag(price = 1500000.0, isSelected = false, modifier = Modifier.offset(x = 320.dp, y = 80.dp))
+        PriceTag(price = 1200000.0, isSelected = true, modifier = Modifier.offset(x = 180.dp, y = 120.dp))
+        PriceTag(price = 1400000.0, isSelected = false, modifier = Modifier.offset(x = 40.dp, y = 180.dp))
+        PriceTag(price = 1200000.0, isSelected = false, modifier = Modifier.offset(x = 130.dp, y = 220.dp))
+        PriceTag(price = 1300000.0, isSelected = false, modifier = Modifier.offset(x = 300.dp, y = 200.dp))
+    }
+}
+
+@Composable
+private fun PriceTag(price: Double, isSelected: Boolean, modifier: Modifier = Modifier) {
+    val displayPrice = when {
+        price >= 1000000 -> "$${(price / 1000000).format(1)}M"
+        else -> "$${(price / 1000).toInt()}K"
+    }
+    Surface(
+        modifier = modifier,
+        color = if (isSelected) Color.Black else Color.White,
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = 4.dp
+    ) {
+        Text(
+            text = displayPrice,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+            color = if (isSelected) Color.White else Color.Black
+        )
+    }
+}
+
+private fun Double.format(digits: Int) = "%.${digits}f".format(this)
 
 @Preview(showBackground = true)
 @Composable
