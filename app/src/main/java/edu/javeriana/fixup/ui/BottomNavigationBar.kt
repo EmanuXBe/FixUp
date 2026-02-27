@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Search
@@ -39,11 +38,6 @@ fun BottomNavigationBar() {
         )
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Search, contentDescription = "Search") },
-            selected = false,
-            onClick = { /*TODO*/ }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Outlined.AddBox, contentDescription = "Add", modifier = Modifier.size(28.dp)) },
             selected = false,
             onClick = { /*TODO*/ }
         )

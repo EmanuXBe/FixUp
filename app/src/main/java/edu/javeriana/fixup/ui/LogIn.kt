@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import edu.javeriana.fixup.R
@@ -74,7 +73,7 @@ fun LogInScreen(
             onValueChange = { password = it },
             placeholder = stringResource(R.string.password_placeholder),
             keyboardType = KeyboardType.Password,
-            visualTransformation = PasswordVisualTransformation()
+            isPassword = true
         )
 
         Spacer(modifier = Modifier.height(24.dp))
