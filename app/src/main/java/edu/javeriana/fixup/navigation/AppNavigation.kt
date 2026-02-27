@@ -1,16 +1,24 @@
 package edu.javeriana.fixup.navigation
 
+import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import edu.javeriana.fixup.ui.CheckoutScreen
 import edu.javeriana.fixup.ui.FeedScreen
 import edu.javeriana.fixup.ui.LogInScreen
+import edu.javeriana.fixup.ui.ProfileScreen
+import edu.javeriana.fixup.ui.PropertyDetailScreen
+import edu.javeriana.fixup.ui.PublicationScreen
 import edu.javeriana.fixup.ui.RegisterScreen
+import edu.javeriana.fixup.ui.RentScreen
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val context = LocalContext.current
 
     NavHost(
         navController = navController,
@@ -42,9 +50,52 @@ fun AppNavigation() {
 
         // Feed placeholder screen
         composable(AppScreens.Feed.route) {
-            FeedScreen()
+            FeedScreen(
+                onHomeClick = { /* Ya estamos en home */ },
+                onSearchClick = { navController.navigate(AppScreens.Rent.route) },
+                onProfileClick = { navController.navigate(AppScreens.Profile.route) },
+                onPublicationClick = { navController.navigate(AppScreens.Publication.route) }
+            )
         }
 
-        // Profile: declared in AppScreens enum but not yet wired
+        composable(AppScreens.Rent.route) {
+            RentScreen(
+                onSelectClick = { navController.navigate(AppScreens.PropertyDetail.route) },
+                onHomeClick = { navController.navigate(AppScreens.Feed.route) },
+                onSearchClick = { /* Ya estamos en rent */ },
+                onProfileClick = { navController.navigate(AppScreens.Profile.route) }
+            )
+        }
+
+        composable(AppScreens.PropertyDetail.route) {
+            PropertyDetailScreen(
+                onBackClick = { navController.popBackStack() },
+                onReserveClick = { navController.navigate(AppScreens.Checkout.route) }
+            )
+        }
+
+        // Profile screen
+        composable(AppScreens.Profile.route) {
+            val sharedPrefs = context.getSharedPreferences("fixup_prefs", Context.MODE_PRIVATE)
+            ProfileScreen(
+                sp = sharedPrefs,
+                onHomeClick = { navController.navigate(AppScreens.Feed.route) },
+                onSearchClick = { navController.navigate(AppScreens.Rent.route) },
+                onProfileClick = { /* Ya estamos en perfil */ }
+            )
+        }
+
+        // Publication screen
+        composable(AppScreens.Publication.route) {
+            PublicationScreen(
+                onBackClick = { navController.popBackStack() },
+                onContactClick = { navController.navigate(AppScreens.Checkout.route) }
+            )
+        }
+
+        // Checkout screen
+        composable(AppScreens.Checkout.route) {
+            CheckoutScreen(onBackClick = { navController.popBackStack() })
+        }
     }
 }

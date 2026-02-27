@@ -327,12 +327,20 @@ fun CategoryItem(imageRes: Int, title: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun PublicationCard(imageRes: Int, title: String, price: String, modifier: Modifier = Modifier) {
+fun PublicationCard(
+    imageRes: Int,
+    title: String,
+    price: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = modifier.width(200.dp)
+        modifier = modifier
+            .width(200.dp)
+            .clickable { onClick() }
     ) {
         Column {
             Image(
@@ -363,27 +371,33 @@ fun PublicationCard(imageRes: Int, title: String, price: String, modifier: Modif
 }
 
 @Composable
-fun BottomNavBar(modifier: Modifier = Modifier) {
+fun BottomNavBar(
+    onHomeClick: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    currentScreen: String = "home",
+    modifier: Modifier = Modifier
+) {
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 8.dp,
         modifier = modifier
     ) {
         NavigationBarItem(
-            selected = true,
-            onClick = { },
+            selected = currentScreen == "home",
+            onClick = onHomeClick,
             icon = { Icon(Icons.Default.Home, contentDescription = stringResource(R.string.nav_home)) },
             label = { Text(stringResource(R.string.nav_home)) }
         )
         NavigationBarItem(
-            selected = false,
-            onClick = { },
+            selected = currentScreen == "search",
+            onClick = onSearchClick,
             icon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.nav_search)) },
             label = { Text(stringResource(R.string.nav_search)) }
         )
         NavigationBarItem(
-            selected = false,
-            onClick = { },
+            selected = currentScreen == "profile",
+            onClick = onProfileClick,
             icon = { Icon(Icons.Default.AccountCircle, contentDescription = stringResource(R.string.nav_profile)) },
             label = { Text(stringResource(R.string.nav_profile)) }
         )
