@@ -1,76 +1,84 @@
 package edu.javeriana.fixup.ui
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import edu.javeriana.fixup.R
-import edu.javeriana.fixup.ui.theme.FixUpTheme
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import edu.javeriana.fixup.navigation.AppScreens
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomNavigationBar(
-    selectedItem: Int = 0,
-    onHomeClick: () -> Unit = {},
-    onSearchClick: () -> Unit = {},
-    onNotificationsClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    navController: NavHostController
 ) {
-    NavigationBar(
-        containerColor = Color.White
-    ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    NavigationBar {
         NavigationBarItem(
             icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
-            selected = selectedItem == 0,
-            onClick = onHomeClick
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Outlined.Search, contentDescription = "Search") },
-            selected = selectedItem == 1,
-            onClick = onSearchClick
-        )
-        NavigationBarItem(
-            icon = {
-                BadgedBox(badge = { Badge { Text("5") } }) {
-                    Icon(Icons.Outlined.Notifications, contentDescription = "Notifications")
+            label = { Text("Inicio") },
+            selected = currentRoute == AppScreens.Feed.route,
+            onClick = {
+                navController.navigate(AppScreens.Feed.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                 }
-            },
-            selected = selectedItem == 2,
-            onClick = onNotificationsClick
+            }
         )
-        NavigationBarItem(
-            icon = {
-                Image(
-                    painter = painterResource(id = R.drawable.featured_image),
-                    contentDescription = "Profile",
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            },
-            selected = selectedItem == 3,
-            onClick = onProfileClick
-        )
-    }
-}
 
-@Preview
-@Composable
-fun BottomNavigationBarPreview() {
-    FixUpTheme {
-        BottomNavigationBar()
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.Search, contentDescription = "Rent") },
+            label = { Text("Alquilar") },
+            selected = currentRoute == AppScreens.Rent.route,
+            onClick = {
+                navController.navigate(AppScreens.Rent.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.Notifications, contentDescription = "Notifications") },
+            label = { Text("Alertas") },
+            selected = currentRoute == AppScreens.Notifications.route,
+            onClick = {
+                navController.navigate(AppScreens.Notifications.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.Person, contentDescription = "Profile") },
+            label = { Text("Perfil") },
+            selected = currentRoute == AppScreens.Profile.route,
+            onClick = {
+                navController.navigate(AppScreens.Profile.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
     }
 }

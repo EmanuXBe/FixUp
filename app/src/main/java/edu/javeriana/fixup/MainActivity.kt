@@ -4,7 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import edu.javeriana.fixup.navigation.AppNavigation
+import androidx.navigation.compose.rememberNavController
+import edu.javeriana.fixup.ui.MainScreen
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +14,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FixUpTheme {
-                AppNavigation()
+                val navController = rememberNavController()
+                MainScreen(navController = navController)
             }
         }
     }

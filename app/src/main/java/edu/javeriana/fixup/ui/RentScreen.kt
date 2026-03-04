@@ -42,51 +42,33 @@ import java.util.*
 @Composable
 fun RentScreen(
     viewModel: RentViewModel = viewModel(),
-    onSelectClick: (String) -> Unit,
-    onHomeClick: () -> Unit = {},
-    onSearchClick: () -> Unit = {},
-    onNotificationsClick: () -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    onSelectClick: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                selectedItem = 1,
-                onHomeClick = onHomeClick,
-                onSearchClick = onSearchClick,
-                onNotificationsClick = onNotificationsClick,
-                onProfileClick = onProfileClick
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            RentHeader()
-            
-            when (val state = uiState) {
-                is RentUiState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        RentHeader()
+        
+        when (val state = uiState) {
+            is RentUiState.Loading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
-                is RentUiState.Success -> {
-                    RentContent(
-                        properties = state.properties,
-                        onPropertySelected = { id ->
-                            viewModel.onPropertySelected(id)
-                            onSelectClick(id)
-                        }
-                    )
-                }
-                is RentUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = state.message, color = MaterialTheme.colorScheme.error)
+            }
+            is RentUiState.Success -> {
+                RentContent(
+                    properties = state.properties,
+                    onPropertySelected = { id ->
+                        viewModel.onPropertySelected(id)
+                        onSelectClick(id)
                     }
+                )
+            }
+            is RentUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = state.message, color = MaterialTheme.colorScheme.error)
                 }
             }
         }

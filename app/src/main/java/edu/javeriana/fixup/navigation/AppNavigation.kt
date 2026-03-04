@@ -1,6 +1,8 @@
 package edu.javeriana.fixup.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -9,12 +11,14 @@ import androidx.navigation.navArgument
 import edu.javeriana.fixup.ui.*
 
 @Composable
-fun AppNavigation() {
-    val navController = rememberNavController()
-
+fun AppNavigation(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
     NavHost(
         navController = navController,
-        startDestination = AppScreens.LogIn.route
+        startDestination = AppScreens.LogIn.route,
+        modifier = modifier
     ) {
         // Login screen
         composable(AppScreens.LogIn.route) {
@@ -27,8 +31,8 @@ fun AppNavigation() {
                 }
             )
         }
-
-        // Register placeholder screen
+        
+        // Register screen
         composable(AppScreens.Register.route) {
             RegisterScreen(
                 onBackClick = { navController.popBackStack() },
@@ -43,11 +47,9 @@ fun AppNavigation() {
         // Feed screen
         composable(AppScreens.Feed.route) {
             FeedScreen(
-                onHomeClick = { /* Ya estamos en home */ },
-                onSearchClick = { navController.navigate(AppScreens.Rent.route) },
-                onNotificationsClick = { navController.navigate(AppScreens.Notifications.route) },
-                onProfileClick = { navController.navigate(AppScreens.Profile.route) },
-                onPublicationClick = { navController.navigate(AppScreens.Publication.route) }
+                onPublicationClick = { 
+                    navController.navigate(AppScreens.Publication.route) 
+                }
             )
         }
 
@@ -56,34 +58,21 @@ fun AppNavigation() {
             RentScreen(
                 onSelectClick = { id -> 
                     navController.navigate(AppScreens.PropertyDetail.route + "/$id") 
-                },
-                onHomeClick = { navController.navigate(AppScreens.Feed.route) },
-                onSearchClick = { /* Ya estamos en rent */ },
-                onNotificationsClick = { navController.navigate(AppScreens.Notifications.route) },
-                onProfileClick = { navController.navigate(AppScreens.Profile.route) }
+                }
             )
         }
 
         // Notifications screen
         composable(AppScreens.Notifications.route) {
-            NewRequestsScreen(
-                onHomeClick = { navController.navigate(AppScreens.Feed.route) },
-                onSearchClick = { navController.navigate(AppScreens.Rent.route) },
-                onNotificationsClick = { /* Ya estamos en notificaciones */ },
-                onProfileClick = { navController.navigate(AppScreens.Profile.route) }
-            )
+            NewRequestsScreen()
         }
 
         // Profile screen
         composable(AppScreens.Profile.route) {
-            ProfileScreen(
-                onHomeClick = { navController.navigate(AppScreens.Feed.route) },
-                onSearchClick = { navController.navigate(AppScreens.Rent.route) },
-                onNotificationsClick = { navController.navigate(AppScreens.Notifications.route) },
-                onProfileClick = { /* Ya estamos en perfil */ }
-            )
+            ProfileScreen()
         }
 
+        // Property Detail screen
         composable(
             route = AppScreens.PropertyDetail.route + "/{propertyId}",
             arguments = listOf(navArgument("propertyId") { type = NavType.StringType })
