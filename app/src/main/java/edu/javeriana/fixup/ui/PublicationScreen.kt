@@ -10,6 +10,8 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -19,16 +21,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
+import edu.javeriana.fixup.ui.viewmodel.FeedViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublicationScreen(
+    publicationId: String? = null,
     onBackClick: () -> Unit,
-    onContactClick: () -> Unit
+    onContactClick: () -> Unit,
+    feedViewModel: FeedViewModel = viewModel()
 ) {
+    val uiState by feedViewModel.uiState.collectAsState()
+    val publication = uiState.publications.find { it.id == publicationId } ?: uiState.publications.first()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,7 +66,7 @@ fun PublicationScreen(
         ) {
             item {
                 Image(
-                    painter = painterResource(id = R.drawable.sala),
+                    painter = painterResource(id = publication.imageRes),
                     contentDescription = "Imagen de la publicación",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -69,13 +78,13 @@ fun PublicationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "Salas a tu medida",
+                    text = publication.title,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
                 
                 Text(
-                    text = "Desde $300.000",
+                    text = publication.price,
                     fontSize = 20.sp,
                     color = SoftFawn,
                     fontWeight = FontWeight.SemiBold
@@ -89,8 +98,16 @@ fun PublicationScreen(
                     fontWeight = FontWeight.Bold
                 )
                 
+                val description = when(publicationId) {
+                    "1" -> "Transforma tu espacio con nuestros diseños exclusivos de salas. Utilizamos materiales de alta calidad y nos adaptamos a tus necesidades y presupuesto."
+                    "2" -> "¡Arma el comedor de tus sueños! Ofrecemos soluciones integrales para que tus cenas familiares sean inolvidables."
+                    "3" -> "Renovamos tu baño por completo. Incluye cambio de sanitarios, grifería de alta gama y revestimientos modernos."
+                    "4" -> "Cocina integral con acabados premium. Optimización de espacio y diseño ergonómico para tu comodidad."
+                    else -> "Transforma tu espacio con nuestros diseños exclusivos. Utilizamos materiales de alta calidad y nos adaptamos a tus necesidades."
+                }
+
                 Text(
-                    text = "Transforma tu espacio con nuestros diseños exclusivos de salas. Utilizamos materiales de alta calidad y nos adaptamos a tus necesidades y presupuesto. El precio incluye asesoría inicial y propuesta de diseño.",
+                    text = description,
                     fontSize = 16.sp,
                     color = Color.Gray,
                     lineHeight = 24.sp
@@ -117,6 +134,6 @@ fun PublicationScreen(
 @Composable
 fun PublicationScreenPreview() {
     FixUpTheme {
-        PublicationScreen(onBackClick = {}, onContactClick = {})
+        PublicationScreen(publicationId = "1", onBackClick = {}, onContactClick = {})
     }
 }

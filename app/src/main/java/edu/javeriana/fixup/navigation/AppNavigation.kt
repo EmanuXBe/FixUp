@@ -24,14 +24,16 @@ fun AppNavigation(
         composable(AppScreens.LogIn.route) {
             LogInScreen(
                 onContinueClick = {
-                    navController.navigate(AppScreens.Feed.route)
+                    navController.navigate(AppScreens.Feed.route) {
+                        popUpTo(AppScreens.LogIn.route) { inclusive = true }
+                    }
                 },
                 onRegisterClick = {
                     navController.navigate(AppScreens.Register.route)
                 }
             )
         }
-        
+
         // Register screen
         composable(AppScreens.Register.route) {
             RegisterScreen(
@@ -47,8 +49,8 @@ fun AppNavigation(
         // Feed screen
         composable(AppScreens.Feed.route) {
             FeedScreen(
-                onPublicationClick = { 
-                    navController.navigate(AppScreens.Publication.route) 
+                onPublicationClick = {
+                    navController.navigate(AppScreens.Publication.route)
                 }
             )
         }
@@ -56,8 +58,8 @@ fun AppNavigation(
         // Rent screen
         composable(AppScreens.Rent.route) {
             RentScreen(
-                onSelectClick = { id -> 
-                    navController.navigate(AppScreens.PropertyDetail.route + "/$id") 
+                onSelectClick = { id ->
+                    navController.navigate(AppScreens.PropertyDetail.route + "/$id")
                 }
             )
         }

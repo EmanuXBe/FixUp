@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -203,7 +204,7 @@ fun PropertyCard(
     ) {
         Column {
             Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-                val pageCount = 3
+                val pageCount = property.imageUrls.size
                 val pagerState = rememberPagerState(pageCount = { pageCount })
                 HorizontalPager(
                     state = pagerState,
@@ -211,7 +212,7 @@ fun PropertyCard(
                 ) { page ->
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(property.imageUrl)
+                            .data(property.imageUrls[page])
                             .crossfade(true)
                             .build(),
                         contentDescription = null,
