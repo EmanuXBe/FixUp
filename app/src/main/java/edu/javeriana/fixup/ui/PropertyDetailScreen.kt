@@ -11,6 +11,9 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,11 +25,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import edu.javeriana.fixup.R
-import edu.javeriana.fixup.ui.model.MockPropertyRepository
 import edu.javeriana.fixup.ui.theme.FixUpTheme
+import edu.javeriana.fixup.ui.viewmodel.PropertyDetailViewModel
 import java.text.NumberFormat
 import java.util.*
 
@@ -34,11 +38,13 @@ import java.util.*
 fun PropertyDetailScreen(
     propertyId: String? = null,
     onBackClick: () -> Unit,
-    onReserveClick: () -> Unit
+    onReserveClick: () -> Unit,
+    viewModel: PropertyDetailViewModel = viewModel()
 ) {
-    // Buscamos la propiedad por ID. Si no se encuentra o el ID es nulo, usamos un valor por defecto o manejamos el error.
-    val property = remember(propertyId) {
-        MockPropertyRepository.getProperties().find { it.id == propertyId }
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(propertyId) {
+        viewModel.loadProperty(propertyId)
     }
 
     val currencyFormat = remember {
@@ -47,10 +53,19 @@ fun PropertyDetailScreen(
         }
     }
 
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val property = uiState.property
+
     if (property == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Propiedad no encontrada")
+                Text(uiState.error ?: "Propiedad no encontrada")
                 Button(onClick = onBackClick) {
                     Text("Volver")
                 }
@@ -150,7 +165,7 @@ fun PropertyDetailScreen(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Bogotá, Colombia", // Podrías agregar ubicación al modelo si fuera necesario
+                    text = "Bogotá, Colombia",
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
@@ -187,7 +202,6 @@ fun PropertyDetailScreen(
                     fontWeight = FontWeight.Bold
                 )
                 
-                // Aquí podrías listar amenidades adicionales si el modelo las tuviera
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("• Cocina integral", fontSize = 14.sp)
                 Text("• Wifi de alta velocidad", fontSize = 14.sp)

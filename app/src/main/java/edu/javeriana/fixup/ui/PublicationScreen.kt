@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,7 +26,7 @@ import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
-import edu.javeriana.fixup.ui.viewmodel.FeedViewModel
+import edu.javeriana.fixup.ui.viewmodel.PublicationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,10 +34,34 @@ fun PublicationScreen(
     publicationId: String? = null,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
-    feedViewModel: FeedViewModel = viewModel()
+    viewModel: PublicationViewModel = viewModel()
 ) {
-    val uiState by feedViewModel.uiState.collectAsState()
-    val publication = uiState.publications.find { it.id == publicationId } ?: uiState.publications.first()
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(publicationId) {
+        viewModel.loadPublication(publicationId)
+    }
+
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val publication = uiState.publication
+
+    if (publication == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(uiState.error ?: "Publicación no encontrada")
+                Button(onClick = onBackClick) {
+                    Text("Volver")
+                }
+            }
+        }
+        return
+    }
 
     Scaffold(
         topBar = {
@@ -98,16 +123,8 @@ fun PublicationScreen(
                     fontWeight = FontWeight.Bold
                 )
                 
-                val description = when(publicationId) {
-                    "1" -> "Transforma tu espacio con nuestros diseños exclusivos de salas. Utilizamos materiales de alta calidad y nos adaptamos a tus necesidades y presupuesto."
-                    "2" -> "¡Arma el comedor de tus sueños! Ofrecemos soluciones integrales para que tus cenas familiares sean inolvidables."
-                    "3" -> "Renovamos tu baño por completo. Incluye cambio de sanitarios, grifería de alta gama y revestimientos modernos."
-                    "4" -> "Cocina integral con acabados premium. Optimización de espacio y diseño ergonómico para tu comodidad."
-                    else -> "Transforma tu espacio con nuestros diseños exclusivos. Utilizamos materiales de alta calidad y nos adaptamos a tus necesidades."
-                }
-
                 Text(
-                    text = description,
+                    text = uiState.description,
                     fontSize = 16.sp,
                     color = Color.Gray,
                     lineHeight = 24.sp

@@ -4,10 +4,13 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Send
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material.icons.outlined.Mic
@@ -15,6 +18,8 @@ import androidx.compose.material.icons.outlined.InsertEmoticon
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,16 +30,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.ui.model.MessageModel
 import edu.javeriana.fixup.ui.theme.FixUpTheme
+import edu.javeriana.fixup.ui.viewmodel.ChatViewModel
 
 @Composable
 fun ChatScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    viewModel: ChatViewModel = viewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        bottomBar = { MessageInputBar() }
+        bottomBar = { 
+            MessageInputBar(
+                value = uiState.currentMessage,
+                onValueChange = { viewModel.onMessageChanged(it) },
+                onSendClick = { viewModel.sendMessage() }
+            ) 
+        }
     ) { padding ->
 
         Column(
@@ -44,20 +60,25 @@ fun ChatScreen(
                 .background(Color(0xFFF4F4F4))
         ) {
 
-            ChatTopBar(onBackClick = onBackClick)
+            ChatTopBar(
+                name = uiState.contactName,
+                status = uiState.status,
+                onBackClick = onBackClick
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            ChatContent()
+            ChatContent(messages = uiState.messages)
         }
     }
 }
 
 @Composable
 fun ChatTopBar(
+    name: String,
+    status: String,
     onBackClick: () -> Unit
 ) {
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -66,9 +87,7 @@ fun ChatTopBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-
         Row(verticalAlignment = Alignment.CenterVertically) {
-
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                 contentDescription = null,
@@ -89,8 +108,8 @@ fun ChatTopBar(
             Spacer(modifier = Modifier.width(12.dp))
 
             Column {
-                Text("Andres Contreras", fontWeight = FontWeight.SemiBold)
-                Text("Activo hace 11 minutos", fontSize = 12.sp, color = Color.Gray)
+                Text(name, fontWeight = FontWeight.SemiBold)
+                Text(status, fontSize = 12.sp, color = Color.Gray)
             }
         }
 
@@ -102,49 +121,31 @@ fun ChatTopBar(
 }
 
 @Composable
-fun ChatContent() {
-
-    Column(
+fun ChatContent(messages: List<MessageModel>) {
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MessageBubble(
-            text = "Hola! quisiera saber mas sobre tu solicitud",
-            isMe = true
-        )
-
-        DateSeparator("30 de noviembre de 2023, 9:41 AM")
-
-        MessageBubble("Hola", false)
-        MessageBubble("Quisiera remodelar el piso de mi apartamento", false)
-        MessageBubble("Cuando podrias pasar?", false)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MessageBubble("Claro! podria pasar el lunes", true)
-        MessageBubble("Y asi hacer una cotizacion", true)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        MessageBubble("Ok", false)
-        MessageBubble("perfecto!", false)
-        MessageBubble("el lunes estaria perfecto, estare atento", false)
+        item { Spacer(modifier = Modifier.height(8.dp)) }
+        
+        items(messages) { message ->
+            MessageBubble(
+                text = message.text,
+                isMe = message.isMe
+            )
+        }
     }
 }
 
 @Composable
 fun MessageBubble(text: String, isMe: Boolean) {
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start
     ) {
-
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = if (isMe) Color.Black else Color(0xFFE6E6E6)
@@ -160,21 +161,11 @@ fun MessageBubble(text: String, isMe: Boolean) {
 }
 
 @Composable
-fun DateSeparator(text: String) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text, fontSize = 12.sp, color = Color.Gray)
-    }
-}
-
-@Composable
-fun MessageInputBar() {
-
+fun MessageInputBar(
+    value: String,
+    onValueChange: (String) -> Unit,
+    onSendClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -182,7 +173,6 @@ fun MessageInputBar() {
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Surface(
             modifier = Modifier
                 .weight(1f)
@@ -196,16 +186,35 @@ fun MessageInputBar() {
                     .padding(horizontal = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    "Mensaje...",
-                    color = Color.Gray,
+                TextField(
+                    value = value,
+                    onValueChange = onValueChange,
+                    placeholder = { Text("Mensaje...", color = Color.Gray) },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                    ),
                     modifier = Modifier.weight(1f)
                 )
-                Icon(Icons.Outlined.Mic, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Outlined.InsertEmoticon, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Outlined.Image, contentDescription = null)
+                
+                if (value.isNotBlank()) {
+                    IconButton(onClick = onSendClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Outlined.Send,
+                            contentDescription = "Enviar",
+                            tint = Color.Black
+                        )
+                    }
+                } else {
+                    Icon(Icons.Outlined.Mic, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Outlined.InsertEmoticon, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Outlined.Image, contentDescription = null)
+                }
             }
         }
     }

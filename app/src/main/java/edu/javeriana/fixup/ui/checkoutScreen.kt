@@ -21,7 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.javeriana.fixup.ui.model.CheckoutUiState
 import edu.javeriana.fixup.ui.theme.FixUpTheme
+import edu.javeriana.fixup.ui.viewmodel.CheckoutViewModel
 
 data class CheckoutItemUiModel(
     val imageRes: Int,
@@ -35,31 +38,10 @@ data class CheckoutItemUiModel(
 fun CheckoutScreen(
     onBackClick: () -> Unit,
     onConfirmClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: CheckoutViewModel = viewModel()
 ) {
-
-    var selectedAddress by remember { mutableStateOf("Direcciones guardadas") }
-    var selectedDate by remember { mutableStateOf("5 de octubre 2025") }
-    var selectedPayment by remember { mutableStateOf("Visa *1234") }
-
-    val items = listOf(
-        CheckoutItemUiModel(
-            imageRes = R.drawable.cocina,
-            category = "Iluminacion",
-            title = "Luces para entrada",
-            description = "Instalacion incluida",
-            price = "$350.000"
-        ),
-        CheckoutItemUiModel(
-            imageRes = R.drawable.comedor,
-            category = "Lavanderia",
-            title = "Crea tu zona de lavado",
-            description = "Materiales cotizados",
-            price = "$1.550.000"
-        )
-    )
-
-    val subtotal = "$1.900.000"
+    val uiState by viewModel.uiState.collectAsState()
 
     Column(
         modifier = modifier
@@ -72,19 +54,19 @@ fun CheckoutScreen(
 
         CheckoutOptionRow(
             label = "Direccion",
-            value = selectedAddress,
+            value = uiState.selectedAddress,
             onClick = { }
         )
 
         CheckoutOptionRow(
             label = "Dia",
-            value = "Programado\n$selectedDate",
+            value = "Programado\n${uiState.selectedDate}",
             onClick = { }
         )
 
         CheckoutOptionRow(
             label = "PAGO",
-            value = selectedPayment,
+            value = uiState.selectedPayment,
             onClick = { }
         )
 
@@ -94,9 +76,9 @@ fun CheckoutScreen(
             onClick = { }
         )
 
-        CheckoutItemsSection(items = items)
+        CheckoutItemsSection(items = uiState.items)
 
-        CheckoutSummary(subtotal = subtotal)
+        CheckoutSummary(subtotal = uiState.subtotal)
 
         Button(
             onClick = onConfirmClick,
