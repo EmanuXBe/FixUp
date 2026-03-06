@@ -1,4 +1,4 @@
-package edu.javeriana.fixup.ui
+package edu.javeriana.fixup.ui.features.main
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -6,6 +6,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -15,11 +17,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.javeriana.fixup.navigation.AppNavigation
 import edu.javeriana.fixup.navigation.AppScreens
+import edu.javeriana.fixup.ui.BottomNavigationBar
 import edu.javeriana.fixup.ui.model.MockPropertyRepository
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 import java.text.NumberFormat
@@ -27,28 +30,21 @@ import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(navController: NavHostController) {
-
+fun MainScreen(
+    viewModel: MainViewModel = viewModel()
+) {
+    val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    
+    val uiState by viewModel.uiState.collectAsState()
 
-    // 1. Lógica para Bottom Bar de Navegación
-    val showBottomNav = currentRoute in listOf(
-        AppScreens.Feed.route,
-        AppScreens.Rent.route,
-        AppScreens.Notifications.route,
-        AppScreens.Profile.route
-    )
-
-    // 2. Lógica para Top Bar dinámica
-    val topBarTitle = when {
-        currentRoute?.startsWith(AppScreens.Publication.route) == true -> "Detalle de Publicación"
-        currentRoute == AppScreens.AllPublications.route -> "Publicaciones"
-        currentRoute == AppScreens.Checkout.route -> "Pantalla de pago"
-        else -> null
+    // Sincronizar la ruta actual con el ViewModel
+    LaunchedEffect(currentRoute) {
+        viewModel.updateCurrentRoute(currentRoute)
     }
 
-    // 3. Lógica para Bottom Bar especial (como la de Property Detail)
+    // Lógica para Bottom Bar especial (como la de Property Detail)
     val specialBottomBar: @Composable () -> Unit = {
         if (currentRoute?.startsWith(AppScreens.PropertyDetail.route) == true) {
             val propertyId = navBackStackEntry?.arguments?.getString("propertyId")
@@ -84,7 +80,7 @@ fun MainScreen(navController: NavHostController) {
                             )
                         }
                         Button(
-                            onClick = { /* Esta lógica se maneja via callbacks si es necesario, pero por simplicidad para la entrega 1: */
+                            onClick = { 
                                 navController.navigate(AppScreens.Checkout.route)
                             },
                             shape = RoundedCornerShape(12.dp),
@@ -100,9 +96,9 @@ fun MainScreen(navController: NavHostController) {
 
     Scaffold(
         topBar = {
-            if (topBarTitle != null) {
+            if (uiState.topBarTitle != null) {
                 TopAppBar(
-                    title = { Text(topBarTitle) },
+                    title = { Text(uiState.topBarTitle!!) },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
@@ -112,7 +108,7 @@ fun MainScreen(navController: NavHostController) {
             }
         },
         bottomBar = {
-            if (showBottomNav) {
+            if (uiState.showBottomNav) {
                 BottomNavigationBar(navController = navController)
             } else {
                 specialBottomBar()
@@ -130,7 +126,6 @@ fun MainScreen(navController: NavHostController) {
 @Composable
 fun MainScreenPreview() {
     FixUpTheme {
-        val navController = rememberNavController()
-        MainScreen(navController = navController)
+        MainScreen()
     }
 }
