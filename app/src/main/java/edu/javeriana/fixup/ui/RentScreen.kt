@@ -32,9 +32,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.model.PropertyModel
-import edu.javeriana.fixup.ui.model.RentUiState
+import edu.javeriana.fixup.ui.features.rent.RentUiState
 import edu.javeriana.fixup.ui.theme.FixUpTheme
-import edu.javeriana.fixup.ui.viewmodel.RentViewModel
+import edu.javeriana.fixup.ui.features.rent.RentViewModel
 import java.text.NumberFormat
 import java.util.*
 

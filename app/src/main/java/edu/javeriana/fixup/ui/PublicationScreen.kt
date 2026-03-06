@@ -26,7 +26,7 @@ import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
-import edu.javeriana.fixup.ui.viewmodel.PublicationViewModel
+import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +34,7 @@ fun PublicationScreen(
     publicationId: String? = null,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
-    viewModel: PublicationViewModel = viewModel()
+    viewModel: PublicationDetailViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

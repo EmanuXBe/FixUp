@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,7 +39,7 @@ fun NotificationsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = "Tus nuevas solicitudes",
@@ -48,20 +49,20 @@ fun NotificationsScreen(
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         FilterChips()
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 20.dp)
+                contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(uiState.requests) { request ->
                     RequestRow(request)
@@ -78,7 +79,7 @@ fun FilterChips() {
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         ChipItem(text = "Recientes", selected = true)
         ChipItem(text = "Antiguos")
@@ -89,19 +90,20 @@ fun FilterChips() {
 
 @Composable
 fun ChipItem(text: String, selected: Boolean = false) {
-    val backgroundColor = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+    val backgroundColor = if (selected) MaterialTheme.colorScheme.primary else Color(0xFFF0EBF5)
+    val textColor = if (selected) MaterialTheme.colorScheme.onPrimary else Color(0xFF423D32)
 
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(30.dp))
             .background(backgroundColor)
-            .padding(horizontal = 18.dp, vertical = 10.dp)
+            .padding(horizontal = 20.dp, vertical = 10.dp)
     ) {
         Text(
             text = text,
             color = textColor,
             fontSize = 14.sp,
+            fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal,
             maxLines = 1
         )
     }
@@ -112,14 +114,14 @@ fun ChipItemIcon() {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(30.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(Color(0xFFF0EBF5))
             .padding(horizontal = 14.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = Icons.Default.MoreHoriz,
             contentDescription = "Más opciones",
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = Color(0xFF423D32),
             modifier = Modifier.size(20.dp)
         )
     }
@@ -133,6 +135,7 @@ fun RequestRow(item: NotificationItemModel) {
             .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Indicador de no leído (punto rojo)
         Box(
             modifier = Modifier
                 .size(8.dp)
@@ -141,66 +144,83 @@ fun RequestRow(item: NotificationItemModel) {
 
         Spacer(modifier = Modifier.width(12.dp))
 
+        // Imagen de perfil circular
         AsyncImage(
             model = item.profileImage,
-            contentDescription = "Profile picture of ${item.name}",
+            contentDescription = null,
             modifier = Modifier
-                .size(50.dp)
+                .size(52.dp)
                 .clip(CircleShape),
             contentScale = ContentScale.Crop
         )
 
         Spacer(modifier = Modifier.width(12.dp))
 
+        // Contenido principal (Nombre, Tiempo, Descripción)
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = item.name,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = item.time,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    maxLines = 1
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = item.description,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                lineHeight = 18.sp
             )
         }
 
+        // Acciones laterales (Botón o Vista previa)
         if (item.showButton) {
+            Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = { },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp)
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+                modifier = Modifier.height(36.dp)
             ) {
-                Text(text = "Responder", color = MaterialTheme.colorScheme.onPrimary, fontSize = 12.sp)
+                Text(
+                    text = "Responder",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
 
-        if (item.hasPreview) {
-            Spacer(modifier = Modifier.width(8.dp))
-            item.previewImage?.let {
-                AsyncImage(
-                    model = it,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(55.dp)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
+        if (item.hasPreview && item.previewImage != null) {
+            Spacer(modifier = Modifier.width(12.dp))
+            AsyncImage(
+                model = item.previewImage,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }
