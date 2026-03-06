@@ -8,7 +8,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import edu.javeriana.fixup.ui.*
+import edu.javeriana.fixup.ui.features.auth.login.LogInScreen
+import edu.javeriana.fixup.ui.features.auth.register.RegisterScreen
+import edu.javeriana.fixup.ui.features.chat.ChatScreen
+import edu.javeriana.fixup.ui.features.checkout.CheckoutScreen
+import edu.javeriana.fixup.ui.features.feed.AllPublicationsScreen
+import edu.javeriana.fixup.ui.features.feed.FeedScreen
+import edu.javeriana.fixup.ui.features.notifications.NotificationsScreen
+import edu.javeriana.fixup.ui.features.profile.ProfileScreen
+import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
+import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
+import edu.javeriana.fixup.ui.features.rent.RentScreen
 
 @Composable
 fun AppNavigation(
@@ -69,7 +79,7 @@ fun AppNavigation(
 
         // Notifications screen
         composable(AppScreens.Notifications.route) {
-            NewRequestsScreen()
+            NotificationsScreen()
         }
 
         // Profile screen
@@ -96,7 +106,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("publicationId") { type = NavType.StringType })
         ) { backStackEntry ->
             val publicationId = backStackEntry.arguments?.getString("publicationId")
-            PublicationScreen(
+            PublicationDetailScreen(
                 publicationId = publicationId,
                 onBackClick = { navController.popBackStack() },
                 onContactClick = { navController.navigate(AppScreens.Checkout.route) }

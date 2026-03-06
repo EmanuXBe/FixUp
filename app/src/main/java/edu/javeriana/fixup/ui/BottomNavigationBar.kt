@@ -8,7 +8,6 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -23,7 +22,7 @@ fun BottomNavigationBar(
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
-        containerColor = Color.White, // Fondo blanco para que haga juego con la app
+        containerColor = MaterialTheme.colorScheme.surface,
         contentColor = SoftFawn
     ) {
         NavigationBarItem(
@@ -33,9 +32,9 @@ fun BottomNavigationBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = SoftFawn,
                 selectedTextColor = SoftFawn,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray,
-                indicatorColor = Color(0xFFF5F5F5) // Un gris muy tenue para el círculo de selección
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = MaterialTheme.colorScheme.secondaryContainer
             ),
             onClick = {
                 navController.navigate(AppScreens.Feed.route) {
@@ -55,9 +54,9 @@ fun BottomNavigationBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = SoftFawn,
                 selectedTextColor = SoftFawn,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray,
-                indicatorColor = Color(0xFFF5F5F5)
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = MaterialTheme.colorScheme.secondaryContainer
             ),
             onClick = {
                 navController.navigate(AppScreens.Rent.route) {
@@ -77,9 +76,9 @@ fun BottomNavigationBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = SoftFawn,
                 selectedTextColor = SoftFawn,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray,
-                indicatorColor = Color(0xFFF5F5F5)
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = MaterialTheme.colorScheme.secondaryContainer
             ),
             onClick = {
                 navController.navigate(AppScreens.Notifications.route) {
@@ -99,9 +98,9 @@ fun BottomNavigationBar(
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = SoftFawn,
                 selectedTextColor = SoftFawn,
-                unselectedIconColor = Color.Gray,
-                unselectedTextColor = Color.Gray,
-                indicatorColor = Color(0xFFF5F5F5)
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = MaterialTheme.colorScheme.secondaryContainer
             ),
             onClick = {
                 navController.navigate(AppScreens.Profile.route) {

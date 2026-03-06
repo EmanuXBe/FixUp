@@ -25,9 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
-import edu.javeriana.fixup.ui.theme.CharcoalBrown
-import edu.javeriana.fixup.ui.theme.GreyOlive
-import edu.javeriana.fixup.ui.theme.Inter
 import edu.javeriana.fixup.ui.theme.SoftFawn
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 
@@ -36,7 +33,7 @@ fun FixUpTitle(modifier: Modifier = Modifier) {
     Text(
         text = stringResource(R.string.app_name_title),
         style = MaterialTheme.typography.displayLarge,
-        color = GreyOlive,
+        color = MaterialTheme.colorScheme.onSurface,
         modifier = modifier
     )
 }
@@ -61,10 +58,12 @@ fun FixUpTextField(
         isError = isError,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = if (isError) Color.Red else SoftFawn,
-            unfocusedBorderColor = if (isError) Color.Red.copy(alpha = 0.4f) else GreyOlive.copy(alpha = 0.4f),
+            unfocusedBorderColor = if (isError) Color.Red.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
             cursorColor = SoftFawn,
-            focusedTextColor = CharcoalBrown,
-            unfocusedTextColor = CharcoalBrown
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         textStyle = MaterialTheme.typography.bodyMedium,
         modifier = modifier.fillMaxWidth()
@@ -114,19 +113,19 @@ fun AuthTabs(
         Text(
             text = stringResource(R.string.tab_login),
             style = MaterialTheme.typography.titleMedium,
-            color = if (isLoginSelected) SoftFawn else CharcoalBrown,
+            color = if (isLoginSelected) SoftFawn else MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.clickable(enabled = !isLoginSelected) { onLoginClick() }
         )
         Text(
             text = " ${stringResource(R.string.tab_separator)} ",
             style = MaterialTheme.typography.titleMedium,
-            color = GreyOlive
+            color = MaterialTheme.colorScheme.outline
         )
         Text(
             text = stringResource(R.string.tab_register),
             style = MaterialTheme.typography.titleMedium,
-            color = if (!isLoginSelected) SoftFawn else CharcoalBrown,
+            color = if (!isLoginSelected) SoftFawn else MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.clickable(enabled = isLoginSelected) { onRegisterClick() }
         )
@@ -143,18 +142,18 @@ fun AuthDivider(
     ) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = GreyOlive.copy(alpha = 0.3f),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
             thickness = 1.dp
         )
         Text(
             text = stringResource(R.string.divider_or),
             modifier = Modifier.padding(horizontal = 16.dp),
             style = MaterialTheme.typography.bodyMedium,
-            color = GreyOlive
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = GreyOlive.copy(alpha = 0.3f),
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
             thickness = 1.dp
         )
     }
@@ -171,7 +170,7 @@ fun OAuthButton(
     OutlinedButton(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, GreyOlive.copy(alpha = 0.3f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
         colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent),
         modifier = modifier
             .fillMaxWidth()
@@ -181,7 +180,6 @@ fun OAuthButton(
             text = icon,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = Inter,
             color = iconColor
         )
         Text(
@@ -210,7 +208,7 @@ fun SocialAuthButtons(
         OAuthButton(
             textResId = R.string.btn_apple,
             icon = stringResource(R.string.apple_icon),
-            iconColor = CharcoalBrown,
+            iconColor = MaterialTheme.colorScheme.onSurface,
             onClick = { /* TODO */ }
         )
     }
@@ -221,7 +219,7 @@ fun TermsOfServiceText(modifier: Modifier = Modifier) {
     Text(
         text = stringResource(R.string.terms_of_service),
         style = MaterialTheme.typography.bodySmall,
-        color = GreyOlive,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
         modifier = modifier.padding(horizontal = 16.dp)
     )
@@ -236,15 +234,15 @@ fun SearchBar(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(stringResource(R.string.search_placeholder), color = GreyOlive) },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = GreyOlive) },
+        placeholder = { Text(stringResource(R.string.search_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
         shape = RoundedCornerShape(24.dp),
         singleLine = true,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = SoftFawn,
-            unfocusedBorderColor = GreyOlive.copy(alpha = 0.3f),
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
         ),
         modifier = modifier.fillMaxWidth()
     )
@@ -265,7 +263,7 @@ fun SectionTitle(
             text = text,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = CharcoalBrown
+            color = MaterialTheme.colorScheme.onSurface
         )
         if (showArrow) {
             Icon(
@@ -315,7 +313,7 @@ fun CategoryItem(imageRes: Int, title: String, modifier: Modifier = Modifier) {
             text = title,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = CharcoalBrown,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
     }
@@ -331,7 +329,7 @@ fun PublicationCard(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = modifier
             .width(200.dp)
@@ -351,7 +349,7 @@ fun PublicationCard(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = CharcoalBrown
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -385,7 +383,7 @@ fun RoleSelector(
                 shape = RoundedCornerShape(12.dp),
                 border = BorderStroke(
                     width = 1.dp,
-                    color = if (isSelected) SoftFawn else GreyOlive.copy(alpha = 0.3f)
+                    color = if (isSelected) SoftFawn else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 ),
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = if (isSelected) SoftFawn.copy(alpha = 0.1f) else Color.Transparent
@@ -393,7 +391,7 @@ fun RoleSelector(
             ) {
                 Text(
                     text = role,
-                    color = if (isSelected) SoftFawn else CharcoalBrown,
+                    color = if (isSelected) SoftFawn else MaterialTheme.colorScheme.onSurface,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                 )
             }
