@@ -100,8 +100,10 @@ fun MainScreen(
                 TopAppBar(
                     title = { Text(uiState.topBarTitle!!) },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                        if (uiState.showBackButton) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
+                            }
                         }
                     }
                 )

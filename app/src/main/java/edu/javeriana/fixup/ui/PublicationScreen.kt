@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -28,7 +27,6 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublicationScreen(
     publicationId: String? = null,
@@ -63,153 +61,131 @@ fun PublicationScreen(
         return
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Detalle de Publicación") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorito")
-                    }
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.Share, contentDescription = "Compartir")
-                    }
-                }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        item {
+            AsyncImage(
+                model = publication.imageRes,
+                contentDescription = "Imagen de la publicación",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(16.dp)),
+                contentScale = ContentScale.Crop
             )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = publication.title,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Text(
+                text = publication.price,
+                fontSize = 20.sp,
+                color = SoftFawn,
+                fontWeight = FontWeight.SemiBold
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = "Descripción",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            
+            Text(
+                text = uiState.description,
+                fontSize = 16.sp,
+                color = Color.Gray,
+                lineHeight = 24.sp
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
         }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            item {
-                AsyncImage(
-                    model = publication.imageRes,
-                    contentDescription = "Imagen de la publicación",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                        .clip(RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = publication.title,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Text(
-                    text = publication.price,
-                    fontSize = 20.sp,
-                    color = SoftFawn,
-                    fontWeight = FontWeight.SemiBold
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = "Descripción",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Text(
-                    text = uiState.description,
-                    fontSize = 16.sp,
-                    color = Color.Gray,
-                    lineHeight = 24.sp
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-            }
 
-            // Sección "Sobre tu fixer"
-            item {
-                Row(
+        // Sección "Sobre tu fixer"
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    AsyncImage(
+                        model = R.drawable.profile_photo,
+                        contentDescription = "Fixer Photo",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row {
+                        repeat(4) { Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFC107), modifier = Modifier.size(18.dp)) }
+                        Icon(Icons.Default.StarBorder, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+                    }
+                    Text(text = "Destacados", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                }
+                
+                Spacer(modifier = Modifier.width(16.dp))
+                
+                Column {
+                    Text(text = "Sobre tu fixer", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam commodo nunc nulla, ut rutrum nulla sodales id.",
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        lineHeight = 20.sp
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        // Sección de beneficios
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                BenefitItem(icon = Icons.Outlined.AccessTime, text = "Puntual")
+                BenefitItem(icon = Icons.Outlined.Bolt, text = "Eficaz")
+                BenefitItem(icon = Icons.Outlined.Payments, text = "Economico")
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Button(
+                    onClick = onContactClick,
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        AsyncImage(
-                            model = R.drawable.profile_photo,
-                            contentDescription = "Fixer Photo",
-                            modifier = Modifier
-                                .size(100.dp)
-                                .clip(RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row {
-                            repeat(4) { Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFC107), modifier = Modifier.size(18.dp)) }
-                            Icon(Icons.Default.StarBorder, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(18.dp))
-                        }
-                        Text(text = "Destacados", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                    }
-                    
-                    Spacer(modifier = Modifier.width(16.dp))
-                    
-                    Column {
-                        Text(text = "Sobre tu fixer", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                        Text(
-                            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam commodo nunc nulla, ut rutrum nulla sodales id.",
-                            fontSize = 14.sp,
-                            color = Color.Gray,
-                            lineHeight = 20.sp
-                        )
-                    }
+                    Text(text = "Ir al Pago", fontSize = 16.sp)
                 }
                 
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-
-            // Sección de beneficios
-            item {
-                Row(
+                OutlinedButton(
+                    onClick = { /* Acción para contactar especialista */ },
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
+                    shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, SoftFawn),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = SoftFawn)
                 ) {
-                    BenefitItem(icon = Icons.Outlined.AccessTime, text = "Puntual")
-                    BenefitItem(icon = Icons.Outlined.Bolt, text = "Eficaz")
-                    BenefitItem(icon = Icons.Outlined.Payments, text = "Economico")
+                    Text(text = "Contactar Especialista", fontSize = 16.sp)
                 }
-                
-                Spacer(modifier = Modifier.height(32.dp))
             }
-
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Button(
-                        onClick = onContactClick,
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)
-                    ) {
-                        Text(text = "Ir al Pago", fontSize = 16.sp)
-                    }
-                    
-                    OutlinedButton(
-                        onClick = { /* Acción para contactar especialista */ },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, SoftFawn),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = SoftFawn)
-                    ) {
-                        Text(text = "Contactar Especialista", fontSize = 16.sp)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

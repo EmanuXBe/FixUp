@@ -22,13 +22,24 @@ class MainViewModel : ViewModel() {
             route?.startsWith(AppScreens.Publication.route) == true -> "Detalle de Publicación"
             route == AppScreens.AllPublications.route -> "Publicaciones"
             route == AppScreens.Checkout.route -> "Pantalla de pago"
+            route == AppScreens.Chat.route -> "Chat"
             else -> null
         }
+
+        val showBackButton = route !in listOf(
+            AppScreens.LogIn.route,
+            AppScreens.Register.route,
+            AppScreens.Feed.route,
+            AppScreens.Rent.route,
+            AppScreens.Notifications.route,
+            AppScreens.Profile.route
+        )
 
         _uiState.value = MainUiState(
             currentRoute = route,
             showBottomNav = showBottomNav,
-            topBarTitle = topBarTitle
+            topBarTitle = topBarTitle,
+            showBackButton = showBackButton
         )
     }
 }
@@ -36,5 +47,6 @@ class MainViewModel : ViewModel() {
 data class MainUiState(
     val currentRoute: String? = null,
     val showBottomNav: Boolean = false,
-    val topBarTitle: String? = null
+    val topBarTitle: String? = null,
+    val showBackButton: Boolean = false
 )
