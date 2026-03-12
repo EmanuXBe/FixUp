@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import edu.javeriana.fixup.ui.features.main.MainScreen
+import edu.javeriana.fixup.ui.FixUpApp
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FixUpTheme {
-                MainScreen()
+                FixUpApp()
             }
         }
     }

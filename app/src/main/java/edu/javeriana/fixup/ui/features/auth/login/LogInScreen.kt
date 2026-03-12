@@ -37,6 +37,27 @@ fun LogInScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        LoginHeader(onRegisterClick = onRegisterClick)
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        LoginForm(
+            email = uiState.email,
+            password = uiState.password,
+            onEmailChange = { viewModel.onEmailChanged(it) },
+            onPasswordChange = { viewModel.onPasswordChanged(it) },
+            onContinueClick = onContinueClick
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        LoginFooter()
+    }
+}
+
+@Composable
+private fun LoginHeader(onRegisterClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FixUpTitle()
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -50,12 +71,21 @@ fun LogInScreen(
             onLoginClick = {},
             onRegisterClick = onRegisterClick
         )
+    }
+}
 
-        Spacer(modifier = Modifier.height(48.dp))
-
+@Composable
+private fun LoginForm(
+    email: String,
+    password: String,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onContinueClick: () -> Unit
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FixUpTextField(
-            value = uiState.email,
-            onValueChange = { viewModel.onEmailChanged(it) },
+            value = email,
+            onValueChange = onEmailChange,
             placeholder = stringResource(R.string.email_placeholder),
             keyboardType = KeyboardType.Email
         )
@@ -63,8 +93,8 @@ fun LogInScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         FixUpTextField(
-            value = uiState.password,
-            onValueChange = { viewModel.onPasswordChanged(it) },
+            value = password,
+            onValueChange = onPasswordChange,
             placeholder = stringResource(R.string.password_placeholder),
             keyboardType = KeyboardType.Password,
             isPassword = true
@@ -76,9 +106,12 @@ fun LogInScreen(
             text = stringResource(R.string.btn_continue),
             onClick = onContinueClick
         )
+    }
+}
 
-        Spacer(modifier = Modifier.height(28.dp))
-
+@Composable
+private fun LoginFooter() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         AuthDivider()
 
         Spacer(modifier = Modifier.height(28.dp))

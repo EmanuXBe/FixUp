@@ -31,7 +31,6 @@ fun FeedScreen(
             .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        // SEARCH BAR
         item {
             SearchBar(
                 value = uiState.searchQuery,
@@ -40,67 +39,76 @@ fun FeedScreen(
             )
         }
 
-        // TITULO 1
         item {
-            Text(
-                text = "Remodelaciones recomendadas",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+            FeaturedSection()
+        }
+
+        item {
+            CategoriesSection(categories = uiState.categories)
+        }
+
+        item {
+            PublicationsSection(
+                publications = uiState.publications,
+                onAllPublicationsClick = onAllPublicationsClick,
+                onPublicationClick = onPublicationClick
             )
-        }
-
-        // IMAGEN DESTACADA
-        item {
-            FeaturedImage(
-                imageRes = R.drawable.featured_image
-            )
-        }
-
-        // TITULO CATEGORIAS
-        item {
-            SectionTitle(
-                text = "Categorias",
-                showArrow = true
-            )
-        }
-
-        // CATEGORIAS
-        item {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                items(uiState.categories) { category ->
-                    CategoryItem(
-                        imageRes = category.imageRes,
-                        title = category.title
-                    )
-                }
-            }
-        }
-
-        // TITULO PUBLICACIONES
-        item {
-            SectionTitle(
-                text = "Publicaciones",
-                showArrow = true,
-                modifier = Modifier.clickable { onAllPublicationsClick() }
-            )
-        }
-
-        // PUBLICACIONES
-        item {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                items(uiState.publications) { publication ->
-                    PublicationCard(
-                        imageRes = publication.imageRes,
-                        title = publication.title,
-                        price = publication.price,
-                        onClick = { onPublicationClick(publication.id) }
-                    )
-                }
-            }
         }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
+    }
+}
+
+@Composable
+private fun FeaturedSection() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Text(
+            text = "Remodelaciones recomendadas",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        FeaturedImage(imageRes = R.drawable.featured_image)
+    }
+}
+
+@Composable
+private fun CategoriesSection(categories: List<CategoryItemModel>) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SectionTitle(text = "Categorias", showArrow = true)
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            items(categories) { category ->
+                CategoryItem(
+                    imageRes = category.imageRes,
+                    title = category.title
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PublicationsSection(
+    publications: List<PublicationCardModel>,
+    onAllPublicationsClick: () -> Unit,
+    onPublicationClick: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SectionTitle(
+            text = "Publicaciones",
+            showArrow = true,
+            modifier = Modifier.clickable { onAllPublicationsClick() }
+        )
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            items(publications) { publication ->
+                PublicationCard(
+                    imageRes = publication.imageRes,
+                    title = publication.title,
+                    price = publication.price,
+                    onClick = { onPublicationClick(publication.id) }
+                )
+            }
+        }
     }
 }
 

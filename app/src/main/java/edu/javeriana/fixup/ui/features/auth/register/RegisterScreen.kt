@@ -35,6 +35,25 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        RegisterHeader(onBackClick = onBackClick)
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        RegisterForm(
+            uiState = uiState,
+            viewModel = viewModel,
+            onContinueClick = onContinueClick
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        RegisterFooter()
+    }
+}
+
+@Composable
+private fun RegisterHeader(onBackClick: () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FixUpTitle()
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -45,55 +64,58 @@ fun RegisterScreen(
             onRegisterClick = {},
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
 
-        Spacer(modifier = Modifier.height(48.dp))
+@Composable
+private fun RegisterForm(
+    uiState: RegisterUiState,
+    viewModel: RegisterViewModel,
+    onContinueClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        FixUpTextField(
+            value = uiState.email,
+            onValueChange = { viewModel.onEmailChanged(it) },
+            placeholder = stringResource(R.string.email_placeholder),
+            keyboardType = KeyboardType.Email
+        )
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FixUpTextField(
-                value = uiState.email,
-                onValueChange = { viewModel.onEmailChanged(it) },
-                placeholder = stringResource(R.string.email_placeholder),
-                keyboardType = KeyboardType.Email,
-                modifier = Modifier.fillMaxWidth()
-            )
+        FixUpTextField(
+            value = uiState.cedula,
+            onValueChange = { viewModel.onCedulaChanged(it) },
+            placeholder = stringResource(R.string.cedula_placeholder),
+            keyboardType = KeyboardType.Number
+        )
 
-            FixUpTextField(
-                value = uiState.cedula,
-                onValueChange = { viewModel.onCedulaChanged(it) },
-                placeholder = stringResource(R.string.cedula_placeholder),
-                keyboardType = KeyboardType.Number,
-                modifier = Modifier.fillMaxWidth()
-            )
+        FixUpTextField(
+            value = uiState.password,
+            onValueChange = { viewModel.onPasswordChanged(it) },
+            placeholder = stringResource(R.string.password_placeholder),
+            keyboardType = KeyboardType.Password,
+            isPassword = true
+        )
 
-            FixUpTextField(
-                value = uiState.password,
-                onValueChange = { viewModel.onPasswordChanged(it) },
-                placeholder = stringResource(R.string.password_placeholder),
-                keyboardType = KeyboardType.Password,
-                isPassword = true,
-                modifier = Modifier.fillMaxWidth()
-            )
+        RoleSelector(
+            selectedRole = uiState.selectedRole,
+            onRoleSelected = { viewModel.onRoleSelected(it) }
+        )
 
-            RoleSelector(
-                selectedRole = uiState.selectedRole,
-                onRoleSelected = { viewModel.onRoleSelected(it) },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         FixUpButton(
             text = stringResource(R.string.btn_register),
-            onClick = onContinueClick,
-            modifier = Modifier.fillMaxWidth()
+            onClick = onContinueClick
         )
+    }
+}
 
-        Spacer(modifier = Modifier.height(28.dp))
-
+@Composable
+private fun RegisterFooter() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         AuthDivider(modifier = Modifier.fillMaxWidth())
 
         Spacer(modifier = Modifier.height(28.dp))

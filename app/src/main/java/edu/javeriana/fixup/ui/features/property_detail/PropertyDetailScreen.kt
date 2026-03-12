@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.ui.model.PropertyModel
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
@@ -42,155 +43,203 @@ fun PropertyDetailScreen(
         viewModel.loadProperty(propertyId)
     }
 
-    if (uiState.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
+    when {
+        uiState.isLoading -> LoadingState()
+        uiState.property != null -> PropertyContent(
+            property = uiState.property!!,
+            onBackClick = onBackClick,
+            onReserveClick = onReserveClick
+        )
+        else -> ErrorState(
+            errorText = uiState.error ?: "Propiedad no encontrada",
+            onBackClick = onBackClick
+        )
     }
+}
 
-    val property = uiState.property
+@Composable
+private fun LoadingState() {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
 
-    if (property == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = uiState.error ?: "Propiedad no encontrada",
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Button(onClick = onBackClick) {
-                    Text("Volver")
-                }
+@Composable
+private fun ErrorState(errorText: String, onBackClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = errorText,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Button(onClick = onBackClick) {
+                Text("Volver")
             }
         }
-        return
     }
+}
 
+@Composable
+private fun PropertyContent(
+    property: PropertyModel,
+    onBackClick: () -> Unit,
+    onReserveClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
     ) {
-        // Header with Image and Back button
-        Box(modifier = Modifier.height(300.dp)) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(property.imageUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Property Image",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.chapi)
-            )
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.TopStart)
-                    .background(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                        RoundedCornerShape(50.dp)
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.onSurface
+        PropertyHeader(
+            imageUrl = property.imageUrl,
+            onBackClick = onBackClick
+        )
+
+        PropertyDetails(property = property)
+    }
+}
+
+@Composable
+private fun PropertyHeader(
+    imageUrl: String,
+    onBackClick: () -> Unit
+) {
+    Box(modifier = Modifier.height(300.dp)) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Property Image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            placeholder = painterResource(R.drawable.chapi)
+        )
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.TopStart)
+                .background(
+                    MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    RoundedCornerShape(50.dp)
                 )
-            }
-            Row(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.TopEnd)
-            ) {
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                            RoundedCornerShape(50.dp)
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = { },
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                            RoundedCornerShape(50.dp)
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorite",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
         }
-
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = property.title,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = "Bogotá, Colombia",
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                PropertyFeature(text = "${property.bedrooms} Habitaciones")
-                PropertyFeature(text = "${property.bathrooms} Baños")
-                if (property.hasParking) {
-                    PropertyFeature(text = "1 Parqueadero")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Text(
-                text = "Descripción",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = property.description,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                lineHeight = 20.sp
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Text(
-                text = "Lo que ofrece este lugar",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("• Cocina integral", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-            Text("• Wifi de alta velocidad", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-            Text("• Zona de lavandería", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .align(Alignment.TopEnd)
+        ) {
+            ActionIconButton(icon = Icons.Default.Share, contentDescription = "Share")
+            Spacer(modifier = Modifier.width(8.dp))
+            ActionIconButton(icon = Icons.Default.FavoriteBorder, contentDescription = "Favorite")
         }
     }
+}
+
+@Composable
+private fun ActionIconButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String
+) {
+    IconButton(
+        onClick = { },
+        modifier = Modifier
+            .background(
+                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                RoundedCornerShape(50.dp)
+            )
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun PropertyDetails(property: PropertyModel) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(
+            text = property.title,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Text(
+            text = "Bogotá, Colombia",
+            fontSize = 16.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PropertyFeaturesRow(property)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        PropertyDescription(description = property.description)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        PropertyAmenities()
+    }
+}
+
+@Composable
+private fun PropertyFeaturesRow(property: PropertyModel) {
+    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        PropertyFeature(text = "${property.bedrooms} Habitaciones")
+        PropertyFeature(text = "${property.bathrooms} Baños")
+        if (property.hasParking) {
+            PropertyFeature(text = "1 Parqueadero")
+        }
+    }
+}
+
+@Composable
+private fun PropertyDescription(description: String) {
+    Text(
+        text = "Descripción",
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Text(
+        text = description,
+        fontSize = 14.sp,
+        color = MaterialTheme.colorScheme.onSurface,
+        lineHeight = 20.sp
+    )
+}
+
+@Composable
+private fun PropertyAmenities() {
+    Text(
+        text = "Lo que ofrece este lugar",
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onBackground
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+    AmenityText("• Cocina integral")
+    AmenityText("• Wifi de alta velocidad")
+    AmenityText("• Zona de lavandería")
+}
+
+@Composable
+private fun AmenityText(text: String) {
+    Text(text = text, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
 }
 
 @Composable
