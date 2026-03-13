@@ -4,12 +4,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,7 +24,7 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 fun LogInScreen(
     modifier: Modifier = Modifier,
     viewModel: LogInViewModel = viewModel(),
-    onContinueClick: () -> Unit = {},
+    onLoginSuccess: () -> Unit = {},
     onRegisterClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -44,9 +45,11 @@ fun LogInScreen(
         LoginForm(
             email = uiState.email,
             password = uiState.password,
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.error,
             onEmailChange = { viewModel.onEmailChanged(it) },
             onPasswordChange = { viewModel.onPasswordChanged(it) },
-            onContinueClick = onContinueClick
+            onContinueClick = { viewModel.signIn(onSuccess = onLoginSuccess) }
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -59,13 +62,9 @@ fun LogInScreen(
 private fun LoginHeader(onRegisterClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FixUpTitle()
-
         Spacer(modifier = Modifier.height(20.dp))
-
         TermsOfServiceText()
-
         Spacer(modifier = Modifier.height(28.dp))
-
         AuthTabs(
             isLoginSelected = true,
             onLoginClick = {},
@@ -78,6 +77,8 @@ private fun LoginHeader(onRegisterClick: () -> Unit) {
 private fun LoginForm(
     email: String,
     password: String,
+    isLoading: Boolean,
+    errorMessage: String?,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onContinueClick: () -> Unit
@@ -87,7 +88,8 @@ private fun LoginForm(
             value = email,
             onValueChange = onEmailChange,
             placeholder = stringResource(R.string.email_placeholder),
-            keyboardType = KeyboardType.Email
+            keyboardType = KeyboardType.Email,
+            isError = errorMessage != null
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -97,15 +99,31 @@ private fun LoginForm(
             onValueChange = onPasswordChange,
             placeholder = stringResource(R.string.password_placeholder),
             keyboardType = KeyboardType.Password,
-            isPassword = true
+            isPassword = true,
+            isError = errorMessage != null
         )
+
+        // Mensaje de error
+        if (errorMessage != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        FixUpButton(
-            text = stringResource(R.string.btn_continue),
-            onClick = onContinueClick
-        )
+        if (isLoading) {
+            CircularProgressIndicator(color = Color(0xFFBFA980))
+        } else {
+            FixUpButton(
+                text = stringResource(R.string.btn_continue),
+                onClick = onContinueClick
+            )
+        }
     }
 }
 
@@ -113,11 +131,8 @@ private fun LoginForm(
 private fun LoginFooter() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         AuthDivider()
-
         Spacer(modifier = Modifier.height(28.dp))
-
         SocialAuthButtons()
-
         Spacer(modifier = Modifier.height(32.dp))
     }
 }

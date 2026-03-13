@@ -4,10 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,7 +23,7 @@ fun RegisterScreen(
     modifier: Modifier = Modifier,
     viewModel: RegisterViewModel = viewModel(),
     onBackClick: () -> Unit = {},
-    onContinueClick: () -> Unit = {}
+    onRegisterSuccess: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -35,25 +36,6 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        RegisterHeader(onBackClick = onBackClick)
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        RegisterForm(
-            uiState = uiState,
-            viewModel = viewModel,
-            onContinueClick = onContinueClick
-        )
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        RegisterFooter()
-    }
-}
-
-@Composable
-private fun RegisterHeader(onBackClick: () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FixUpTitle()
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -64,58 +46,72 @@ private fun RegisterHeader(onBackClick: () -> Unit) {
             onRegisterClick = {},
             modifier = Modifier.fillMaxWidth()
         )
-    }
-}
 
-@Composable
-private fun RegisterForm(
-    uiState: RegisterUiState,
-    viewModel: RegisterViewModel,
-    onContinueClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        FixUpTextField(
-            value = uiState.email,
-            onValueChange = { viewModel.onEmailChanged(it) },
-            placeholder = stringResource(R.string.email_placeholder),
-            keyboardType = KeyboardType.Email
-        )
+        Spacer(modifier = Modifier.height(48.dp))
 
-        FixUpTextField(
-            value = uiState.cedula,
-            onValueChange = { viewModel.onCedulaChanged(it) },
-            placeholder = stringResource(R.string.cedula_placeholder),
-            keyboardType = KeyboardType.Number
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            FixUpTextField(
+                value = uiState.email,
+                onValueChange = { viewModel.onEmailChanged(it) },
+                placeholder = stringResource(R.string.email_placeholder),
+                keyboardType = KeyboardType.Email,
+                isError = uiState.error != null,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        FixUpTextField(
-            value = uiState.password,
-            onValueChange = { viewModel.onPasswordChanged(it) },
-            placeholder = stringResource(R.string.password_placeholder),
-            keyboardType = KeyboardType.Password,
-            isPassword = true
-        )
+            FixUpTextField(
+                value = uiState.cedula,
+                onValueChange = { viewModel.onCedulaChanged(it) },
+                placeholder = stringResource(R.string.cedula_placeholder),
+                keyboardType = KeyboardType.Number,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        RoleSelector(
-            selectedRole = uiState.selectedRole,
-            onRoleSelected = { viewModel.onRoleSelected(it) }
-        )
+            FixUpTextField(
+                value = uiState.password,
+                onValueChange = { viewModel.onPasswordChanged(it) },
+                placeholder = stringResource(R.string.password_placeholder),
+                keyboardType = KeyboardType.Password,
+                isPassword = true,
+                isError = uiState.error != null,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(12.dp))
+            RoleSelector(
+                selectedRole = uiState.selectedRole,
+                onRoleSelected = { viewModel.onRoleSelected(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
-        FixUpButton(
-            text = stringResource(R.string.btn_register),
-            onClick = onContinueClick
-        )
-    }
-}
+        // Mensaje de error
+        if (uiState.error != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = uiState.error!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
-@Composable
-private fun RegisterFooter() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (uiState.isLoading) {
+            CircularProgressIndicator(color = Color(0xFFBFA980))
+        } else {
+            FixUpButton(
+                text = stringResource(R.string.btn_register),
+                onClick = { viewModel.signUp(onSuccess = onRegisterSuccess) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
         AuthDivider(modifier = Modifier.fillMaxWidth())
 
         Spacer(modifier = Modifier.height(28.dp))

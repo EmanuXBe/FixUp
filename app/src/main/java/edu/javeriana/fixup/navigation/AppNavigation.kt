@@ -19,6 +19,7 @@ import edu.javeriana.fixup.ui.features.profile.ProfileScreen
 import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
+import edu.javeriana.fixup.ui.features.splash.SplashScreen
 
 @Composable
 fun AppNavigation(
@@ -27,13 +28,29 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppScreens.LogIn.route,
+        startDestination = AppScreens.Splash.route,
         modifier = modifier
     ) {
+        // Splash screen - verifica sesión activa
+        composable(AppScreens.Splash.route) {
+            SplashScreen(
+                onNavigateToFeed = {
+                    navController.navigate(AppScreens.Feed.route) {
+                        popUpTo(AppScreens.Splash.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(AppScreens.LogIn.route) {
+                        popUpTo(AppScreens.Splash.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // Login screen
         composable(AppScreens.LogIn.route) {
             LogInScreen(
-                onContinueClick = {
+                onLoginSuccess = {
                     navController.navigate(AppScreens.Feed.route) {
                         popUpTo(AppScreens.LogIn.route) { inclusive = true }
                     }
@@ -48,7 +65,7 @@ fun AppNavigation(
         composable(AppScreens.Register.route) {
             RegisterScreen(
                 onBackClick = { navController.popBackStack() },
-                onContinueClick = {
+                onRegisterSuccess = {
                     navController.navigate(AppScreens.Feed.route) {
                         popUpTo(AppScreens.LogIn.route) { inclusive = true }
                     }
@@ -82,9 +99,15 @@ fun AppNavigation(
             NotificationsScreen()
         }
 
-        // Profile screen
+        // Profile screen - con logout
         composable(AppScreens.Profile.route) {
-            ProfileScreen()
+            ProfileScreen(
+                onLogout = {
+                    navController.navigate(AppScreens.LogIn.route) {
+                        popUpTo(AppScreens.Feed.route) { inclusive = true }
+                    }
+                }
+            )
         }
 
         // Property Detail screen

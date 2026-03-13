@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -28,15 +29,24 @@ import edu.javeriana.fixup.ui.theme.SoftFawn
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(),
+    onLogout: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    ProfileContent(uiState = uiState)
+
+    ProfileContent(
+        uiState = uiState,
+        onLogout = {
+            viewModel.signOut()
+            onLogout()
+        }
+    )
 }
 
 @Composable
 fun ProfileContent(
-    uiState: ProfileUiState
+    uiState: ProfileUiState,
+    onLogout: () -> Unit = {}
 ) {
     if (uiState.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -50,8 +60,6 @@ fun ProfileContent(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // Espacio inicial
             Spacer(modifier = Modifier.height(40.dp))
 
             // ── Foto de perfil ──────────────────────────────────────
@@ -139,6 +147,30 @@ fun ProfileContent(
                         text = "Tus remodelaciones"
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ── Botón de Cerrar Sesión ──────────────────────────────
+            Button(
+                onClick = onLogout,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFD32F2F),
+                    contentColor = Color.White
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ExitToApp,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Cerrar sesión", style = MaterialTheme.typography.labelLarge)
             }
 
             Spacer(modifier = Modifier.height(40.dp))
