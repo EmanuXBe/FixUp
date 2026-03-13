@@ -5,6 +5,7 @@ package edu.javeriana.fixup.navigation
  * Each entry has a [route] string used by the navigation graph.
  */
 sealed class AppScreens(val route: String) {
+    data object Splash : AppScreens("splash")
     data object LogIn : AppScreens("login")
     data object Register : AppScreens("register")
     data object Feed : AppScreens("feed")
