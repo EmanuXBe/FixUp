@@ -4,9 +4,7 @@ import com.google.firebase.auth.FirebaseUser
 import edu.javeriana.fixup.data.datasource.AuthDataSource
 
 /**
- * Repositorio de autenticación.
- * Actúa como intermediario entre el DataSource (Firebase) y los ViewModels.
- * Aquí se puede añadir lógica de negocio adicional (validaciones, transformaciones, etc.)
+ * Repositorio de autenticación refactorizado con manejo de Result.
  */
 class AuthRepository(
     private val dataSource: AuthDataSource = AuthDataSource()
@@ -21,19 +19,27 @@ class AuthRepository(
         get() = dataSource.currentUser != null
 
     /**
-     * Inicia sesión con email y contraseña.
-     * Lanza excepción si las credenciales son incorrectas.
+     * Inicia sesión con email y contraseña retornando un Result.
      */
-    suspend fun signIn(email: String, password: String): FirebaseUser {
-        return dataSource.signIn(email, password)
+    suspend fun signIn(email: String, password: String): Result<FirebaseUser> {
+        return try {
+            val user = dataSource.signIn(email, password)
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     /**
-     * Registra un nuevo usuario.
-     * Lanza excepción si el email ya existe u otro error ocurre.
+     * Registra un nuevo usuario retornando un Result.
      */
-    suspend fun signUp(email: String, password: String): FirebaseUser {
-        return dataSource.signUp(email, password)
+    suspend fun signUp(email: String, password: String): Result<FirebaseUser> {
+        return try {
+            val user = dataSource.signUp(email, password)
+            Result.success(user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     /** Cierra la sesión activa. */

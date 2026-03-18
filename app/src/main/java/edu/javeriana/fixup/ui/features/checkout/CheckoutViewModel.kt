@@ -1,13 +1,17 @@
 package edu.javeriana.fixup.ui.features.checkout
 
 import androidx.lifecycle.ViewModel
-import edu.javeriana.fixup.R
+import androidx.lifecycle.viewModelScope
+import edu.javeriana.fixup.data.repository.CheckoutRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class CheckoutViewModel : ViewModel() {
+class CheckoutViewModel(
+    private val repository: CheckoutRepository = CheckoutRepository()
+) : ViewModel() {
     private val _uiState = MutableStateFlow(CheckoutUiState())
     val uiState: StateFlow<CheckoutUiState> = _uiState.asStateFlow()
 
@@ -16,27 +20,21 @@ class CheckoutViewModel : ViewModel() {
     }
 
     private fun loadCheckoutData() {
-        val items = listOf(
-            CheckoutItemUiModel(
-                imageRes = R.drawable.cocina,
-                category = "Iluminacion",
-                title = "Luces para entrada",
-                description = "Instalacion incluida",
-                price = "$350.000"
-            ),
-            CheckoutItemUiModel(
-                imageRes = R.drawable.comedor,
-                category = "Lavanderia",
-                title = "Crea tu zona de lavado",
-                description = "Materiales cotizados",
-                price = "$1.550.000"
-            )
-        )
-        _uiState.update { 
-            it.copy(
-                items = items,
-                subtotal = "$1.900.000"
-            )
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            val result = repository.getCheckoutItems()
+            
+            result.onSuccess { items ->
+                _uiState.update { 
+                    it.copy(
+                        items = items,
+                        subtotal = "$1.900.000", // En una app real esto se calcularía
+                        isLoading = false
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 }

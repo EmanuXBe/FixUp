@@ -6,5 +6,7 @@ data class ProfileUiState(
     val phone: String = "",
     val email: String = "",
     val role: String = "",
-    val isLoading: Boolean = false
+    val profileImageUrl: String? = null,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )

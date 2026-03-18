@@ -37,8 +37,7 @@ class RegisterViewModel(
     }
 
     /**
-     * Registra un nuevo usuario en Firebase.
-     * Si el email ya está en uso u otro error ocurre, guarda el mensaje en el UiState.
+     * Registra un nuevo usuario consumiendo el Result del repositorio.
      */
     fun signUp(onSuccess: () -> Unit) {
         val email = _uiState.value.email.trim()
@@ -57,11 +56,13 @@ class RegisterViewModel(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
-            try {
-                authRepository.signUp(email, password)
+            
+            val result = authRepository.signUp(email, password)
+            
+            result.onSuccess {
                 _uiState.update { it.copy(isLoading = false) }
                 onSuccess()
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 val errorMessage = when {
                     e.message?.contains("email") == true &&
                             e.message?.contains("already") == true -> "Este correo ya está registrado"

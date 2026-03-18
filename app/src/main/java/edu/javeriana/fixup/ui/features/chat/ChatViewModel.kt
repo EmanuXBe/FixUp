@@ -1,12 +1,17 @@
 package edu.javeriana.fixup.ui.features.chat
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import edu.javeriana.fixup.data.repository.ChatRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class ChatViewModel : ViewModel() {
+class ChatViewModel(
+    private val repository: ChatRepository = ChatRepository()
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
@@ -15,18 +20,14 @@ class ChatViewModel : ViewModel() {
     }
 
     private fun loadMessages() {
-        val messages = listOf(
-            MessageModel(text = "Hola! quisiera saber mas sobre tu solicitud", isMe = true),
-            MessageModel(text = "Hola", isMe = false),
-            MessageModel(text = "Quisiera remodelar el piso de mi apartamento", isMe = false),
-            MessageModel(text = "Cuando podrias pasar?", isMe = false),
-            MessageModel(text = "Claro! podria pasar el lunes", isMe = true),
-            MessageModel(text = "Y asi hacer una cotizacion", isMe = true),
-            MessageModel(text = "Ok", isMe = false),
-            MessageModel(text = "perfecto!", isMe = false),
-            MessageModel(text = "el lunes estaria perfecto, estare atento", isMe = false)
-        )
-        _uiState.update { it.copy(messages = messages) }
+        _uiState.update { it.copy(isLoading = true) }
+        val result = repository.getMessages()
+        
+        result.onSuccess { messages ->
+            _uiState.update { it.copy(messages = messages, isLoading = false) }
+        }.onFailure { error ->
+            _uiState.update { it.copy(error = error.message, isLoading = false) }
+        }
     }
 
     fun onMessageChanged(newMessage: String) {
@@ -34,13 +35,19 @@ class ChatViewModel : ViewModel() {
     }
 
     fun sendMessage() {
-        if (_uiState.value.currentMessage.isNotBlank()) {
-            val newMessage = MessageModel(text = _uiState.value.currentMessage, isMe = true)
-            _uiState.update { 
-                it.copy(
-                    messages = it.messages + newMessage,
-                    currentMessage = ""
-                )
+        val currentText = _uiState.value.currentMessage
+        if (currentText.isNotBlank()) {
+            val result = repository.sendMessage(currentText)
+            
+            result.onSuccess { newMessage ->
+                _uiState.update { 
+                    it.copy(
+                        messages = it.messages + newMessage,
+                        currentMessage = ""
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(error = error.message) }
             }
         }
     }
