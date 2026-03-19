@@ -2,12 +2,13 @@ package edu.javeriana.fixup.data.repository
 
 import com.google.firebase.auth.FirebaseUser
 import edu.javeriana.fixup.data.datasource.AuthDataSource
+import javax.inject.Inject
 
 /**
  * Repositorio de autenticación refactorizado con manejo de Result.
  */
-class AuthRepository(
-    private val dataSource: AuthDataSource = AuthDataSource()
+class AuthRepository @Inject constructor(
+    private val dataSource: AuthDataSource
 ) {
 
     /** Retorna el usuario actual si hay sesión activa. */

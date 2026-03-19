@@ -1,17 +1,17 @@
 package edu.javeriana.fixup.data.datasource
 
-
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
 /**
  * Capa de datos: se conecta directamente con Firebase Authentication.
  * Solo contiene funciones suspend que llaman a la API de Firebase.
  */
-class AuthDataSource {
-
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+class AuthDataSource @Inject constructor(
+    private val auth: FirebaseAuth
+) {
 
     /** Retorna el usuario actualmente autenticado, o null si no hay sesión. */
     val currentUser: FirebaseUser?
