@@ -2,14 +2,17 @@ package edu.javeriana.fixup.ui.features.auth.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.javeriana.fixup.data.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LogInViewModel(
-    private val authRepository: AuthRepository = AuthRepository()
+@HiltViewModel
+class LogInViewModel @Inject constructor(
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LogInUiState())
@@ -29,8 +32,6 @@ class LogInViewModel(
 
     /**
      * Llama a Firebase para iniciar sesión.
-     * Si las credenciales son incorrectas, guarda el mensaje de error en el UiState.
-     * onSuccess se ejecuta solo cuando el login fue exitoso.
      */
     fun signIn(onSuccess: () -> Unit) {
         val email = _uiState.value.email.trim()

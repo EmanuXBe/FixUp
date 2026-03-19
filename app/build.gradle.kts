@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -63,6 +65,11 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.coil.compose)
+
+    // Dagger Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Firebase
     implementation(platform(libs.firebase.bom))

@@ -1,6 +1,5 @@
 package edu.javeriana.fixup.ui.features.splash
 
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import edu.javeriana.fixup.componentsUtils.FixUpTitle
-import edu.javeriana.fixup.data.repository.AuthRepository
 
 /**
  * Pantalla de splash que verifica si hay una sesión activa.
@@ -19,13 +18,12 @@ import edu.javeriana.fixup.data.repository.AuthRepository
  */
 @Composable
 fun SplashScreen(
+    viewModel: SplashViewModel = hiltViewModel(),
     onNavigateToFeed: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    val authRepository = AuthRepository()
-
     LaunchedEffect(Unit) {
-        if (authRepository.isUserLoggedIn) {
+        if (viewModel.isUserLoggedIn) {
             onNavigateToFeed()
         } else {
             onNavigateToLogin()

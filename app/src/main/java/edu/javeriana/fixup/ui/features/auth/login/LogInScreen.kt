@@ -15,7 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.componentsUtils.*
 import edu.javeriana.fixup.ui.theme.FixUpTheme
@@ -23,7 +23,7 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 @Composable
 fun LogInScreen(
     modifier: Modifier = Modifier,
-    viewModel: LogInViewModel = viewModel(),
+    viewModel: LogInViewModel = hiltViewModel(),
     onLoginSuccess: () -> Unit = {},
     onRegisterClick: () -> Unit = {}
 ) {
