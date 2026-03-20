@@ -2,9 +2,10 @@ package edu.javeriana.fixup.data.repository
 
 import com.google.firebase.auth.FirebaseUser
 import edu.javeriana.fixup.data.datasource.AuthDataSource
+import edu.javeriana.fixup.data.util.toAppError
 
 /**
- * Repositorio de autenticación refactorizado con manejo de Result.
+ * Repositorio de autenticación refactorizado con manejo de Result y errores personalizados.
  */
 class AuthRepository(
     private val dataSource: AuthDataSource = AuthDataSource()
@@ -26,7 +27,8 @@ class AuthRepository(
             val user = dataSource.signIn(email, password)
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            // Mapeamos el error a uno amigable de nuestra app
+            Result.failure(e.toAppError())
         }
     }
 
@@ -38,7 +40,8 @@ class AuthRepository(
             val user = dataSource.signUp(email, password)
             Result.success(user)
         } catch (e: Exception) {
-            Result.failure(e)
+            // Mapeamos el error a uno amigable de nuestra app
+            Result.failure(e.toAppError())
         }
     }
 

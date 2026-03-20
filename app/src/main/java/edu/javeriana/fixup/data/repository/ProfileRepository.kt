@@ -3,6 +3,7 @@ package edu.javeriana.fixup.data.repository
 import android.net.Uri
 import com.google.firebase.auth.FirebaseUser
 import edu.javeriana.fixup.data.datasource.ProfileDataSource
+import edu.javeriana.fixup.data.util.toAppError
 
 class ProfileRepository(
     private val profileDataSource: ProfileDataSource = ProfileDataSource()
@@ -13,7 +14,7 @@ class ProfileRepository(
 
     /**
      * Sube una imagen y actualiza el perfil del usuario.
-     * Retorna Result.success con la URL o Result.failure con el error.
+     * Retorna Result.success con la URL o Result.failure con el error mapeado.
      */
     suspend fun updateProfileImage(uri: Uri): Result<String> {
         return try {
@@ -26,8 +27,8 @@ class ProfileRepository(
             // 3. Retornar éxito
             Result.success(downloadUrl)
         } catch (e: Exception) {
-            // 4. Retornar fallo si algo falla en el DataSource
-            Result.failure(e)
+            // 4. Retornar fallo mapeado
+            Result.failure(e.toAppError())
         }
     }
 }

@@ -43,19 +43,17 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
-    // Launcher para seleccionar imagen de la galería
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let {
-            viewModel.uploadProfileImage(it)
-        }
+        uri?.let { viewModel.uploadProfileImage(it) }
     }
 
-    // Mostrar error si existe
+    // Mostrar error y limpiarlo en el ViewModel
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.resetErrorMessage() // Limpiamos el error después de mostrar el Toast
         }
     }
 
@@ -91,25 +89,18 @@ fun ProfileContent(
             modifier = Modifier
                 .size(130.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .clickable { onChangePhoto() },
+                .clickable { if (!uiState.isLoading) onChangePhoto() }, // Bloqueamos clic si está cargando
             contentAlignment = Alignment.Center
         ) {
-            if (uiState.profileImageUrl != null) {
-                AsyncImage(
-                    model = uiState.profileImageUrl,
-                    contentDescription = "Foto de perfil",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                    error = painterResource(id = R.drawable.profile_photo)
-                )
-            } else {
-                Image(
-                    painter = painterResource(id = R.drawable.profile_photo),
-                    contentDescription = "Foto de perfil",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+            // Imagen principal
+            AsyncImage(
+                model = uiState.profileImageUrl ?: R.drawable.profile_photo,
+                contentDescription = "Foto de perfil",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+                error = painterResource(id = R.drawable.profile_photo),
+                placeholder = painterResource(id = R.drawable.profile_photo)
+            )
 
             // Indicador de carga sobre la imagen
             if (uiState.isLoading) {
@@ -119,7 +110,10 @@ fun ProfileContent(
                         .background(Color.Black.copy(alpha = 0.4f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = Color.White)
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(40.dp)
+                    )
                 }
             }
             

@@ -49,14 +49,8 @@ class LogInViewModel(
                 _uiState.update { it.copy(isLoading = false) }
                 onSuccess()
             }.onFailure { e ->
-                val errorMessage = when {
-                    e.message?.contains("password") == true ||
-                            e.message?.contains("credential") == true ||
-                            e.message?.contains("no user") == true -> "Correo o contraseña incorrectos"
-                    e.message?.contains("network") == true -> "Error de conexión. Verifica tu internet"
-                    else -> "Error al iniciar sesión. Intenta de nuevo"
-                }
-                _uiState.update { it.copy(isLoading = false, error = errorMessage) }
+                // Usamos directamente el mensaje que viene del repositorio (mapeado por AppError)
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
     }
