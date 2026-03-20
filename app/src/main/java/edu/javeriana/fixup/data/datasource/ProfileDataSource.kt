@@ -13,9 +13,9 @@ class ProfileDataSource {
 
     /** 
      * Sube la imagen a Firebase Storage con un tiempo límite realista.
-     * @param timeoutMillis Tiempo máximo de espera (30 segundos).
+     * @param timeoutMillis Tiempo máximo de espera (15 segundos).
      */
-    suspend fun uploadProfileImage(uri: Uri, timeoutMillis: Long = 30000L): String {
+    suspend fun uploadProfileImage(uri: Uri, timeoutMillis: Long = 15000L): String {
         return withTimeout(timeoutMillis) {
             val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
             val storageRef = storage.reference.child("profilePictures/${user.uid}.jpg")

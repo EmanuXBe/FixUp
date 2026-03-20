@@ -90,7 +90,7 @@ private fun SpecialBottomBar(
 
         if (property != null) {
             BottomAppBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
                 Row(
@@ -102,18 +102,22 @@ private fun SpecialBottomBar(
                         Text(
                             text = "${currencyFormat.format(property.price)} $",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "Por mes",
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Button(
                         onClick = onReserveClick,
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) {
                         Text("Reservar ahora")
                     }

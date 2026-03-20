@@ -4,6 +4,9 @@ import edu.javeriana.fixup.ui.model.PropertyModel
 
 class RentDataSource {
     fun getRentProperties(): List<PropertyModel> {
+        val baseUrl = "https://firebasestorage.googleapis.com/v0/b/fixup-f2128.firebasestorage.app/o/properties%2F"
+        val suffix = "?alt=media"
+
         return listOf(
             PropertyModel(
                 id = "1",
@@ -18,7 +21,11 @@ class RentDataSource {
                 rating = 4.8,
                 reviewCount = 12,
                 distanceKm = 1.2,
-                imageUrls = emptyList()
+                imageUrls = listOf(
+                    "${baseUrl}chapi.jpeg$suffix",
+                    "${baseUrl}apto2.jpeg$suffix",
+                    "${baseUrl}apto3.jpeg$suffix"
+                )
             ),
             PropertyModel(
                 id = "2",
@@ -33,7 +40,10 @@ class RentDataSource {
                 rating = 4.9,
                 reviewCount = 8,
                 distanceKm = 15.0,
-                imageUrls = emptyList()
+                imageUrls = listOf(
+                    "${baseUrl}apto4.jpeg$suffix",
+                    "${baseUrl}apto5.jpeg$suffix"
+                )
             )
         )
     }

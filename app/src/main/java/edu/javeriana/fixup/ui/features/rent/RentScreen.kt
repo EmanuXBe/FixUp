@@ -99,7 +99,7 @@ fun RentContent(
         items(properties) { property ->
             PropertyCard(
                 property = property,
-                onSelectClick = { onPropertySelected(property.id) },
+                onCardClick = { onPropertySelected(property.id) },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
@@ -194,10 +194,11 @@ private fun FilterButton(text: String, icon: androidx.compose.ui.graphics.vector
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PropertyCard(
     property: PropertyModel,
-    onSelectClick: () -> Unit,
+    onCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
@@ -205,6 +206,7 @@ fun PropertyCard(
     }
 
     Card(
+        onClick = onCardClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
@@ -322,7 +324,7 @@ fun PropertyCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
@@ -331,15 +333,6 @@ fun PropertyCard(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Button(
-                        onClick = onSelectClick,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        shape = RoundedCornerShape(12.dp),
-                        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                        modifier = Modifier.height(40.dp)
-                    ) {
-                        Text("Seleccionar", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary, fontSize = 14.sp)
-                    }
                 }
             }
         }

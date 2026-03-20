@@ -20,6 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,10 +71,16 @@ private fun ErrorState(errorText: String, onBackClick: () -> Unit) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = errorText,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
+            Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onBackClick) {
-                Text("Volver")
+                Text(
+                    text = "Volver",
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -253,15 +260,24 @@ fun PropertyFeature(text: String) {
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
         )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PropertyDetailScreenPreview() {
     FixUpTheme {
+        PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {})
+    }
+}
+
+@Preview(showBackground = true, name = "Dark Mode")
+@Composable
+fun PropertyDetailScreenDarkPreview() {
+    FixUpTheme(darkTheme = true) {
         PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {})
     }
 }

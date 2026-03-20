@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -184,7 +185,7 @@ fun ProfileContent(
                 ActionButton(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Outlined.Home,
-                    text = "Mis casas guardadas"
+                    text = "Mis casas"
                 )
                 ActionButton(
                     modifier = Modifier.weight(1f),
@@ -204,7 +205,7 @@ fun ProfileContent(
                 ActionButton(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Outlined.Refresh,
-                    text = "Tus remodelaciones"
+                    text = "Pedidos"
                 )
             }
         }
@@ -224,13 +225,21 @@ fun ProfileContent(
                 contentColor = Color.White
             )
         ) {
-            Icon(
-                imageVector = Icons.Outlined.ExitToApp,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Cerrar sesión", style = MaterialTheme.typography.labelLarge)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Icon(
+                    imageVector = Icons.Outlined.ExitToApp,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .align(Alignment.CenterStart)
+                )
+                Text(
+                    text = "Cerrar sesión",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -278,21 +287,25 @@ fun ActionButton(modifier: Modifier = Modifier, icon: ImageVector, text: String)
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
-        )
+        ),
+        contentPadding = PaddingValues(horizontal = 12.dp)
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = text,
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1
-        )
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = text,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }
 
