@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import edu.javeriana.fixup.R
@@ -36,7 +36,7 @@ fun PropertyDetailScreen(
     propertyId: String? = null,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit,
-    viewModel: PropertyDetailViewModel = viewModel()
+    viewModel: PropertyDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

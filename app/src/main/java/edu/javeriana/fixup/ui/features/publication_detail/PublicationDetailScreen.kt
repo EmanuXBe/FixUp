@@ -20,7 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.features.feed.PublicationCardModel
@@ -32,7 +32,7 @@ fun PublicationDetailScreen(
     publicationId: String? = null,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
-    viewModel: PublicationDetailViewModel = viewModel()
+    viewModel: PublicationDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

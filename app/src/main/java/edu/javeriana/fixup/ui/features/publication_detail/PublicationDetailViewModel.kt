@@ -3,7 +3,7 @@ package edu.javeriana.fixup.ui.features.publication_detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.javeriana.fixup.ui.features.feed.FeedUiState
+import edu.javeriana.fixup.data.repository.FeedRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,14 +12,17 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class PublicationDetailViewModel @Inject constructor() : ViewModel() {
+class PublicationDetailViewModel @Inject constructor(
+    private val repository: FeedRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(PublicationDetailUiState())
     val uiState: StateFlow<PublicationDetailUiState> = _uiState.asStateFlow()
 
     fun loadPublication(publicationId: String?) {
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            val allPublications = FeedUiState().publications
+            val publicationsResult = repository.getPublications()
+            val allPublications = publicationsResult.getOrDefault(emptyList())
             val publication = allPublications.find { it.id == publicationId }
             
             val description = when(publicationId) {

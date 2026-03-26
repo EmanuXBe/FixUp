@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import edu.javeriana.fixup.componentsUtils.SearchBar
 import edu.javeriana.fixup.componentsUtils.SectionTitle
@@ -27,7 +27,7 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
 fun AllPublicationsScreen(
-    viewModel: FeedViewModel = viewModel(),
+    viewModel: FeedViewModel = hiltViewModel(),
     onPublicationClick: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
