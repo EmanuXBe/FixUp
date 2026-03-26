@@ -1,26 +1,13 @@
 package edu.javeriana.fixup.data.datasource
 
-import edu.javeriana.fixup.R
-import edu.javeriana.fixup.ui.features.feed.CategoryItemModel
-import edu.javeriana.fixup.ui.features.feed.PublicationCardModel
-import javax.inject.Inject
+// DTOs (Data Transfer Objects)
+data class CategoryDto(val id: Int, val name: String, val iconRes: Int)
+data class PublicationDto(val id: String, val title: String, val priceText: String, val imageRes: Int)
 
-class FeedDataSource @Inject constructor() {
-    fun getCategories(): List<CategoryItemModel> {
-        return listOf(
-            CategoryItemModel(R.drawable.bano, "Baños"),
-            CategoryItemModel(R.drawable.luz, "Iluminación"),
-            CategoryItemModel(R.drawable.cocina, "Cocina"),
-            CategoryItemModel(R.drawable.exterior, "Exterior")
-        )
-    }
-
-    fun getPublications(): List<PublicationCardModel> {
-        return listOf(
-            PublicationCardModel("1", R.drawable.sala, "Salas a tu medida", "Desde $300.000"),
-            PublicationCardModel("2", R.drawable.comedor, "¡Arma tu comedor!", "Desde $450.000"),
-            PublicationCardModel("3", R.drawable.bano, "Renovación de Baño", "Desde $800.000"),
-            PublicationCardModel("4", R.drawable.cocina, "Cocina Integral Moderna", "Desde $1.200.000")
-        )
-    }
+/**
+ * Contrato del Data Source para Feed.
+ */
+interface FeedDataSource {
+    suspend fun getCategories(): List<CategoryDto>
+    suspend fun getPublications(): List<PublicationDto>
 }

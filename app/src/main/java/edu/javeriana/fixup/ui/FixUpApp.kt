@@ -5,24 +5,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.javeriana.fixup.navigation.AppNavigation
 import edu.javeriana.fixup.navigation.AppScreens
 import edu.javeriana.fixup.ui.features.main.MainViewModel
-import edu.javeriana.fixup.ui.model.MockPropertyRepository
+import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailViewModel
 import java.text.NumberFormat
 import java.util.*
 
@@ -78,15 +74,22 @@ private fun SpecialBottomBar(
     propertyId: String?,
     onReserveClick: () -> Unit
 ) {
-    if (currentRoute?.startsWith(AppScreens.PropertyDetail.route) == true) {
-        val property = remember(propertyId) {
-            MockPropertyRepository.getProperties().find { it.id == propertyId }
+    if (currentRoute?.startsWith(AppScreens.PropertyDetail.route) == true && propertyId != null) {
+        // Usamos el ViewModel para obtener la propiedad en lugar del repositorio directamente
+        val propertyViewModel: PropertyDetailViewModel = hiltViewModel()
+        val detailUiState by propertyViewModel.uiState.collectAsState()
+
+        LaunchedEffect(propertyId) {
+            propertyViewModel.loadProperty(propertyId)
         }
+
         val currencyFormat = remember {
             NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
                 maximumFractionDigits = 0
             }
         }
+
+        val property = detailUiState.property
 
         if (property != null) {
             BottomAppBar(

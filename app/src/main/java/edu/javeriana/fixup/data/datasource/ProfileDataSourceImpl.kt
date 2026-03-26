@@ -1,0 +1,39 @@
+package edu.javeriana.fixup.data.datasource
+
+import android.net.Uri
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeout
+import javax.inject.Inject
+
+/**
+ * Implementación de ProfileDataSource usando Firebase Auth y Storage.
+ */
+class ProfileDataSourceImpl @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val storage: FirebaseStorage
+) : ProfileDataSource {
+
+    override suspend fun uploadProfileImage(uri: Uri, timeoutMillis: Long): String {
+        return withTimeout(timeoutMillis) {
+            val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
+            val storageRef = storage.reference.child("profilePictures/${user.uid}.jpg")
+            
+            storageRef.putFile(uri).await()
+            storageRef.downloadUrl.await().toString()
+        }
+    }
+
+    override suspend fun updateProfilePhotoUrl(photoUrl: String) {
+        val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
+        val profileUpdates = userProfileChangeRequest {
+            photoUri = Uri.parse(photoUrl)
+        }
+        user.updateProfile(profileUpdates).await()
+    }
+
+    override fun getCurrentUser(): FirebaseUser? = auth.currentUser
+}
