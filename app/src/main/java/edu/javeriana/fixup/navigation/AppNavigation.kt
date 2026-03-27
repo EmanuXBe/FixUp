@@ -19,6 +19,7 @@ import edu.javeriana.fixup.ui.features.notifications.NotificationsScreen
 import edu.javeriana.fixup.ui.features.profile.ProfileScreen
 import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
+import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
 
@@ -32,18 +33,16 @@ fun AppNavigation(
         startDestination = AppScreens.Splash.route,
         modifier = modifier
     ) {
-        // Splash screen - verifica sesión activa
+        // Splash screen
         composable(AppScreens.Splash.route) {
             SplashScreen(
                 onNavigateToFeed = {
                     navController.navigate(AppScreens.Feed.route) {
-                        popUpTo(AppScreens.Splash.route) { inclusive = true }
-                    }
+                        popUpTo(AppScreens.Splash.route) { inclusive = true } }
                 },
                 onNavigateToLogin = {
                     navController.navigate(AppScreens.LogIn.route) {
-                        popUpTo(AppScreens.Splash.route) { inclusive = true }
-                    }
+                        popUpTo(AppScreens.Splash.route) { inclusive = true } }
                 }
             )
         }
@@ -54,12 +53,9 @@ fun AppNavigation(
                 viewModel = hiltViewModel(),
                 onLoginSuccess = {
                     navController.navigate(AppScreens.Feed.route) {
-                        popUpTo(AppScreens.LogIn.route) { inclusive = true }
-                    }
+                        popUpTo(AppScreens.LogIn.route) { inclusive = true } }
                 },
-                onRegisterClick = {
-                    navController.navigate(AppScreens.Register.route)
-                }
+                onRegisterClick = { navController.navigate(AppScreens.Register.route) }
             )
         }
 
@@ -70,8 +66,7 @@ fun AppNavigation(
                 onBackClick = { navController.popBackStack() },
                 onRegisterSuccess = {
                     navController.navigate(AppScreens.Feed.route) {
-                        popUpTo(AppScreens.LogIn.route) { inclusive = true }
-                    }
+                        popUpTo(AppScreens.LogIn.route) { inclusive = true } }
                 }
             )
         }
@@ -95,25 +90,34 @@ fun AppNavigation(
                 viewModel = hiltViewModel(),
                 onSelectClick = { id ->
                     navController.navigate(AppScreens.PropertyDetail.route + "/$id")
+                },
+                onCreateClick = {
+                    navController.navigate(AppScreens.CreatePublication.route)
                 }
+            )
+        }
+
+        // Create Publication screen
+        composable(AppScreens.CreatePublication.route) {
+            CreatePropertyScreen(
+                onBackClick = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() },
+                viewModel = hiltViewModel()
             )
         }
 
         // Notifications screen
         composable(AppScreens.Notifications.route) {
-            NotificationsScreen(
-                viewModel = hiltViewModel()
-            )
+            NotificationsScreen(viewModel = hiltViewModel())
         }
 
-        // Profile screen - con logout
+        // Profile screen
         composable(AppScreens.Profile.route) {
             ProfileScreen(
                 viewModel = hiltViewModel(),
                 onLogout = {
                     navController.navigate(AppScreens.LogIn.route) {
-                        popUpTo(AppScreens.Feed.route) { inclusive = true }
-                    }
+                        popUpTo(AppScreens.Feed.route) { inclusive = true } }
                 }
             )
         }

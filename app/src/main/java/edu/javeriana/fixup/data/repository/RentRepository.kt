@@ -1,6 +1,6 @@
 package edu.javeriana.fixup.data.repository
 
-import edu.javeriana.fixup.data.datasource.PropertyDto
+import android.net.Uri
 import edu.javeriana.fixup.data.datasource.RentDataSource
 import edu.javeriana.fixup.ui.model.PropertyModel
 import javax.inject.Inject
@@ -10,27 +10,19 @@ class RentRepository @Inject constructor(
 ) {
     suspend fun getProperties(): Result<List<PropertyModel>> {
         return try {
-            val dtos = dataSource.getRentProperties()
-            Result.success(dtos.map { it.toDomain() })
+            val properties = dataSource.getRentProperties()
+            Result.success(properties)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createProperty(property: PropertyModel, imageUri: Uri): Result<PropertyModel> {
+        return try {
+            val created = dataSource.createProperty(property, imageUri)
+            Result.success(created)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 }
-
-// Mapper for Rent
-fun PropertyDto.toDomain() = PropertyModel(
-    id = this.id,
-    title = this.title,
-    description = this.description,
-    price = this.price,
-    bedrooms = this.bedrooms,
-    bathrooms = this.bathrooms,
-    hasParking = this.hasParking,
-    isFeatured = this.isFeatured,
-    isNew = this.isNew,
-    rating = this.rating,
-    reviewCount = this.reviewCount,
-    distanceKm = this.distanceKm,
-    imageUrls = this.imageUrls
-)

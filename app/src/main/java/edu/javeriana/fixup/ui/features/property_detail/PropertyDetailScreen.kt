@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -99,7 +100,7 @@ private fun PropertyContent(
             .verticalScroll(rememberScrollState())
     ) {
         PropertyHeader(
-            imageUrl = property.imageUrl,
+            imageUrl = property.imageUrl ?: "",
             onBackClick = onBackClick
         )
 
@@ -181,34 +182,28 @@ private fun PropertyDetails(property: PropertyModel) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
-        Text(
-            text = "Bogotá, Colombia",
-            fontSize = 16.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                Icons.Default.LocationOn,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = property.location,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        PropertyFeaturesRow(property)
-
-        Spacer(modifier = Modifier.height(24.dp))
 
         PropertyDescription(description = property.description)
 
         Spacer(modifier = Modifier.height(24.dp))
 
         PropertyAmenities()
-    }
-}
-
-@Composable
-private fun PropertyFeaturesRow(property: PropertyModel) {
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        PropertyFeature(text = "${property.bedrooms} Habitaciones")
-        PropertyFeature(text = "${property.bathrooms} Baños")
-        if (property.hasParking) {
-            PropertyFeature(text = "1 Parqueadero")
-        }
     }
 }
 
@@ -239,9 +234,9 @@ private fun PropertyAmenities() {
     )
 
     Spacer(modifier = Modifier.height(8.dp))
-    AmenityText("• Cocina integral")
-    AmenityText("• Wifi de alta velocidad")
-    AmenityText("• Zona de lavandería")
+    AmenityText("• Servicio de alta calidad")
+    AmenityText("• Atención personalizada")
+    AmenityText("• Garantía FixUp")
 }
 
 @Composable
@@ -249,35 +244,10 @@ private fun AmenityText(text: String) {
     Text(text = text, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
 }
 
-@Composable
-fun PropertyFeature(text: String) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
 @Preview(showBackground = true, name = "Light Mode")
 @Composable
 fun PropertyDetailScreenPreview() {
     FixUpTheme {
-        PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {})
-    }
-}
-
-@Preview(showBackground = true, name = "Dark Mode")
-@Composable
-fun PropertyDetailScreenDarkPreview() {
-    FixUpTheme(darkTheme = true) {
         PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {})
     }
 }

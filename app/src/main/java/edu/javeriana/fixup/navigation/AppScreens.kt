@@ -13,6 +13,7 @@ sealed class AppScreens(val route: String) {
     data object Rent : AppScreens("rent")
     data object PropertyDetail : AppScreens("property_detail")
     data object Publication : AppScreens("publication")
+    data object CreatePublication : AppScreens("create_publication")
     data object AllPublications : AppScreens("all_publications")
     data object Checkout : AppScreens("checkout")
     data object Notifications : AppScreens("notifications")

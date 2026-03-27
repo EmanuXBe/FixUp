@@ -11,15 +11,8 @@ class OtherDataSource {
             title = "Propiedad Detalle",
             description = "Descripción detallada de la propiedad seleccionada.",
             price = 3000000.0,
-            bedrooms = 3,
-            bathrooms = 2,
-            hasParking = true,
-            isFeatured = true,
-            isNew = true,
-            rating = 4.5,
-            reviewCount = 20,
-            distanceKm = 5.0,
-            imageUrls = emptyList()
+            location = "Ubicación Predeterminada",
+            imageUrl = null
         )
     }
 

@@ -1,4 +1,4 @@
-package edu.javeriana.fixup.ui
+package edu.javeriana.fixup.ui.features.rent
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -18,12 +18,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import edu.javeriana.fixup.ui.features.rent.RentViewModel
 import edu.javeriana.fixup.ui.model.PropertyModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PublicationScreen(
+fun CreatePropertyScreen(
     onBackClick: () -> Unit,
     onSuccess: () -> Unit,
     viewModel: RentViewModel = hiltViewModel()
@@ -44,7 +43,7 @@ fun PublicationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nueva Publicación") },
+                title = { Text("Publicar Servicio/Inmueble") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás")
@@ -68,28 +67,19 @@ fun PublicationScreen(
                     contentDescription = "Imagen seleccionada",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(250.dp),
+                        .height(200.dp),
                     contentScale = ContentScale.Crop
                 )
-            } else {
-                Card(
-                    modifier = Modifier.fillMaxWidth().height(200.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("No se ha seleccionado ninguna imagen")
-                    }
-                }
             }
 
             Button(onClick = { launcher.launch("image/*") }) {
-                Text(if (imageUri == null) "Elegir Foto" else "Cambiar Foto")
+                Text(if (imageUri == null) "Seleccionar Imagen" else "Cambiar Imagen")
             }
 
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Nombre del Servicio/Inmueble") },
+                label = { Text("Título") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -104,7 +94,7 @@ fun PublicationScreen(
             OutlinedTextField(
                 value = price,
                 onValueChange = { price = it },
-                label = { Text("Precio (COP)") },
+                label = { Text("Precio") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
@@ -145,7 +135,7 @@ fun PublicationScreen(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = title.isNotBlank() && imageUri != null
                 ) {
-                    Text("Publicar Ahora")
+                    Text("Publicar")
                 }
             }
         }
