@@ -8,5 +8,6 @@ import edu.javeriana.fixup.ui.model.PropertyModel
  */
 interface RentDataSource {
     suspend fun getRentProperties(): List<PropertyModel>
+    suspend fun getPropertyById(id: Int): PropertyModel
     suspend fun createProperty(property: PropertyModel, imageUri: Uri): PropertyModel
 }

@@ -16,7 +16,11 @@ class RentDataSourceImpl @Inject constructor(
 ) : RentDataSource {
 
     override suspend fun getRentProperties(): List<PropertyModel> {
-        return apiService.getServicios()
+        return apiService.getServices()
+    }
+
+    override suspend fun getPropertyById(id: Int): PropertyModel {
+        return apiService.getServiceById(id)
     }
 
     override suspend fun createProperty(property: PropertyModel, imageUri: Uri): PropertyModel {
@@ -32,6 +36,6 @@ class RentDataSourceImpl @Inject constructor(
         // 3. Crear el objeto con la URL de la imagen y enviarlo a la API
         val propertyWithImage = property.copy(imageUrl = downloadUrl)
         
-        return apiService.createServicio(propertyWithImage)
+        return apiService.createService(propertyWithImage)
     }
 }

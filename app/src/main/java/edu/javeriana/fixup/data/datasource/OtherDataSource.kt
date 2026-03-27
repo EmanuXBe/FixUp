@@ -7,7 +7,7 @@ import edu.javeriana.fixup.ui.model.PropertyModel
 class OtherDataSource {
     fun getPropertyDetail(id: String): PropertyModel {
         return PropertyModel(
-            id = id,
+            id = id.toIntOrNull(),
             title = "Propiedad Detalle",
             description = "Descripción detallada de la propiedad seleccionada.",
             price = 3000000.0,

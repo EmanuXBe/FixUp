@@ -24,7 +24,8 @@ class PropertyDetailViewModel @Inject constructor(
             val result = repository.getProperties()
             
             result.onSuccess { properties ->
-                val property = properties.find { it.id == propertyId }
+                val idAsInt = propertyId?.toIntOrNull()
+                val property = properties.find { it.id == idAsInt }
                 _uiState.update { 
                     it.copy(
                         property = property,

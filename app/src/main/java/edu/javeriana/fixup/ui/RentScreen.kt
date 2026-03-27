@@ -71,14 +71,15 @@ fun RentScreen(
                     RentContent(
                         properties = state.properties,
                         onPropertySelected = { id ->
-                            viewModel.onPropertySelected(id)
-                            onSelectClick(id)
+                            // Convertimos Int a String para el ViewModel y la Navegación
+                            viewModel.onPropertySelected(id.toString())
+                            onSelectClick(id.toString())
                         }
                     )
                 }
                 is RentUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = state.message, color = MaterialTheme.colorScheme.error)
+                        Text(text = state.message ?: "Error desconocido", color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -89,7 +90,7 @@ fun RentScreen(
 @Composable
 fun RentContent(
     properties: List<PropertyModel>,
-    onPropertySelected: (String) -> Unit
+    onPropertySelected: (Int) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -239,16 +240,16 @@ fun PropertyCard(
             }
 
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = property.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(text = property.title ?: "Sin título", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = property.location, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(text = property.location ?: "Sin ubicación", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = property.description, maxLines = 2, style = MaterialTheme.typography.bodyMedium)
+                Text(text = property.description ?: "Sin descripción", maxLines = 2, style = MaterialTheme.typography.bodyMedium)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -258,7 +259,7 @@ fun PropertyCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "${currencyFormat.format(property.price)} $",
+                        text = "${currencyFormat.format(property.price ?: 0.0)} $",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )

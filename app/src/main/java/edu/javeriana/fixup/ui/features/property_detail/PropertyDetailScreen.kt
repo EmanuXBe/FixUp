@@ -177,7 +177,7 @@ private fun ActionIconButton(
 private fun PropertyDetails(property: PropertyModel) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
-            text = property.title,
+            text = property.title ?: "Sin título",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -191,7 +191,7 @@ private fun PropertyDetails(property: PropertyModel) {
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = property.location,
+                text = property.location ?: "Sin ubicación",
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -199,7 +199,7 @@ private fun PropertyDetails(property: PropertyModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PropertyDescription(description = property.description)
+        PropertyDescription(description = property.description ?: "Sin descripción")
 
         Spacer(modifier = Modifier.height(24.dp))
 
