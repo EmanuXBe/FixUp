@@ -1,12 +1,20 @@
 package edu.javeriana.fixup.data.datasource
 
+import android.net.Uri
+import com.google.firebase.storage.FirebaseStorage
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.ui.model.PropertyModel
+import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 
 /**
- * Implementación concreta de FeedDataSource.
+ * Implementación de FeedDataSource que consume datos del backend real y usa Firebase Storage.
  */
-class FeedDataSourceImpl @Inject constructor() : FeedDataSource {
+class FeedDataSourceImpl @Inject constructor(
+    private val apiService: FixUpApiService,
+    private val storage: FirebaseStorage
+) : FeedDataSource {
     override suspend fun getCategories(): List<CategoryDto> {
         return listOf(
             CategoryDto(1, "Baños", R.drawable.bano),
@@ -17,11 +25,37 @@ class FeedDataSourceImpl @Inject constructor() : FeedDataSource {
     }
 
     override suspend fun getPublications(): List<PublicationDto> {
-        return listOf(
-            PublicationDto("1", "Salas a tu medida", "Desde $300.000", R.drawable.sala),
-            PublicationDto("2", "¡Arma tu comedor!", "Desde $450.000", R.drawable.comedor),
-            PublicationDto("3", "Renovación de Baño", "Desde $800.000", R.drawable.bano),
-            PublicationDto("4", "Cocina Integral Moderna", "Desde $1.200.000", R.drawable.cocina)
-        )
+        val services = apiService.getServices()
+        return services.map { it.toDto() }
     }
+
+    override suspend fun getPublicationById(id: Int): PublicationDto {
+        val service = apiService.getServiceById(id)
+        return service.toDto()
+    }
+
+    override suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel {
+        // 1. Subir imagen a Firebase Storage
+        val filename = UUID.randomUUID().toString()
+        val ref = storage.getReference("publications/$filename.jpg")
+        
+        ref.putFile(imageUri).await()
+        
+        // 2. Obtener la URL de descarga
+        val downloadUrl = ref.downloadUrl.await().toString()
+        
+        // 3. Crear el objeto con la URL de la imagen y enviarlo a la API
+        val publicationWithImage = property.copy(imageUrl = downloadUrl)
+        
+        return apiService.createService(publicationWithImage)
+    }
+
+    private fun PropertyModel.toDto() = PublicationDto(
+        id = this.id.toString(),
+        title = this.title ?: "Sin título",
+        priceText = "Desde $${this.price ?: 0.0}",
+        description = this.description,
+        location = this.location,
+        imageUrl = this.imageUrl
+    )
 }

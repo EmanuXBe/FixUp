@@ -8,4 +8,11 @@ data class FeedUiState(
 )
 
 data class CategoryItemModel(val imageRes: Int, val title: String)
-data class PublicationCardModel(val id: String, val imageRes: Int, val title: String, val price: String)
+data class PublicationCardModel(
+    val id: String,
+    val imageUrl: Any, // Puede ser un Int (recurso) o String (URL)
+    val title: String,
+    val price: String,
+    val description: String? = null,
+    val location: String? = null
+)

@@ -17,6 +17,11 @@ class OtherDataSource {
     }
 
     fun getPublicationDetail(id: String): PublicationCardModel {
-        return PublicationCardModel(id, R.drawable.sala, "Detalle de Publicación", "Desde $500.000")
+        return PublicationCardModel(
+            id = id,
+            imageUrl = R.drawable.sala,
+            title = "Detalle de Publicación",
+            price = "Desde $500.000"
+        )
     }
 }

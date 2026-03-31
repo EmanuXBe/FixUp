@@ -102,7 +102,7 @@ private fun PublicationsSection(
         LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             items(publications) { publication ->
                 PublicationCard(
-                    imageRes = publication.imageRes,
+                    imageRes = publication.imageUrl,
                     title = publication.title,
                     price = publication.price,
                     onClick = { onPublicationClick(publication.id) }

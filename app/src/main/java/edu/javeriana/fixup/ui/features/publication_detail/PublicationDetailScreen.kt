@@ -106,7 +106,7 @@ private fun PublicationContent(
 private fun PublicationHeader(publication: PublicationCardModel, description: String) {
     Column {
         AsyncImage(
-            model = publication.imageRes,
+            model = publication.imageUrl,
             contentDescription = "Imagen de la publicación",
             modifier = Modifier
                 .fillMaxWidth()

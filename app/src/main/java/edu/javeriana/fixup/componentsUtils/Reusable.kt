@@ -1,24 +1,30 @@
 package edu.javeriana.fixup.componentsUtils
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -26,76 +32,26 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.SoftFawn
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @Composable
 fun FixUpTitle(modifier: Modifier = Modifier) {
     Text(
-        text = stringResource(R.string.app_name_title),
+        text = stringResource(id = R.string.app_name_title),
         style = MaterialTheme.typography.displayLarge,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = MaterialTheme.colorScheme.primary,
         modifier = modifier
     )
 }
 
 @Composable
-fun FixUpTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    keyboardType: KeyboardType = KeyboardType.Text,
-    isPassword: Boolean = false,
-    isError: Boolean = false,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(text = placeholder) },
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        shape = RoundedCornerShape(12.dp),
-        isError = isError,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = if (isError) Color.Red else SoftFawn,
-            unfocusedBorderColor = if (isError) Color.Red.copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-            cursorColor = SoftFawn,
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        textStyle = MaterialTheme.typography.bodyMedium,
-        modifier = modifier.fillMaxWidth()
+fun TermsOfServiceText(modifier: Modifier = Modifier) {
+    Text(
+        text = stringResource(id = R.string.terms_of_service),
+        style = MaterialTheme.typography.bodySmall,
+        textAlign = TextAlign.Center,
+        color = Color.Gray,
+        modifier = modifier.padding(horizontal = 16.dp)
     )
-}
-
-@Composable
-fun FixUpButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
-) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = SoftFawn,
-            contentColor = Color.White,
-            disabledContainerColor = SoftFawn.copy(alpha = 0.5f),
-            disabledContentColor = Color.White.copy(alpha = 0.7f)
-        ),
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp)
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge
-        )
-    }
 }
 
 @Composable
@@ -111,118 +67,194 @@ fun AuthTabs(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(R.string.tab_login),
+            text = stringResource(id = R.string.tab_login),
             style = MaterialTheme.typography.titleMedium,
-            color = if (isLoginSelected) SoftFawn else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.clickable(enabled = !isLoginSelected) { onLoginClick() }
+            fontWeight = if (isLoginSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (isLoginSelected) MaterialTheme.colorScheme.primary else Color.Gray,
+            modifier = Modifier.clickable { onLoginClick() }
         )
         Text(
-            text = " ${stringResource(R.string.tab_separator)} ",
+            text = " " + stringResource(id = R.string.tab_separator) + " ",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.outline
+            color = Color.Gray
         )
         Text(
-            text = stringResource(R.string.tab_register),
+            text = stringResource(id = R.string.tab_register),
             style = MaterialTheme.typography.titleMedium,
-            color = if (!isLoginSelected) SoftFawn else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.clickable(enabled = isLoginSelected) { onRegisterClick() }
+            fontWeight = if (!isLoginSelected) FontWeight.Bold else FontWeight.Normal,
+            color = if (!isLoginSelected) MaterialTheme.colorScheme.primary else Color.Gray,
+            modifier = Modifier.clickable { onRegisterClick() }
         )
     }
 }
 
 @Composable
-fun AuthDivider(
+fun FixUpTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    keyboardType: KeyboardType = KeyboardType.Text,
+    imeAction: ImeAction = ImeAction.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    isPassword: Boolean = false,
+    isError: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-            thickness = 1.dp
+    var passwordVisible by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        placeholder = { Text(placeholder) },
+        visualTransformation = if (isPassword && !passwordVisible) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = keyboardType,
+            imeAction = imeAction
+        ),
+        keyboardActions = keyboardActions,
+        singleLine = true,
+        trailingIcon = if (isPassword) {
+            {
+                val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(image, contentDescription = null)
+                }
+            }
+        } else null,
+        isError = isError,
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = Color.LightGray
         )
-        Text(
-            text = stringResource(R.string.divider_or),
-            modifier = Modifier.padding(horizontal = 16.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-            thickness = 1.dp
-        )
-    }
+    )
 }
 
 @Composable
-fun OAuthButton(
-    textResId: Int,
-    icon: String,
-    iconColor: Color,
+fun FixUpButton(
+    text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OutlinedButton(
+    Button(
         onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent),
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
-    ) {
-        Text(
-            text = icon,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = iconColor
+            .height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White
         )
+    ) {
+        Text(text = text, style = MaterialTheme.typography.labelLarge)
+    }
+}
+
+@Composable
+fun AuthDivider(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
         Text(
-            text = "  ${stringResource(textResId)}",
-            style = MaterialTheme.typography.bodyMedium,
-            color = SoftFawn,
-            fontWeight = FontWeight.Medium
+            text = stringResource(id = R.string.divider_or),
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = Color.Gray,
+            style = MaterialTheme.typography.bodySmall
+        )
+        HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray)
+    }
+}
+
+@Composable
+fun SocialAuthButtons(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        SocialButton(
+            text = stringResource(id = R.string.btn_google),
+            icon = stringResource(id = R.string.google_icon),
+            modifier = Modifier.weight(1f)
+        )
+        SocialButton(
+            text = stringResource(id = R.string.btn_apple),
+            icon = stringResource(id = R.string.apple_icon),
+            modifier = Modifier.weight(1f)
         )
     }
 }
 
 @Composable
-fun SocialAuthButtons(
+private fun SocialButton(text: String, icon: String, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = { },
+        modifier = modifier.height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        contentPadding = PaddingValues(0.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = icon, fontWeight = FontWeight.Bold, modifier = Modifier.padding(end = 8.dp))
+            Text(text = text, style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@Composable
+fun RoleSelector(
+    selectedRole: String,
+    onRoleSelected: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        OAuthButton(
-            textResId = R.string.btn_google,
-            icon = stringResource(R.string.google_icon),
-            iconColor = SoftFawn,
-            onClick = { /* TODO */ }
+        Text(
+            text = stringResource(id = R.string.role_label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OAuthButton(
-            textResId = R.string.btn_apple,
-            icon = stringResource(R.string.apple_icon),
-            iconColor = MaterialTheme.colorScheme.onSurface,
-            onClick = { /* TODO */ }
-        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            RoleOption(
+                text = stringResource(id = R.string.role_fixer),
+                isSelected = selectedRole == "Fixer",
+                onSelect = { onRoleSelected("Fixer") },
+                modifier = Modifier.weight(1f)
+            )
+            RoleOption(
+                text = stringResource(id = R.string.role_cliente),
+                isSelected = selectedRole == "Cliente",
+                onSelect = { onRoleSelected("Cliente") },
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
 @Composable
-fun TermsOfServiceText(modifier: Modifier = Modifier) {
-    Text(
-        text = stringResource(R.string.terms_of_service),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-        modifier = modifier.padding(horizontal = 16.dp)
-    )
+private fun RoleOption(
+    text: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onSelect,
+        modifier = modifier.height(48.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+        border = if (isSelected) null else BorderStroke(1.dp, Color.LightGray)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = text,
+                color = if (isSelected) Color.White else Color.Black,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
 }
 
 @Composable
@@ -231,28 +263,30 @@ fun SearchBar(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    OutlinedTextField(
+    TextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(stringResource(R.string.search_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-        shape = RoundedCornerShape(24.dp),
-        singleLine = true,
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = SoftFawn,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        placeholder = { Text("Search services...", color = Color.Gray) },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray) },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color(0xFFF5F5F5),
+            unfocusedContainerColor = Color(0xFFF5F5F5),
+            disabledContainerColor = Color(0xFFF5F5F5),
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
         ),
-        modifier = modifier.fillMaxWidth()
+        shape = RoundedCornerShape(28.dp)
     )
 }
 
 @Composable
 fun SectionTitle(
     text: String,
-    modifier: Modifier = Modifier,
-    showArrow: Boolean = false
+    showArrow: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -261,67 +295,71 @@ fun SectionTitle(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleLarge,
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         if (showArrow) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = SoftFawn,
-                modifier = Modifier.size(24.dp)
+            Text(
+                text = "See All",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Medium
             )
         }
     }
 }
 
 @Composable
-fun FeaturedImage(imageRes: Int, modifier: Modifier = Modifier) {
-    AsyncImage(
-        model = imageRes,
-        contentDescription = null,
-        modifier = modifier
+fun FeaturedImage(imageRes: Int) {
+    Box(
+        modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp)
-            .clip(RoundedCornerShape(16.dp)),
-        contentScale = ContentScale.Crop
-    )
+            .height(180.dp)
+            .clip(RoundedCornerShape(24.dp))
+    ) {
+        Image(
+            painter = painterResource(id = imageRes),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+    }
 }
 
 @Composable
-fun CategoryItem(imageRes: Int, title: String, modifier: Modifier = Modifier) {
+fun CategoryItem(imageRes: Int, title: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.width(80.dp)
+        modifier = Modifier.width(80.dp)
     ) {
         Box(
             modifier = Modifier
                 .size(70.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(SoftFawn.copy(alpha = 0.1f)),
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0xFFF5F5F5)),
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = imageRes,
+            Image(
+                painter = painterResource(id = imageRes),
                 contentDescription = title,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.bodySmall,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
 
 @Composable
 fun PublicationCard(
-    imageRes: Int,
+    imageRes: Any, // Cambiado a Any para aceptar Int o String (URL)
     title: String,
     price: String,
     modifier: Modifier = Modifier,
@@ -357,42 +395,6 @@ fun PublicationCard(
                     style = MaterialTheme.typography.bodyMedium,
                     color = SoftFawn,
                     fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-    }
-}
-
-
-@Composable
-fun RoleSelector(
-    selectedRole: String,
-    onRoleSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        val roles = listOf("Cliente", "Especialista")
-        roles.forEach { role ->
-            val isSelected = selectedRole == role
-            OutlinedButton(
-                onClick = { onRoleSelected(role) },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = if (isSelected) SoftFawn else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                ),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = if (isSelected) SoftFawn.copy(alpha = 0.1f) else Color.Transparent
-                )
-            ) {
-                Text(
-                    text = role,
-                    color = if (isSelected) SoftFawn else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                 )
             }
         }

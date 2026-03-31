@@ -3,15 +3,21 @@ package edu.javeriana.fixup.ui.features.auth.login
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -83,12 +89,19 @@ private fun LoginForm(
     onPasswordChange: (String) -> Unit,
     onContinueClick: () -> Unit
 ) {
+    val passwordFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FixUpTextField(
             value = email,
             onValueChange = onEmailChange,
             placeholder = stringResource(R.string.email_placeholder),
             keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next,
+            keyboardActions = KeyboardActions(
+                onNext = { passwordFocusRequester.requestFocus() }
+            ),
             isError = errorMessage != null
         )
 
@@ -99,8 +112,16 @@ private fun LoginForm(
             onValueChange = onPasswordChange,
             placeholder = stringResource(R.string.password_placeholder),
             keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done,
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    focusManager.clearFocus()
+                    onContinueClick()
+                }
+            ),
             isPassword = true,
-            isError = errorMessage != null
+            isError = errorMessage != null,
+            modifier = Modifier.focusRequester(passwordFocusRequester)
         )
 
         // Mensaje de error

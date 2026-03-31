@@ -19,27 +19,32 @@ class PublicationDetailViewModel @Inject constructor(
     val uiState: StateFlow<PublicationDetailUiState> = _uiState.asStateFlow()
 
     fun loadPublication(publicationId: String?) {
+        val id = publicationId?.toIntOrNull()
+        if (id == null) {
+            _uiState.update { it.copy(error = "ID de publicación inválido", isLoading = false) }
+            return
+        }
+
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            val publicationsResult = repository.getPublications()
-            val allPublications = publicationsResult.getOrDefault(emptyList())
-            val publication = allPublications.find { it.id == publicationId }
+            val result = repository.getPublicationById(id)
             
-            val description = when(publicationId) {
-                "1" -> "Transforma tu espacio con nuestros diseños exclusivos de salas. Utilizamos materiales de alta calidad y nos adaptamos a tus necesidades y presupuesto."
-                "2" -> "¡Arma el comedor de tus sueños! Ofrecemos soluciones integrales para que tus cenas familiares sean inolvidables."
-                "3" -> "Renovamos tu baño por completo. Incluye cambio de sanitarios, grifería de alta gama y revestimientos modernos."
-                "4" -> "Cocina integral con acabados premium. Optimización de espacio y diseño ergonómico para tu comodidad."
-                else -> "Transforma tu espacio con nuestros diseños exclusivos. Utilizamos materiales de alta calidad y nos adaptamos a tus necesidades."
-            }
-
-            _uiState.update { 
-                it.copy(
-                    publication = publication,
-                    description = description,
-                    isLoading = false,
-                    error = if (publication == null) "Publicación no encontrada" else null
-                )
+            result.onSuccess { publication ->
+                _uiState.update { 
+                    it.copy(
+                        publication = publication,
+                        description = publication.description ?: "Sin descripción disponible",
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        error = "Error al cargar la publicación: ${error.message}"
+                    )
+                }
             }
         }
     }

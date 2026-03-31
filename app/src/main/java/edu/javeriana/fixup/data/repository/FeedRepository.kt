@@ -1,10 +1,12 @@
 package edu.javeriana.fixup.data.repository
 
+import android.net.Uri
 import edu.javeriana.fixup.data.datasource.CategoryDto
 import edu.javeriana.fixup.data.datasource.FeedDataSource
 import edu.javeriana.fixup.data.datasource.PublicationDto
 import edu.javeriana.fixup.ui.features.feed.CategoryItemModel
 import edu.javeriana.fixup.ui.features.feed.PublicationCardModel
+import edu.javeriana.fixup.ui.model.PropertyModel
 import javax.inject.Inject
 
 class FeedRepository @Inject constructor(
@@ -27,6 +29,24 @@ class FeedRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun getPublicationById(id: Int): Result<PublicationCardModel> {
+        return try {
+            val dto = dataSource.getPublicationById(id)
+            Result.success(dto.toUiModel())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createPublication(property: PropertyModel, imageUri: Uri): Result<PropertyModel> {
+        return try {
+            val created = dataSource.createPublication(property, imageUri)
+            Result.success(created)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 // Extension functions for mapping (Mappers)
@@ -37,7 +57,9 @@ fun CategoryDto.toUiModel() = CategoryItemModel(
 
 fun PublicationDto.toUiModel() = PublicationCardModel(
     id = this.id,
-    imageRes = this.imageRes,
+    imageUrl = this.imageUrl ?: this.imageRes,
     title = this.title,
-    price = this.priceText
+    price = this.priceText,
+    description = this.description,
+    location = this.location
 )

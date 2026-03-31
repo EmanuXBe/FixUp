@@ -4,7 +4,6 @@ import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -99,8 +98,8 @@ fun ProfileContent(
                 contentDescription = "Foto de perfil",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                error = painterResource(id = R.drawable.profile_photo),
-                placeholder = painterResource(id = R.drawable.profile_photo)
+                // Eliminamos el placeholder para mostrar la imagen real lo antes posible
+                error = painterResource(id = R.drawable.profile_photo)
             )
 
             // Indicador de carga sobre la imagen

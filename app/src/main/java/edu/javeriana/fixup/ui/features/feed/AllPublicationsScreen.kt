@@ -61,7 +61,7 @@ fun AllPublicationsScreen(
         ) {
             items(uiState.publications) { publication ->
                 VerticalPublicationItem(
-                    imageRes = publication.imageRes,
+                    imageUrl = publication.imageUrl,
                     title = publication.title,
                     price = publication.price,
                     onClick = { onPublicationClick(publication.id) }
@@ -73,7 +73,7 @@ fun AllPublicationsScreen(
 
 @Composable
 fun VerticalPublicationItem(
-    imageRes: Int,
+    imageUrl: Any,
     title: String,
     price: String,
     onClick: () -> Unit
@@ -84,7 +84,7 @@ fun VerticalPublicationItem(
             .clickable { onClick() }
     ) {
         AsyncImage(
-            model = imageRes,
+            model = imageUrl,
             contentDescription = title,
             modifier = Modifier
                 .fillMaxWidth()
