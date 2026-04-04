@@ -27,7 +27,8 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch {
             val categoriesResult = repository.getCategories()
             _uiState.update { it.copy(
-                categories = categoriesResult.getOrDefault(emptyList())
+                categories = categoriesResult.getOrDefault(emptyList()),
+                isConnected = categoriesResult.isSuccess
             ) }
         }
 
@@ -36,7 +37,8 @@ class FeedViewModel @Inject constructor(
             val publicationsResult = repository.getPublications()
             _uiState.update { it.copy(
                 publications = publicationsResult.getOrDefault(emptyList()),
-                isLoading = false
+                isLoading = false,
+                isConnected = publicationsResult.isSuccess
             ) }
         }
     }

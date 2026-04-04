@@ -4,7 +4,8 @@ data class FeedUiState(
     val searchQuery: String = "",
     val categories: List<CategoryItemModel> = emptyList(),
     val publications: List<PublicationCardModel> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isConnected: Boolean = true
 )
 
 data class CategoryItemModel(val imageRes: Int, val title: String)
