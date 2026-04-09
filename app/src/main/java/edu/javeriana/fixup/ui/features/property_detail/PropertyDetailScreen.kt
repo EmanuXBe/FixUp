@@ -1,6 +1,7 @@
 package edu.javeriana.fixup.ui.features.property_detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,7 +10,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +33,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.model.PropertyModel
+import edu.javeriana.fixup.ui.model.ReviewModel
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
@@ -49,6 +53,13 @@ fun PropertyDetailScreen(
         uiState.isLoading -> LoadingState()
         uiState.property != null -> PropertyContent(
             property = uiState.property!!,
+            reviews = uiState.reviews,
+            newComment = uiState.newReviewComment,
+            newRating = uiState.newReviewRating,
+            isPosting = uiState.isPostingReview,
+            onCommentChange = viewModel::onCommentChange,
+            onRatingChange = viewModel::onRatingChange,
+            onPostReview = viewModel::postReview,
             onBackClick = onBackClick,
             onReserveClick = onReserveClick
         )
@@ -78,10 +89,7 @@ private fun ErrorState(errorText: String, onBackClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onBackClick) {
-                Text(
-                    text = "Volver",
-                    textAlign = TextAlign.Center
-                )
+                Text(text = "Volver")
             }
         }
     }
@@ -90,6 +98,13 @@ private fun ErrorState(errorText: String, onBackClick: () -> Unit) {
 @Composable
 private fun PropertyContent(
     property: PropertyModel,
+    reviews: List<ReviewModel>,
+    newComment: String,
+    newRating: Int,
+    isPosting: Boolean,
+    onCommentChange: (String) -> Unit,
+    onRatingChange: (Int) -> Unit,
+    onPostReview: () -> Unit,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit
 ) {
@@ -105,6 +120,172 @@ private fun PropertyContent(
         )
 
         PropertyDetails(property = property)
+
+        // Sección para añadir nuevo comentario
+        AddReviewSection(
+            comment = newComment,
+            rating = newRating,
+            isPosting = isPosting,
+            onCommentChange = onCommentChange,
+            onRatingChange = onRatingChange,
+            onPostReview = onPostReview
+        )
+
+        // Sección de reseñas listadas
+        ReviewsSection(reviews = reviews)
+
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Button(
+            onClick = onReserveClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            val priceDisplay = property.price?.let { String.format("%.2f", it) } ?: "0.00"
+            Text("Reservar ahora por $$priceDisplay")
+        }
+    }
+}
+
+@Composable
+private fun AddReviewSection(
+    comment: String,
+    rating: Int,
+    isPosting: Boolean,
+    onCommentChange: (String) -> Unit,
+    onRatingChange: (Int) -> Unit,
+    onPostReview: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "¿Qué te pareció este servicio?",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Selector de estrellas táctil
+            Row(modifier = Modifier.padding(vertical = 4.dp)) {
+                repeat(5) { index ->
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clickable { onRatingChange(index + 1) },
+                        tint = if (index < rating) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            OutlinedTextField(
+                value = comment,
+                onValueChange = onCommentChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Escribe tu experiencia aquí...") },
+                maxLines = 3,
+                shape = RoundedCornerShape(8.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Button(
+                onClick = onPostReview,
+                enabled = !isPosting && comment.isNotBlank(),
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                if (isPosting) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                } else {
+                    Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Publicar")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewsSection(reviews: List<ReviewModel>) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = "Reseñas de otros usuarios",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        if (reviews.isEmpty()) {
+            Text(
+                text = "Aún no hay reseñas para este artículo. ¡Sé el primero en comentar!",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        } else {
+            reviews.forEach { review ->
+                ReviewItem(review)
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewItem(review: ReviewModel) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (review.userName.isNullOrBlank()) "Usuario FixUp" else review.userName,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            RatingStars(rating = review.rating)
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = review.comment,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = review.date,
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun RatingStars(rating: Int) {
+    Row {
+        repeat(5) { index ->
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = if (index < rating) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+            )
+        }
     }
 }
 
@@ -140,36 +321,6 @@ private fun PropertyHeader(
                 tint = MaterialTheme.colorScheme.onSurface
             )
         }
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.TopEnd)
-        ) {
-            ActionIconButton(icon = Icons.Default.Share, contentDescription = "Share")
-            Spacer(modifier = Modifier.width(8.dp))
-            ActionIconButton(icon = Icons.Default.FavoriteBorder, contentDescription = "Favorite")
-        }
-    }
-}
-
-@Composable
-private fun ActionIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescription: String
-) {
-    IconButton(
-        onClick = { },
-        modifier = Modifier
-            .background(
-                MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                RoundedCornerShape(50.dp)
-            )
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 
@@ -196,58 +347,24 @@ private fun PropertyDetails(property: PropertyModel) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
-        PropertyDescription(description = property.description ?: "Sin descripción")
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        PropertyAmenities()
+        Text(
+            text = "Descripción",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = property.description ?: "Sin descripción",
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
-@Composable
-private fun PropertyDescription(description: String) {
-    Text(
-        text = "Descripción",
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    Text(
-        text = description,
-        fontSize = 14.sp,
-        color = MaterialTheme.colorScheme.onSurface,
-        lineHeight = 20.sp
-    )
-}
-
-@Composable
-private fun PropertyAmenities() {
-    Text(
-        text = "Lo que ofrece este lugar",
-        fontSize = 18.sp,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onBackground
-    )
-
-    Spacer(modifier = Modifier.height(8.dp))
-    AmenityText("• Servicio de alta calidad")
-    AmenityText("• Atención personalizada")
-    AmenityText("• Garantía FixUp")
-}
-
-@Composable
-private fun AmenityText(text: String) {
-    Text(text = text, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-}
-
-@Preview(showBackground = true, name = "Light Mode")
+@Preview(showBackground = true)
 @Composable
 fun PropertyDetailScreenPreview() {
     FixUpTheme {
-        PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {})
+        PropertyDetailScreen(onBackClick = {}, onReserveClick = {})
     }
 }

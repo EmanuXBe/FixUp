@@ -1,6 +1,7 @@
 package edu.javeriana.fixup.data.datasource
 
 import edu.javeriana.fixup.ui.model.PropertyModel
+import edu.javeriana.fixup.ui.model.ReviewModel
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -20,8 +21,11 @@ interface FixUpApiService {
     suspend fun getUserById(@Path("id") id: String): Any
 
     @GET("api/reviews/user/{userId}")
-    suspend fun getReviewsByUserId(@Path("userId") userId: String): List<edu.javeriana.fixup.ui.model.ReviewModel>
+    suspend fun getReviewsByUserId(@Path("userId") userId: String): List<ReviewModel>
+
+    @GET("api/reviews/article/{articleId}")
+    suspend fun getReviewsByArticleId(@Path("articleId") articleId: Int): List<ReviewModel>
 
     @POST("api/reviews")
-    suspend fun createReview(@Body review: Any): Any
+    suspend fun createReview(@Body review: ReviewModel): ReviewModel
 }
