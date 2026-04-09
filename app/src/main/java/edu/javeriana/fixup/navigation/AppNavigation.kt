@@ -17,6 +17,7 @@ import edu.javeriana.fixup.ui.features.feed.AllPublicationsScreen
 import edu.javeriana.fixup.ui.features.feed.FeedScreen
 import edu.javeriana.fixup.ui.features.notifications.NotificationsScreen
 import edu.javeriana.fixup.ui.features.profile.ProfileScreen
+import edu.javeriana.fixup.ui.features.profile.SettingsScreen
 import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
 import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
@@ -115,10 +116,22 @@ fun AppNavigation(
         composable(AppScreens.Profile.route) {
             ProfileScreen(
                 viewModel = hiltViewModel(),
+                onSettingsClick = {
+                    navController.navigate(AppScreens.Settings.route)
+                }
+            )
+        }
+
+        // Settings screen
+        composable(AppScreens.Settings.route) {
+            SettingsScreen(
+                viewModel = hiltViewModel(),
                 onLogout = {
                     navController.navigate(AppScreens.LogIn.route) {
-                        popUpTo(AppScreens.Feed.route) { inclusive = true } }
-                }
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
 

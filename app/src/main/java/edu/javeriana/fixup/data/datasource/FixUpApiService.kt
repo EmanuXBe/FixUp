@@ -19,6 +19,9 @@ interface FixUpApiService {
     @GET("api/users/{id}")
     suspend fun getUserById(@Path("id") id: String): Any
 
+    @GET("api/reviews/user/{userId}")
+    suspend fun getReviewsByUserId(@Path("userId") userId: String): List<edu.javeriana.fixup.ui.model.ReviewModel>
+
     @POST("api/reviews")
     suspend fun createReview(@Body review: Any): Any
 }

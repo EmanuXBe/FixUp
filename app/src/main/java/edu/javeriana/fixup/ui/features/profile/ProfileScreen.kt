@@ -40,7 +40,7 @@ import edu.javeriana.fixup.ui.theme.SoftFawn
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
-    onLogout: () -> Unit = {}
+    onSettingsClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -59,34 +59,52 @@ fun ProfileScreen(
         }
     }
 
-    ProfileContent(
-        uiState = uiState,
-        onLogout = {
-            viewModel.signOut()
-            onLogout()
-        },
-        onChangePhoto = {
-            galleryLauncher.launch("image/*")
+    Scaffold(
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                IconButton(
+                    onClick = onSettingsClick,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = "Ajustes",
+                        tint = SoftFawn
+                    )
+                }
+            }
         }
-    )
+    ) { padding ->
+        ProfileContent(
+            modifier = Modifier.padding(padding),
+            uiState = uiState,
+            onChangePhoto = {
+                galleryLauncher.launch("image/*")
+            }
+        )
+    }
 }
 
 @Composable
 fun ProfileContent(
+    modifier: Modifier = Modifier,
     uiState: ProfileUiState,
-    onLogout: () -> Unit = {},
     onChangePhoto: () -> Unit = {}
 ) {
     val context = LocalContext.current
     
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // ── Foto de perfil ──────────────────────────────────────
         Box(
@@ -165,88 +183,36 @@ fun ProfileContent(
 
         Spacer(modifier = Modifier.height(36.dp))
 
-        // ── Campos de información ───────────────────────────────
+        // ── Mis Reseñas (Movidas aquí) ──────────────────────────
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            InfoRow(icon = Icons.Outlined.LocationOn, value = uiState.address)
-            InfoRow(icon = Icons.Outlined.Phone, value = uiState.phone)
-            InfoRow(icon = Icons.Outlined.Email, value = uiState.email)
-        }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        // ── Botones de acción 2x2 ───────────────────────────────
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.Home,
-                    text = "Mis casas"
-                )
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.CreditCard,
-                    text = "Pagos"
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.Settings,
-                    text = "Ajustes"
-                )
-                ActionButton(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Outlined.Refresh,
-                    text = "Pedidos"
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // ── Botón de Cerrar Sesión ──────────────────────────────
-        Button(
-            onClick = onLogout,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFD32F2F),
-                contentColor = Color.White
+            Text(
+                text = "Mis Reseñas",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = SoftFawn
             )
-        ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Icon(
-                    imageVector = Icons.Outlined.ExitToApp,
-                    contentDescription = null,
+
+            if (uiState.reviews.isEmpty()) {
+                Box(
                     modifier = Modifier
-                        .size(18.dp)
-                        .align(Alignment.CenterStart)
-                )
-                Text(
-                    text = "Cerrar sesión",
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Aún no has realizado reseñas.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                uiState.reviews.forEach { review ->
+                    ReviewItem(review)
+                }
             }
         }
 
@@ -255,63 +221,48 @@ fun ProfileContent(
 }
 
 @Composable
-fun InfoRow(icon: ImageVector, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = SoftFawn,
-            modifier = Modifier.size(22.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = value,
-            fontSize = 15.sp,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = Icons.Outlined.Edit,
-            contentDescription = "Editar",
-            tint = SoftFawn,
-            modifier = Modifier.size(18.dp)
-        )
-    }
-}
-
-@Composable
-fun ActionButton(modifier: Modifier = Modifier, icon: ImageVector, text: String) {
-    OutlinedButton(
-        onClick = { },
-        modifier = modifier.height(56.dp),
-        shape = RoundedCornerShape(14.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
+fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        contentPadding = PaddingValues(horizontal = 12.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = text,
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = review.userName,
+                    fontWeight = FontWeight.Bold,
+                    color = SoftFawn
+                )
+                Row {
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
+                            contentDescription = null,
+                            tint = Color(0xFFFFB300),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = review.comment,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = review.date,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

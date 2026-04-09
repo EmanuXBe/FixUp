@@ -14,7 +14,8 @@ import javax.inject.Inject
  */
 class ProfileDataSourceImpl @Inject constructor(
     private val auth: FirebaseAuth,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val apiService: FixUpApiService
 ) : ProfileDataSource {
 
     override suspend fun uploadProfileImage(uri: Uri, timeoutMillis: Long): String {
@@ -36,4 +37,17 @@ class ProfileDataSourceImpl @Inject constructor(
     }
 
     override fun getCurrentUser(): FirebaseUser? = auth.currentUser
+
+    override suspend fun getReviewsByUserId(userId: String): List<edu.javeriana.fixup.ui.model.ReviewModel> {
+        return try {
+            // Se asume que el backend ya maneja el userId "1" si se pasa como parámetro
+            apiService.getReviewsByUserId(userId)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun createReview(review: edu.javeriana.fixup.ui.model.ReviewModel): edu.javeriana.fixup.ui.model.ReviewModel {
+        return apiService.createReview(review) as edu.javeriana.fixup.ui.model.ReviewModel
+    }
 }

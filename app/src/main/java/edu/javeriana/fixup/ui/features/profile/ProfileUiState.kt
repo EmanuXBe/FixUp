@@ -1,5 +1,7 @@
 package edu.javeriana.fixup.ui.features.profile
 
+import edu.javeriana.fixup.ui.model.ReviewModel
+
 data class ProfileUiState(
     val name: String = "",
     val address: String = "",
@@ -8,5 +10,6 @@ data class ProfileUiState(
     val role: String = "",
     val profileImageUrl: String? = null,
     val isLoading: Boolean = false,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val reviews: List<ReviewModel> = emptyList()
 )

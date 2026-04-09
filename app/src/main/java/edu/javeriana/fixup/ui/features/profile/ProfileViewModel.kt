@@ -34,6 +34,36 @@ class ProfileViewModel @Inject constructor(
     )
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
+    init {
+        loadUserReviews()
+    }
+
+    private fun loadUserReviews() {
+        // No dependemos del UID de Firebase para la carga, ya que el Repositorio usará el ID fijo "1"
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            profileRepository.getReviewsByUserId("1").onSuccess { reviews ->
+                _uiState.update { it.copy(reviews = reviews, isLoading = false) }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
+    }
+
+    /**
+     * Guarda una reseña usando el ID fijo "1" configurado en el Repositorio.
+     */
+    fun saveReview(rating: Int, comment: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            profileRepository.createReview(rating, comment).onSuccess {
+                loadUserReviews() // Recargamos la lista
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
+    }
+
     fun signOut() {
         authRepository.signOut()
     }
