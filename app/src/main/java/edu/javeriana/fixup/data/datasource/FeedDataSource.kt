@@ -2,6 +2,7 @@ package edu.javeriana.fixup.data.datasource
 
 import android.net.Uri
 import edu.javeriana.fixup.ui.model.PropertyModel
+import edu.javeriana.fixup.ui.model.ReviewModel
 
 // DTOs (Data Transfer Objects)
 data class CategoryDto(val id: Int, val name: String, val iconRes: Int)
@@ -23,4 +24,6 @@ interface FeedDataSource {
     suspend fun getPublications(): List<PublicationDto>
     suspend fun getPublicationById(id: Int): PublicationDto
     suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel
+    suspend fun getReviewsByServiceId(serviceId: Int): List<ReviewModel>
+    suspend fun createReview(review: ReviewRequest): ReviewModel
 }

@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -84,6 +86,12 @@ fun ProfileScreen(
             uiState = uiState,
             onChangePhoto = {
                 galleryLauncher.launch("image/*")
+            },
+            onEditReview = { reviewId, rating, comment ->
+                viewModel.updateReview(reviewId, rating, comment)
+            },
+            onDeleteReview = { reviewId ->
+                viewModel.deleteReview(reviewId)
             }
         )
     }
@@ -93,7 +101,9 @@ fun ProfileScreen(
 fun ProfileContent(
     modifier: Modifier = Modifier,
     uiState: ProfileUiState,
-    onChangePhoto: () -> Unit = {}
+    onChangePhoto: () -> Unit = {},
+    onEditReview: (String, Int, String) -> Unit = { _, _, _ -> },
+    onDeleteReview: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     
@@ -211,7 +221,11 @@ fun ProfileContent(
                 }
             } else {
                 uiState.reviews.forEach { review ->
-                    ReviewItem(review)
+                    ReviewItem(
+                        review = review,
+                        onEdit = { rating, comment -> onEditReview(review.id, rating, comment) },
+                        onDelete = { onDeleteReview(review.id) }
+                    )
                 }
             }
         }
@@ -221,7 +235,25 @@ fun ProfileContent(
 }
 
 @Composable
-fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
+fun ReviewItem(
+    review: edu.javeriana.fixup.ui.model.ReviewModel,
+    onEdit: (Int, String) -> Unit = { _, _ -> },
+    onDelete: () -> Unit = {}
+) {
+    var showEditDialog by remember { mutableStateOf(false) }
+
+    if (showEditDialog) {
+        EditReviewDialog(
+            initialRating = review.rating,
+            initialComment = review.comment,
+            onDismiss = { showEditDialog = false },
+            onConfirm = { rating, comment ->
+                onEdit(rating, comment)
+                showEditDialog = false
+            }
+        )
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -241,7 +273,7 @@ fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
                     fontWeight = FontWeight.Bold,
                     color = SoftFawn
                 )
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     repeat(5) { index ->
                         Icon(
                             imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
@@ -249,6 +281,13 @@ fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
                             tint = Color(0xFFFFB300),
                             modifier = Modifier.size(16.dp)
                         )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = { showEditDialog = true }, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = SoftFawn, modifier = Modifier.size(16.dp))
+                    }
+                    IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
                     }
                 }
             }
@@ -266,6 +305,56 @@ fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
             )
         }
     }
+}
+
+@Composable
+fun EditReviewDialog(
+    initialRating: Int,
+    initialComment: String,
+    onDismiss: () -> Unit,
+    onConfirm: (Int, String) -> Unit
+) {
+    var rating by remember { mutableStateOf(initialRating) }
+    var comment by remember { mutableStateOf(initialComment) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar Reseña") },
+        text = {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(5) { index ->
+                        IconButton(onClick = { rating = index + 1 }) {
+                            Icon(
+                                imageVector = if (index < rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
+                                contentDescription = null,
+                                tint = Color(0xFFFFB300)
+                            )
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = { comment = it },
+                    label = { Text("Comentario") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(rating, comment) }) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)

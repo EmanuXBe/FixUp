@@ -4,9 +4,11 @@ import android.net.Uri
 import edu.javeriana.fixup.data.datasource.CategoryDto
 import edu.javeriana.fixup.data.datasource.FeedDataSource
 import edu.javeriana.fixup.data.datasource.PublicationDto
+import edu.javeriana.fixup.data.datasource.ReviewRequest
 import edu.javeriana.fixup.ui.features.feed.CategoryItemModel
 import edu.javeriana.fixup.ui.features.feed.PublicationCardModel
 import edu.javeriana.fixup.ui.model.PropertyModel
+import edu.javeriana.fixup.ui.model.ReviewModel
 import javax.inject.Inject
 
 class FeedRepository @Inject constructor(
@@ -42,6 +44,24 @@ class FeedRepository @Inject constructor(
     suspend fun createPublication(property: PropertyModel, imageUri: Uri): Result<PropertyModel> {
         return try {
             val created = dataSource.createPublication(property, imageUri)
+            Result.success(created)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getReviewsByServiceId(serviceId: Int): Result<List<ReviewModel>> {
+        return try {
+            val reviews = dataSource.getReviewsByServiceId(serviceId)
+            Result.success(reviews)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createReview(review: ReviewRequest): Result<ReviewModel> {
+        return try {
+            val created = dataSource.createReview(review)
             Result.success(created)
         } catch (e: Exception) {
             Result.failure(e)

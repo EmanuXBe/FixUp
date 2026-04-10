@@ -64,6 +64,34 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Borra una reseña y actualiza la lista.
+     */
+    fun deleteReview(reviewId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            profileRepository.deleteReview(reviewId).onSuccess {
+                loadUserReviews()
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
+    }
+
+    /**
+     * Actualiza una reseña y refresca la lista.
+     */
+    fun updateReview(reviewId: String, rating: Int, comment: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            profileRepository.updateReview(reviewId, rating, comment).onSuccess {
+                loadUserReviews()
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
+    }
+
     fun signOut() {
         authRepository.signOut()
     }

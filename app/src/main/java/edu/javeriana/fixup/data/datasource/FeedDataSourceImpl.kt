@@ -4,6 +4,7 @@ import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.model.PropertyModel
+import edu.javeriana.fixup.ui.model.ReviewModel
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import javax.inject.Inject
@@ -48,6 +49,18 @@ class FeedDataSourceImpl @Inject constructor(
         val publicationWithImage = property.copy(imageUrl = downloadUrl)
         
         return apiService.createService(publicationWithImage)
+    }
+
+    override suspend fun getReviewsByServiceId(serviceId: Int): List<ReviewModel> {
+        return try {
+            apiService.getReviewsByServiceId(serviceId)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    override suspend fun createReview(review: ReviewRequest): ReviewModel {
+        return apiService.createReview(review)
     }
 
     private fun PropertyModel.toDto() = PublicationDto(

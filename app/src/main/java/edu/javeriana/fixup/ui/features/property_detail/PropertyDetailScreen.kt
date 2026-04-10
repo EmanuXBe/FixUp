@@ -10,13 +10,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -49,8 +49,14 @@ fun PropertyDetailScreen(
         uiState.isLoading -> LoadingState()
         uiState.property != null -> PropertyContent(
             property = uiState.property!!,
+            uiState = uiState,
             onBackClick = onBackClick,
-            onReserveClick = onReserveClick
+            onReserveClick = onReserveClick,
+            onSaveReview = { rating, comment -> 
+                uiState.property?.id?.let { id ->
+                    viewModel.saveReview(id, rating, comment)
+                }
+            }
         )
         else -> ErrorState(
             errorText = uiState.error ?: "Propiedad no encontrada",
@@ -90,8 +96,10 @@ private fun ErrorState(errorText: String, onBackClick: () -> Unit) {
 @Composable
 private fun PropertyContent(
     property: PropertyModel,
+    uiState: PropertyDetailUiState,
     onBackClick: () -> Unit,
-    onReserveClick: () -> Unit
+    onReserveClick: () -> Unit,
+    onSaveReview: (Int, String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -105,6 +113,16 @@ private fun PropertyContent(
         )
 
         PropertyDetails(property = property)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        ReviewsSection(
+            reviews = uiState.reviews,
+            isSaving = uiState.isSavingReview,
+            onSaveReview = onSaveReview
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
@@ -237,6 +255,141 @@ private fun PropertyAmenities() {
     AmenityText("• Servicio de alta calidad")
     AmenityText("• Atención personalizada")
     AmenityText("• Garantía FixUp")
+}
+
+@Composable
+private fun ReviewsSection(
+    reviews: List<edu.javeriana.fixup.ui.model.ReviewModel>,
+    isSaving: Boolean,
+    onSaveReview: (Int, String) -> Unit
+) {
+    var showAddDialog by remember { mutableStateOf(false) }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Reseñas",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            TextButton(onClick = { showAddDialog = true }) {
+                Text("Dejar Reseña")
+            }
+        }
+
+        if (showAddDialog) {
+            AddReviewDialog(
+                onDismiss = { showAddDialog = false },
+                onConfirm = { rating, comment ->
+                    onSaveReview(rating, comment)
+                    showAddDialog = false
+                }
+            )
+        }
+
+        if (reviews.isEmpty()) {
+            Text(
+                text = "Aún no hay reseñas para este lugar.",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        } else {
+            reviews.forEach { review ->
+                ReviewItem(review)
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = review.userName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Row {
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
+                            contentDescription = null,
+                            tint = Color(0xFFFFB300),
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = review.comment, fontSize = 13.sp)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(text = review.date, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+fun AddReviewDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (Int, String) -> Unit
+) {
+    var rating by remember { mutableStateOf(5) }
+    var comment by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Nueva Reseña") },
+        text = {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(5) { index ->
+                        IconButton(onClick = { rating = index + 1 }) {
+                            Icon(
+                                imageVector = if (index < rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
+                                contentDescription = null,
+                                tint = Color(0xFFFFB300)
+                            )
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = { comment = it },
+                    label = { Text("¿Qué te pareció el lugar?") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(rating, comment) },
+                enabled = comment.isNotBlank()
+            ) {
+                Text("Publicar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @Composable

@@ -33,6 +33,10 @@ class PropertyDetailViewModel @Inject constructor(
                         error = if (property == null) "Propiedad no encontrada" else null
                     )
                 }
+                
+                // Si la propiedad existe, cargamos sus reseñas
+                idAsInt?.let { loadReviews(it) }
+                
             }.onFailure { error ->
                 _uiState.update {
                     it.copy(
@@ -40,6 +44,26 @@ class PropertyDetailViewModel @Inject constructor(
                         error = "Error al cargar la propiedad: ${error.message}"
                     )
                 }
+            }
+        }
+    }
+
+    private fun loadReviews(serviceId: Int) {
+        viewModelScope.launch {
+            repository.getReviewsByServiceId(serviceId).onSuccess { reviews ->
+                _uiState.update { it.copy(reviews = reviews) }
+            }
+        }
+    }
+
+    fun saveReview(serviceId: Int, rating: Int, comment: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSavingReview = true) }
+            repository.createReview(serviceId, rating, comment).onSuccess {
+                _uiState.update { it.copy(isSavingReview = false) }
+                loadReviews(serviceId) // Recargar reseñas después de guardar
+            }.onFailure { error ->
+                _uiState.update { it.copy(isSavingReview = false, error = error.message) }
             }
         }
     }

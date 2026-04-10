@@ -62,4 +62,28 @@ class ProfileRepository @Inject constructor(
             Result.failure(e.toAppError())
         }
     }
+
+    suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<edu.javeriana.fixup.ui.model.ReviewModel> {
+        return try {
+            val reviewToUpdate = edu.javeriana.fixup.ui.model.ReviewModel(
+                id = reviewId,
+                userId = "1", // ID fijo quemado
+                rating = rating,
+                comment = comment
+            )
+            val updatedReview = profileDataSource.updateReview(reviewId, reviewToUpdate)
+            Result.success(updatedReview)
+        } catch (e: Exception) {
+            Result.failure(e.toAppError())
+        }
+    }
+
+    suspend fun deleteReview(reviewId: String): Result<Unit> {
+        return try {
+            profileDataSource.deleteReview(reviewId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e.toAppError())
+        }
+    }
 }
