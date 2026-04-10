@@ -1,6 +1,7 @@
 package edu.javeriana.fixup.ui.features.property_detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +38,7 @@ fun PropertyDetailScreen(
     propertyId: String? = null,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit,
+    onUserClick: (String) -> Unit,
     viewModel: PropertyDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -52,6 +54,7 @@ fun PropertyDetailScreen(
             uiState = uiState,
             onBackClick = onBackClick,
             onReserveClick = onReserveClick,
+            onUserClick = onUserClick,
             onSaveReview = { rating, comment -> 
                 uiState.property?.id?.let { id ->
                     viewModel.saveReview(id, rating, comment)
@@ -99,6 +102,7 @@ private fun PropertyContent(
     uiState: PropertyDetailUiState,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit,
+    onUserClick: (String) -> Unit,
     onSaveReview: (Int, String) -> Unit
 ) {
     Column(
@@ -119,7 +123,8 @@ private fun PropertyContent(
         ReviewsSection(
             reviews = uiState.reviews,
             isSaving = uiState.isSavingReview,
-            onSaveReview = onSaveReview
+            onSaveReview = onSaveReview,
+            onUserClick = onUserClick
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -261,7 +266,8 @@ private fun PropertyAmenities() {
 private fun ReviewsSection(
     reviews: List<edu.javeriana.fixup.ui.model.ReviewModel>,
     isSaving: Boolean,
-    onSaveReview: (Int, String) -> Unit
+    onSaveReview: (Int, String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -301,7 +307,7 @@ private fun ReviewsSection(
             )
         } else {
             reviews.forEach { review ->
-                ReviewItem(review)
+                ReviewItem(review, onUserClick)
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -309,7 +315,7 @@ private fun ReviewsSection(
 }
 
 @Composable
-private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
+private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel, onUserClick: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -320,7 +326,12 @@ private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = review.userName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(
+                    text = review.userName, 
+                    fontWeight = FontWeight.Bold, 
+                    fontSize = 14.sp,
+                    modifier = Modifier.clickable { onUserClick(review.userId) }
+                )
                 Row {
                     repeat(5) { index ->
                         Icon(
@@ -401,6 +412,6 @@ private fun AmenityText(text: String) {
 @Composable
 fun PropertyDetailScreenPreview() {
     FixUpTheme {
-        PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {})
+        PropertyDetailScreen(propertyId = "1", onBackClick = {}, onReserveClick = {}, onUserClick = {})
     }
 }

@@ -19,6 +19,7 @@ import edu.javeriana.fixup.ui.features.notifications.NotificationsScreen
 import edu.javeriana.fixup.ui.features.profile.ProfileScreen
 import edu.javeriana.fixup.ui.features.profile.SettingsScreen
 import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
+import edu.javeriana.fixup.ui.features.user_profile.UserProfileScreen
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
 import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
@@ -145,7 +146,10 @@ fun AppNavigation(
                 propertyId = propertyId,
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() },
-                onReserveClick = { navController.navigate(AppScreens.Checkout.route) }
+                onReserveClick = { navController.navigate(AppScreens.Checkout.route) },
+                onUserClick = { userId ->
+                    navController.navigate(AppScreens.UserProfile.route + "/$userId")
+                }
             )
         }
 
@@ -159,7 +163,10 @@ fun AppNavigation(
                 publicationId = publicationId,
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() },
-                onContactClick = { navController.navigate(AppScreens.Checkout.route) }
+                onContactClick = { navController.navigate(AppScreens.Checkout.route) },
+                onUserClick = { userId ->
+                    navController.navigate(AppScreens.UserProfile.route + "/$userId")
+                }
             )
         }
 
@@ -184,6 +191,19 @@ fun AppNavigation(
         // Chat screen
         composable(AppScreens.Chat.route) {
             ChatScreen(
+                viewModel = hiltViewModel(),
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // User Profile screen
+        composable(
+            route = AppScreens.UserProfile.route + "/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            UserProfileScreen(
+                userId = userId,
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() }
             )

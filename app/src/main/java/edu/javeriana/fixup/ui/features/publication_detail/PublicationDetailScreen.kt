@@ -39,6 +39,7 @@ fun PublicationDetailScreen(
     publicationId: String? = null,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
+    onUserClick: (String) -> Unit,
     viewModel: PublicationDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,6 +74,7 @@ fun PublicationDetailScreen(
                     isSendingReview = uiState.isSendingReview,
                     onBackClick = onBackClick,
                     onContactClick = onContactClick,
+                    onUserClick = onUserClick,
                     onSendReview = { rating, comment ->
                         viewModel.sendReview(rating, comment)
                     }
@@ -114,6 +116,7 @@ private fun PublicationContent(
     isSendingReview: Boolean,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
+    onUserClick: (String) -> Unit,
     onSendReview: (Int, String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -142,7 +145,7 @@ private fun PublicationContent(
                     Spacer(modifier = Modifier.height(24.dp))
                     AddReviewSection(isSendingReview, onSendReview)
                     Spacer(modifier = Modifier.height(24.dp))
-                    ReviewsSection(reviews)
+                    ReviewsSection(reviews, onUserClick)
                     Spacer(modifier = Modifier.height(24.dp))
                     ActionButtons(onContactClick)
                 }
@@ -290,7 +293,7 @@ private fun AddReviewSection(
 }
 
 @Composable
-private fun ReviewsSection(reviews: List<ReviewModel>) {
+private fun ReviewsSection(reviews: List<ReviewModel>, onUserClick: (String) -> Unit) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -333,7 +336,7 @@ private fun ReviewsSection(reviews: List<ReviewModel>) {
             }
         } else {
             reviews.forEach { review ->
-                ReviewItem(review)
+                ReviewItem(review, onUserClick)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -341,7 +344,7 @@ private fun ReviewsSection(reviews: List<ReviewModel>) {
 }
 
 @Composable
-private fun ReviewItem(review: ReviewModel) {
+private fun ReviewItem(review: ReviewModel, onUserClick: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
@@ -354,7 +357,8 @@ private fun ReviewItem(review: ReviewModel) {
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(SoftFawn.copy(alpha = 0.2f)),
+                        .background(SoftFawn.copy(alpha = 0.2f))
+                        .clickable { onUserClick(review.userId) },
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -369,7 +373,8 @@ private fun ReviewItem(review: ReviewModel) {
                     Text(
                         text = review.userName,
                         fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable { onUserClick(review.userId) }
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         repeat(5) { index ->
@@ -493,6 +498,6 @@ fun BenefitItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: Str
 @Composable
 fun PublicationDetailScreenPreview() {
     FixUpTheme {
-        PublicationDetailScreen(publicationId = "1", onBackClick = {}, onContactClick = {})
+        PublicationDetailScreen(publicationId = "1", onBackClick = {}, onContactClick = {}, onUserClick = {})
     }
 }

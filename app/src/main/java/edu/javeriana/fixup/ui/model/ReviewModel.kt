@@ -14,5 +14,7 @@ data class ReviewModel(
     @SerializedName("comment")
     val comment: String = "",
     @SerializedName("created_at")
-    val date: String = ""
+    val date: String = "",
+    @SerializedName("service_title")
+    val serviceTitle: String? = null
 )
