@@ -320,7 +320,7 @@ private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = review.userName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(text = review.displayName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Row {
                     repeat(5) { index ->
                         Icon(

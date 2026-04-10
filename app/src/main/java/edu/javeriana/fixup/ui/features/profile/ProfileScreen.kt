@@ -223,8 +223,8 @@ fun ProfileContent(
                 uiState.reviews.forEach { review ->
                     ReviewItem(
                         review = review,
-                        onEdit = { rating, comment -> onEditReview(review.id, rating, comment) },
-                        onDelete = { onDeleteReview(review.id) }
+                        onEdit = { rating, comment -> onEditReview(review.idAsString, rating, comment) },
+                        onDelete = { onDeleteReview(review.idAsString) }
                     )
                 }
             }
@@ -269,7 +269,7 @@ fun ReviewItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = review.userName,
+                    text = review.displayName,
                     fontWeight = FontWeight.Bold,
                     color = SoftFawn
                 )
