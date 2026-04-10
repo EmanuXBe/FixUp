@@ -244,7 +244,7 @@ fun ReviewItem(
 
     if (showEditDialog) {
         EditReviewDialog(
-            initialRating = review.rating,
+            initialRating = review.rating.toInt(),
             initialComment = review.comment,
             onDismiss = { showEditDialog = false },
             onConfirm = { rating, comment ->

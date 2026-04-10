@@ -10,7 +10,7 @@ fun ReviewDto.toDomain(): ReviewModel {
         id = id ?: "",
         userId = userId ?: "",
         userName = userName ?: "",
-        rating = rating ?: 0,
+        rating = rating ?: 0.0,
         comment = comment ?: "",
         date = createdAt ?: ""
     )

@@ -79,7 +79,7 @@ class FeedDataSourceImpl @Inject constructor(
             apiService.getReviewsByServiceId(serviceId).map { dto ->
                 dto.toDomain()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }

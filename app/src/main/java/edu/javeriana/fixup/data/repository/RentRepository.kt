@@ -45,7 +45,7 @@ class RentRepository @Inject constructor(
             val request = edu.javeriana.fixup.data.network.model.ReviewRequestDto(
                 userId = AppConstants.CURRENT_USER_ID_INT,
                 serviceId = serviceId,
-                rating = rating,
+                rating = rating.toDouble(),
                 comment = comment
             )
             val savedReview = apiService.createReview(request).toDomain()

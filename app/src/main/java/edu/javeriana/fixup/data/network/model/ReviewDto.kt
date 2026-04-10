@@ -10,7 +10,7 @@ data class ReviewDto(
     @SerializedName("service_id")
     val serviceId: Int,
     @SerializedName("rating")
-    val rating: Int,
+    val rating: Double,
     @SerializedName("comment")
     val comment: String
 )
@@ -21,7 +21,7 @@ data class ReviewRequestDto(
     @SerializedName("service_id")
     val serviceId: Int,
     @SerializedName("rating")
-    val rating: Int,
+    val rating: Double,
     @SerializedName("comment")
     val comment: String
 )

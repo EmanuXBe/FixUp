@@ -90,8 +90,14 @@ private fun FeaturedSection() {
 private fun CategoriesSection(categories: List<CategoryItemModel>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionTitle(text = "Categorias", showArrow = true)
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(categories) { category ->
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            items(
+                items = categories,
+                key = { it.title }
+            ) { category ->
                 CategoryItem(
                     imageRes = category.imageRes,
                     title = category.title
@@ -113,8 +119,14 @@ private fun PublicationsSection(
             showArrow = true,
             modifier = Modifier.clickable { onAllPublicationsClick() }
         )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(publications) { publication ->
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            items(
+                items = publications,
+                key = { it.id }
+            ) { publication ->
                 PublicationCard(
                     imageRes = publication.imageUrl,
                     title = publication.title,

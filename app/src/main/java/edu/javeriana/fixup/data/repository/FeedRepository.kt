@@ -41,15 +41,6 @@ class FeedRepository @Inject constructor(
         }
     }
 
-    suspend fun createPublication(property: PropertyModel, imageUri: Uri): Result<PropertyModel> {
-        return try {
-            val created = dataSource.createPublication(property, imageUri)
-            Result.success(created)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
     suspend fun getReviewsByServiceId(serviceId: Int): Result<List<ReviewModel>> {
         return try {
             val reviews = dataSource.getReviewsByServiceId(serviceId)

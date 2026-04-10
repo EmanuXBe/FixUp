@@ -10,7 +10,7 @@ data class ReviewDto(
     @SerializedName("user_name")
     val userName: String?,
     @SerializedName("rating")
-    val rating: Int?,
+    val rating: Double?,
     @SerializedName("comment")
     val comment: String?,
     @SerializedName("created_at")

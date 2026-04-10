@@ -11,10 +11,7 @@ import javax.inject.Inject
  * Implementación de RentDataSource con datos quemados (Mock) para Alquiler.
  * Se han migrado los servicios reales a FeedDataSource.
  */
-class RentDataSourceImpl @Inject constructor(
-    private val apiService: FixUpApiService,
-    private val storage: FirebaseStorage
-) : RentDataSource {
+class RentDataSourceImpl @Inject constructor() : RentDataSource {
 
     private val mockProperties = listOf(
         PropertyModel(

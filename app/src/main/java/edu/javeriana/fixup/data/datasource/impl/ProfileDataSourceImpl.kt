@@ -1,6 +1,7 @@
 package edu.javeriana.fixup.data.datasource.impl
 
 import android.net.Uri
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
@@ -36,7 +37,7 @@ class ProfileDataSourceImpl @Inject constructor(
     override suspend fun updateProfilePhotoUrl(photoUrl: String) {
         val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
         val profileUpdates = userProfileChangeRequest {
-            photoUri = Uri.parse(photoUrl)
+            photoUri = photoUrl.toUri()
         }
         user.updateProfile(profileUpdates).await()
     }
@@ -48,7 +49,7 @@ class ProfileDataSourceImpl @Inject constructor(
             apiService.getReviewsByUserId(userId).map { dto ->
                 dto.toDomain()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             emptyList()
         }
     }

@@ -10,7 +10,7 @@ data class ReviewModel(
     @SerializedName("user_name")
     val userName: String = "",
     @SerializedName("rating")
-    val rating: Int = 0,
+    val rating: Double = 0.0,
     @SerializedName("comment")
     val comment: String = "",
     @SerializedName("created_at")

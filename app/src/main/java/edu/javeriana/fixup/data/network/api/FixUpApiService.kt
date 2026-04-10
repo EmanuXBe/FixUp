@@ -21,9 +21,6 @@ interface FixUpApiService {
     @POST("api/services")
     suspend fun createService(@Body service: PropertyDto): PropertyDto
 
-    @GET("api/users/{id}")
-    suspend fun getUserById(@Path("id") id: String): UserDto
-
     @GET("api/reviews/service/{serviceId}")
     suspend fun getReviewsByServiceId(@Path("serviceId") serviceId: Int): List<ReviewDto>
 
