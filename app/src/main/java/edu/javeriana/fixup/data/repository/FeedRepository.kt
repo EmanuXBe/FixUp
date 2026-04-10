@@ -14,66 +14,41 @@ import javax.inject.Inject
 class FeedRepository @Inject constructor(
     private val dataSource: FeedDataSource
 ) {
-    suspend fun getCategories(): Result<List<CategoryItemModel>> {
-        return try {
-            val dtos = dataSource.getCategories()
-            Result.success(dtos.map { it.toUiModel() })
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun getCategories(): Result<List<CategoryItemModel>> = try {
+        Result.success(dataSource.getCategories().map { it.toUiModel() })
+    } catch (e: Exception) { Result.failure(e) }
 
-    suspend fun getPublications(): Result<List<PublicationCardModel>> {
-        return try {
-            val dtos = dataSource.getPublications()
-            Result.success(dtos.map { it.toUiModel() })
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun getPublications(): Result<List<PublicationCardModel>> = try {
+        Result.success(dataSource.getPublications().map { it.toUiModel() })
+    } catch (e: Exception) { Result.failure(e) }
 
-    suspend fun getPublicationById(id: Int): Result<PublicationCardModel> {
-        return try {
-            val dto = dataSource.getPublicationById(id)
-            Result.success(dto.toUiModel())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun getPublicationById(id: Int): Result<PublicationCardModel> = try {
+        Result.success(dataSource.getPublicationById(id).toUiModel())
+    } catch (e: Exception) { Result.failure(e) }
 
-    suspend fun createPublication(property: PropertyModel, imageUri: Uri): Result<PropertyModel> {
-        return try {
-            val created = dataSource.createPublication(property, imageUri)
-            Result.success(created)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun createPublication(property: PropertyModel, imageUri: Uri): Result<PropertyModel> = try {
+        Result.success(dataSource.createPublication(property, imageUri))
+    } catch (e: Exception) { Result.failure(e) }
 
-    suspend fun getReviewsByServiceId(serviceId: Int): Result<List<ReviewModel>> {
-        return try {
-            val reviews = dataSource.getReviewsByServiceId(serviceId)
-            Result.success(reviews)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun getReviewsByServiceId(serviceId: Int): Result<List<ReviewModel>> = try {
+        Result.success(dataSource.getReviewsByServiceId(serviceId))
+    } catch (e: Exception) { Result.failure(e) }
 
-    suspend fun createReview(review: ReviewRequest): Result<ReviewModel> {
-        return try {
-            val created = dataSource.createReview(review)
-            Result.success(created)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    suspend fun createReview(review: ReviewRequest): Result<ReviewModel> = try {
+        Result.success(dataSource.createReview(review))
+    } catch (e: Exception) { Result.failure(e) }
+
+    suspend fun updateReview(reviewId: String, review: ReviewRequest): Result<ReviewModel> = try {
+        Result.success(dataSource.updateReview(reviewId, review))
+    } catch (e: Exception) { Result.failure(e) }
+
+    suspend fun deleteReview(reviewId: String): Result<Unit> = try {
+        dataSource.deleteReview(reviewId)
+        Result.success(Unit)
+    } catch (e: Exception) { Result.failure(e) }
 }
 
-// Extension functions for mapping (Mappers)
-fun CategoryDto.toUiModel() = CategoryItemModel(
-    imageRes = this.iconRes,
-    title = this.name
-)
+fun CategoryDto.toUiModel() = CategoryItemModel(imageRes = this.iconRes, title = this.name)
 
 fun PublicationDto.toUiModel() = PublicationCardModel(
     id = this.id,

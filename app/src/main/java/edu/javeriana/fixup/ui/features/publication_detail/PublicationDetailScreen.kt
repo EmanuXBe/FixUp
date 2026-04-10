@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -23,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,8 +29,9 @@ import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.features.feed.PublicationCardModel
 import edu.javeriana.fixup.ui.model.ReviewModel
-import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
+
+private const val MY_USER_ID = 1
 
 @Composable
 fun PublicationDetailScreen(
@@ -44,28 +43,21 @@ fun PublicationDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(publicationId) {
-        viewModel.loadPublication(publicationId)
-    }
+    LaunchedEffect(publicationId) { viewModel.loadPublication(publicationId) }
 
     LaunchedEffect(uiState.reviewSent) {
-        if (uiState.reviewSent) {
-            snackbarHostState.showSnackbar("¡Gracias! Tu reseña ha sido publicada.")
-        }
+        if (uiState.reviewSent) snackbarHostState.showSnackbar("¡Review guardada!")
     }
-
     LaunchedEffect(uiState.reviewError) {
-        uiState.reviewError?.let {
-            snackbarHostState.showSnackbar(it)
-        }
+        uiState.reviewError?.let { snackbarHostState.showSnackbar(it) }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
             when {
-                uiState.isLoading -> LoadingState()
+                uiState.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = SoftFawn)
+                }
                 uiState.publication != null -> PublicationContent(
                     publication = uiState.publication!!,
                     description = uiState.description,
@@ -73,36 +65,33 @@ fun PublicationDetailScreen(
                     isSendingReview = uiState.isSendingReview,
                     onBackClick = onBackClick,
                     onContactClick = onContactClick,
-                    onSendReview = { rating, comment ->
-                        viewModel.sendReview(rating, comment)
+                    onSendReview = { rating, comment -> viewModel.sendReview(rating, comment) },
+                    onEditReview = { review -> viewModel.openEditDialog(review) },
+                    onDeleteReview = { reviewId -> viewModel.deleteReview(reviewId) }
+                )
+                else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(uiState.error ?: "Publicación no encontrada", textAlign = TextAlign.Center)
+                        Spacer(Modifier.height(16.dp))
+                        Button(onClick = onBackClick, colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)) {
+                            Text("Volver")
+                        }
                     }
-                )
-                else -> ErrorState(
-                    errorText = uiState.error ?: "Publicación no encontrada",
-                    onBackClick = onBackClick
-                )
+                }
             }
         }
     }
-}
 
-@Composable
-private fun LoadingState() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        CircularProgressIndicator(color = SoftFawn)
-    }
-}
-
-@Composable
-private fun ErrorState(errorText: String, onBackClick: () -> Unit) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(errorText, textAlign = TextAlign.Center)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onBackClick, colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)) {
-                Text("Volver")
-            }
-        }
+    // Dialog de edición
+    if (uiState.showEditDialog && uiState.editingReview != null) {
+        EditReviewDialog(
+            review = uiState.editingReview!!,
+            isSaving = uiState.isSendingReview,
+            onConfirm = { rating, comment ->
+                viewModel.updateReview(uiState.editingReview!!.idAsString, rating, comment)
+            },
+            onDismiss = { viewModel.closeEditDialog() }
+        )
     }
 }
 
@@ -114,78 +103,60 @@ private fun PublicationContent(
     isSendingReview: Boolean,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
-    onSendReview: (Int, String) -> Unit
+    onSendReview: (Int, String) -> Unit,
+    onEditReview: (ReviewModel) -> Unit,
+    onDeleteReview: (String) -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 32.dp)
-        ) {
-            item {
-                AsyncImage(
-                    model = publication.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    contentScale = ContentScale.Crop
-                )
-            }
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 32.dp)) {
+        item {
+            AsyncImage(
+                model = publication.imageUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxWidth().height(300.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
+        item {
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Info publicación
+                Text(publication.title, fontSize = 26.sp, fontWeight = FontWeight.ExtraBold)
+                Text(publication.price, fontSize = 22.sp, color = SoftFawn, fontWeight = FontWeight.Bold)
+                Spacer(Modifier.height(12.dp))
+                Text("Descripción", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(description, fontSize = 15.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-            item {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    PublicationInfo(publication, description)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    FixerSection()
-                    Spacer(modifier = Modifier.height(24.dp))
-                    BenefitsSection()
-                    Spacer(modifier = Modifier.height(24.dp))
-                    AddReviewSection(isSendingReview, onSendReview)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    ReviewsSection(reviews)
-                    Spacer(modifier = Modifier.height(24.dp))
-                    ActionButtons(onContactClick)
-                }
+                Spacer(Modifier.height(24.dp))
+                FixerSection()
+                Spacer(Modifier.height(24.dp))
+                BenefitsSection()
+                Spacer(Modifier.height(24.dp))
+
+                // Sección agregar review
+                AddReviewSection(isSendingReview, onSendReview)
+                Spacer(Modifier.height(24.dp))
+
+                // Lista de reviews con editar/eliminar
+                ReviewsSection(
+                    reviews = reviews,
+                    onEditReview = onEditReview,
+                    onDeleteReview = onDeleteReview
+                )
+                Spacer(Modifier.height(24.dp))
+
+                // Botones de acción
+                Button(
+                    onClick = onContactClick,
+                    modifier = Modifier.fillMaxWidth().height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)
+                ) { Text("Ir al Pago", fontSize = 16.sp, fontWeight = FontWeight.Bold) }
             }
         }
     }
 }
 
 @Composable
-private fun PublicationInfo(publication: PublicationCardModel, description: String) {
-    Column {
-        Text(
-            text = publication.title,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Text(
-            text = publication.price,
-            fontSize = 22.sp,
-            color = SoftFawn,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = "Descripción",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = description,
-            fontSize = 15.sp,
-            lineHeight = 22.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun AddReviewSection(
-    isSending: Boolean,
-    onSendReview: (Int, String) -> Unit
-) {
+private fun AddReviewSection(isSending: Boolean, onSendReview: (Int, String) -> Unit) {
     var rating by remember { mutableIntStateOf(5) }
     var comment by remember { mutableStateOf("") }
     var isExpanded by remember { mutableStateOf(false) }
@@ -197,91 +168,53 @@ private fun AddReviewSection(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded },
+                modifier = Modifier.fillMaxWidth().clickable { isExpanded = !isExpanded },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.RateReview, contentDescription = null, tint = SoftFawn)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "¿Cómo fue tu experiencia?",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("¿Cómo fue tu experiencia?", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
-                Icon(
-                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = null
-                )
+                Icon(if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown, contentDescription = null)
             }
 
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = fadeIn(animationSpec = tween(300)),
-                exit = fadeOut(animationSpec = tween(300))
-            ) {
+            AnimatedVisibility(visible = isExpanded, enter = fadeIn(tween(300)), exit = fadeOut(tween(300))) {
                 Column {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
+                    Spacer(Modifier.height(20.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                         repeat(5) { index ->
-                            val isSelected = index < rating
                             IconButton(onClick = { rating = index + 1 }) {
                                 Icon(
-                                    imageVector = if (isSelected) Icons.Default.Star else Icons.Default.StarBorder,
+                                    imageVector = if (index < rating) Icons.Default.Star else Icons.Default.StarBorder,
                                     contentDescription = null,
-                                    tint = if (isSelected) Color(0xFFFFC107) else MaterialTheme.colorScheme.outline,
+                                    tint = if (index < rating) Color(0xFFFFC107) else MaterialTheme.colorScheme.outline,
                                     modifier = Modifier.size(36.dp)
                                 )
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
+                    Spacer(Modifier.height(12.dp))
                     OutlinedTextField(
                         value = comment,
                         onValueChange = { comment = it },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Cuéntanos más detalles del servicio...") },
+                        placeholder = { Text("Cuéntanos más detalles...") },
                         maxLines = 4,
                         shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = SoftFawn,
-                            cursorColor = SoftFawn
-                        )
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = SoftFawn, cursorColor = SoftFawn)
                     )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                    Spacer(Modifier.height(16.dp))
                     Button(
-                        onClick = {
-                            if (comment.isNotBlank()) {
-                                onSendReview(rating, comment)
-                                comment = ""
-                                isExpanded = false
-                            }
-                        },
+                        onClick = { if (comment.isNotBlank()) { onSendReview(rating, comment); comment = ""; isExpanded = false } },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         enabled = !isSending && comment.isNotBlank(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)
                     ) {
-                        if (isSending) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text("Publicar Reseña", fontWeight = FontWeight.Bold)
-                        }
+                        if (isSending) CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
+                        else Text("Publicar Reseña", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -290,87 +223,69 @@ private fun AddReviewSection(
 }
 
 @Composable
-private fun ReviewsSection(reviews: List<ReviewModel>) {
+private fun ReviewsSection(
+    reviews: List<ReviewModel>,
+    onEditReview: (ReviewModel) -> Unit,
+    onDeleteReview: (String) -> Unit
+) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Opiniones de la comunidad",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+            Text("Opiniones de la comunidad", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(8.dp))
             if (reviews.isNotEmpty()) {
-                Surface(
-                    color = SoftFawn.copy(alpha = 0.1f),
-                    shape = CircleShape
-                ) {
-                    Text(
-                        text = reviews.size.toString(),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        color = SoftFawn,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Surface(color = SoftFawn.copy(alpha = 0.1f), shape = CircleShape) {
+                    Text(reviews.size.toString(), modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp), color = SoftFawn, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
+        Spacer(Modifier.height(16.dp))
+
         if (reviews.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Default.ChatBubbleOutline, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.outline)
-                    Text(
-                        text = "Aún no hay comentarios. ¡Sé el primero!",
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text("Aún no hay comentarios. ¡Sé el primero!", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
             reviews.forEach { review ->
-                ReviewItem(review)
-                Spacer(modifier = Modifier.height(16.dp))
+                ReviewItem(review = review, onEditReview = onEditReview, onDeleteReview = onDeleteReview)
+                Spacer(Modifier.height(16.dp))
             }
         }
     }
 }
 
 @Composable
-private fun ReviewItem(review: ReviewModel) {
+private fun ReviewItem(
+    review: ReviewModel,
+    onEditReview: (ReviewModel) -> Unit,
+    onDeleteReview: (String) -> Unit
+) {
+    val isMyReview = review.userId == MY_USER_ID
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                // Avatar con inicial
                 Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(SoftFawn.copy(alpha = 0.2f)),
+                    modifier = Modifier.size(40.dp).clip(CircleShape).background(SoftFawn.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = review.userName.take(1).uppercase(),
+                        text = review.displayName.take(1).uppercase(),
                         color = SoftFawn,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 18.sp
                     )
                 }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = review.userName,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(review.displayName, fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         repeat(5) { index ->
                             Icon(
@@ -380,24 +295,80 @@ private fun ReviewItem(review: ReviewModel) {
                                 modifier = Modifier.size(14.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = review.date,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    }
+                }
+                // Botones editar/eliminar solo para mis reviews (userId == 1)
+                if (isMyReview) {
+                    IconButton(onClick = { onEditReview(review) }, modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = SoftFawn, modifier = Modifier.size(18.dp))
+                    }
+                    IconButton(onClick = { onDeleteReview(review.idAsString) }, modifier = Modifier.size(36.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color(0xFFD32F2F), modifier = Modifier.size(18.dp))
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = review.comment,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                lineHeight = 20.sp
-            )
+            if (review.comment.isNotBlank()) {
+                Spacer(Modifier.height(12.dp))
+                Text(review.comment, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, lineHeight = 20.sp)
+            }
         }
     }
+}
+
+@Composable
+private fun EditReviewDialog(
+    review: ReviewModel,
+    isSaving: Boolean,
+    onConfirm: (Int, String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var rating by remember { mutableIntStateOf(review.rating) }
+    var comment by remember { mutableStateOf(review.comment) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar review") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Calificación", fontWeight = FontWeight.Medium)
+                Row {
+                    repeat(5) { index ->
+                        IconButton(onClick = { rating = index + 1 }, modifier = Modifier.size(40.dp)) {
+                            Icon(
+                                imageVector = if (index < rating) Icons.Default.Star else Icons.Default.StarBorder,
+                                contentDescription = null,
+                                tint = if (index < rating) Color(0xFFFFC107) else Color.Gray,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
+                OutlinedTextField(
+                    value = comment,
+                    onValueChange = { comment = it },
+                    label = { Text("Comentario") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = SoftFawn, cursorColor = SoftFawn)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(rating, comment) },
+                enabled = !isSaving,
+                colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)
+            ) {
+                if (isSaving) CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                else Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !isSaving) { Text("Cancelar") }
+        },
+        shape = RoundedCornerShape(16.dp)
+    )
 }
 
 @Composable
@@ -405,32 +376,20 @@ private fun FixerSection() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = R.drawable.profile_photo,
                 contentDescription = null,
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(CircleShape),
+                modifier = Modifier.size(60.dp).clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(Modifier.width(16.dp))
             Column {
                 Text("Tu Especialista FixUp", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text("Verificado • 4.8 ★", color = SoftFawn, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                Text(
-                    "Profesional con más de 5 años de experiencia en servicios para el hogar.",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 16.sp
-                )
+                Text("Profesional con más de 5 años de experiencia.", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }
@@ -438,10 +397,7 @@ private fun FixerSection() {
 
 @Composable
 private fun BenefitsSection() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         BenefitItem(icon = Icons.Outlined.VerifiedUser, text = "Garantía")
         BenefitItem(icon = Icons.Outlined.Bolt, text = "Rápido")
         BenefitItem(icon = Icons.Outlined.SupportAgent, text = "Soporte")
@@ -449,50 +405,14 @@ private fun BenefitsSection() {
 }
 
 @Composable
-private fun ActionButtons(onContactClick: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Button(
-            onClick = onContactClick,
-            modifier = Modifier.fillMaxWidth().height(54.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = SoftFawn)
-        ) {
-            Text(text = "Ir al Pago", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-
-        OutlinedButton(
-            onClick = { },
-            modifier = Modifier.fillMaxWidth().height(54.dp),
-            shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.5.dp, SoftFawn),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = SoftFawn)
-        ) {
-            Text(text = "Contactar Especialista", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-        }
-    }
-}
-
-@Composable
 fun BenefitItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Surface(
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.size(56.dp)
-        ) {
+        Surface(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), shape = RoundedCornerShape(12.dp), modifier = Modifier.size(56.dp)) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(icon, contentDescription = null, modifier = Modifier.size(28.dp), tint = SoftFawn)
             }
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(Modifier.height(4.dp))
         Text(text, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PublicationDetailScreenPreview() {
-    FixUpTheme {
-        PublicationDetailScreen(publicationId = "1", onBackClick = {}, onContactClick = {})
     }
 }

@@ -11,5 +11,8 @@ data class PublicationDetailUiState(
     val isSendingReview: Boolean = false,
     val reviewSent: Boolean = false,
     val reviewError: String? = null,
-    val error: String? = null
+    val error: String? = null,
+    // Para el dialog de edición
+    val editingReview: ReviewModel? = null,
+    val showEditDialog: Boolean = false
 )
