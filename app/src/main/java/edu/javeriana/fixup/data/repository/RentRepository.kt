@@ -1,9 +1,9 @@
 package edu.javeriana.fixup.data.repository
 
 import android.net.Uri
-import edu.javeriana.fixup.data.datasource.FixUpApiService
 import edu.javeriana.fixup.data.datasource.RentDataSource
-import edu.javeriana.fixup.data.datasource.ReviewRequest
+import edu.javeriana.fixup.data.network.model.ReviewRequestDto
+import edu.javeriana.fixup.data.network.service.FixUpApiService
 import edu.javeriana.fixup.data.util.AppConstants
 import edu.javeriana.fixup.ui.model.PropertyModel
 import edu.javeriana.fixup.ui.model.ReviewModel
@@ -33,7 +33,16 @@ class RentRepository @Inject constructor(
 
     suspend fun getReviewsByServiceId(serviceId: Int): Result<List<ReviewModel>> {
         return try {
-            val reviews = apiService.getReviewsByServiceId(serviceId)
+            val reviewDtos = apiService.getReviewsByServiceId(serviceId)
+            val reviews = reviewDtos.map { dto ->
+                ReviewModel(
+                    id = dto.id?.toString() ?: "",
+                    userId = dto.userId.toString(),
+                    rating = dto.rating,
+                    comment = dto.comment,
+                    userName = "Usuario ${dto.userId}"
+                )
+            }
             Result.success(reviews)
         } catch (e: Exception) {
             Result.failure(e)
@@ -42,13 +51,20 @@ class RentRepository @Inject constructor(
 
     suspend fun createReview(serviceId: Int, rating: Int, comment: String): Result<ReviewModel> {
         return try {
-            val request = ReviewRequest(
+            val request = ReviewRequestDto(
                 userId = AppConstants.CURRENT_USER_ID_INT,
                 serviceId = serviceId,
                 rating = rating,
                 comment = comment
             )
-            val savedReview = apiService.createReview(request)
+            val resultDto = apiService.createReview(request)
+            val savedReview = ReviewModel(
+                id = resultDto.id?.toString() ?: "",
+                userId = resultDto.userId.toString(),
+                rating = resultDto.rating,
+                comment = resultDto.comment,
+                userName = "Usuario ${resultDto.userId}"
+            )
             Result.success(savedReview)
         } catch (e: Exception) {
             Result.failure(e)
