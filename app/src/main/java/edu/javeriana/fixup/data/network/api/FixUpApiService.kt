@@ -4,6 +4,7 @@ import edu.javeriana.fixup.data.network.dto.ReviewDto
 import edu.javeriana.fixup.data.network.dto.UserDto
 import edu.javeriana.fixup.data.network.model.PropertyDto
 import edu.javeriana.fixup.data.network.model.ReviewRequestDto
+import edu.javeriana.fixup.data.network.model.ServiceDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -13,13 +14,13 @@ import retrofit2.http.Path
 
 interface FixUpApiService {
     @GET("api/services")
-    suspend fun getServices(): List<PropertyDto>
+    suspend fun getServices(): List<ServiceDto>
 
     @GET("api/services/{id}")
-    suspend fun getServiceById(@Path("id") id: Int): PropertyDto
+    suspend fun getServiceById(@Path("id") id: Int): ServiceDto
 
     @POST("api/services")
-    suspend fun createService(@Body service: PropertyDto): PropertyDto
+    suspend fun createService(@Body service: ServiceDto): ServiceDto
 
     @GET("api/reviews/service/{serviceId}")
     suspend fun getReviewsByServiceId(@Path("serviceId") serviceId: Int): List<ReviewDto>
