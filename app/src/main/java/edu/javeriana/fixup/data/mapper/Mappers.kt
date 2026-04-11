@@ -33,7 +33,7 @@ fun UserDto.toDomain(): UserModel {
 fun ServiceDto.toDomain(): ServiceModel {
     return ServiceModel(
         id = id ?: 0,
-        name = name ?: "",
+        name = title ?: "",
         description = description ?: "",
         price = price ?: 0.0,
         category = category ?: "",
@@ -46,7 +46,7 @@ fun ServiceDto.toDomain(): ServiceModel {
 fun ServiceModel.toDto(): ServiceDto {
     return ServiceDto(
         id = id,
-        name = name,
+        title = name,
         description = description,
         price = price,
         category = category,
