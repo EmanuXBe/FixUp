@@ -12,6 +12,7 @@ fun ReviewDto.toDomain(): ReviewModel {
         id = id ?: "",
         userId = userId ?: "",
         userName = userName ?: "",
+        articleName = articleName ?: "",
         rating = rating?.toInt() ?: 0,
         comment = comment ?: "",
         date = createdAt ?: ""
@@ -61,6 +62,7 @@ fun ReviewModel.toDto(): ReviewDto {
         id = id,
         userId = userId,
         userName = userName,
+        articleName = articleName,
         rating = rating.toDouble(),
         comment = comment,
         createdAt = date

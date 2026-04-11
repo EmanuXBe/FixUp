@@ -40,7 +40,8 @@ class RentRepository @Inject constructor(
                     userId = dto.userId ?: "",
                     rating = dto.rating?.toInt() ?: 0,
                     comment = dto.comment ?: "",
-                    userName = dto.userName ?: "Usuario ${dto.userId}"
+                    userName = dto.userName ?: "Usuario ${dto.userId}",
+                    articleName = dto.articleName ?: ""
                 )
             }
             Result.success(reviews)
@@ -63,9 +64,42 @@ class RentRepository @Inject constructor(
                 userId = resultDto.userId ?: "",
                 rating = resultDto.rating?.toInt() ?: 0,
                 comment = resultDto.comment ?: "",
-                userName = resultDto.userName ?: "Usuario ${resultDto.userId}"
+                userName = resultDto.userName ?: "Usuario ${resultDto.userId}",
+                articleName = resultDto.articleName ?: ""
             )
             Result.success(savedReview)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<ReviewModel> {
+        return try {
+            val request = ReviewRequestDto(
+                userId = AppConstants.CURRENT_USER_ID,
+                serviceId = "0", // No es necesario para update en el backend generalmente, pero se envía por el DTO
+                rating = rating,
+                comment = comment
+            )
+            val resultDto = apiService.updateReview(reviewId, request)
+            val updatedReview = ReviewModel(
+                id = resultDto.id ?: "",
+                userId = resultDto.userId ?: "",
+                rating = resultDto.rating?.toInt() ?: 0,
+                comment = resultDto.comment ?: "",
+                userName = resultDto.userName ?: "Usuario ${resultDto.userId}",
+                articleName = resultDto.articleName ?: ""
+            )
+            Result.success(updatedReview)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteReview(reviewId: String): Result<Unit> {
+        return try {
+            apiService.deleteReview(reviewId)
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

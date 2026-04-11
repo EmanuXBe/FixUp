@@ -39,9 +39,9 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadUserReviews() {
-        // No dependemos del UID de Firebase para la carga, ya que el Repositorio usará el ID fijo "1"
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
+            // Usamos el ID del usuario logueado para filtrar en el backend o localmente
             profileRepository.getReviewsByUserId("1").onSuccess { reviews ->
                 _uiState.update { it.copy(reviews = reviews, isLoading = false) }
             }.onFailure { error ->

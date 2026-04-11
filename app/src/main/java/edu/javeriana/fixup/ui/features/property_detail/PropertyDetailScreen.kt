@@ -7,6 +7,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
@@ -29,7 +31,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.data.util.AppConstants
 import edu.javeriana.fixup.ui.model.PropertyModel
+import edu.javeriana.fixup.ui.model.ReviewModel
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 
 @Composable
@@ -55,6 +59,16 @@ fun PropertyDetailScreen(
             onSaveReview = { rating, comment -> 
                 uiState.property?.id?.let { id ->
                     viewModel.saveReview(id, rating, comment)
+                }
+            },
+            onUpdateReview = { reviewId, rating, comment ->
+                uiState.property?.id?.let { id ->
+                    viewModel.updateReview(reviewId, id, rating, comment)
+                }
+            },
+            onDeleteReview = { reviewId ->
+                uiState.property?.id?.let { id ->
+                    viewModel.deleteReview(reviewId, id)
                 }
             }
         )
@@ -99,7 +113,9 @@ private fun PropertyContent(
     uiState: PropertyDetailUiState,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit,
-    onSaveReview: (Int, String) -> Unit
+    onSaveReview: (Int, String) -> Unit,
+    onUpdateReview: (String, Int, String) -> Unit,
+    onDeleteReview: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -119,7 +135,9 @@ private fun PropertyContent(
         ReviewsSection(
             reviews = uiState.reviews,
             isSaving = uiState.isSavingReview,
-            onSaveReview = onSaveReview
+            onSaveReview = onSaveReview,
+            onUpdateReview = onUpdateReview,
+            onDeleteReview = onDeleteReview
         )
 
         Spacer(modifier = Modifier.height(40.dp))
@@ -259,9 +277,11 @@ private fun PropertyAmenities() {
 
 @Composable
 private fun ReviewsSection(
-    reviews: List<edu.javeriana.fixup.ui.model.ReviewModel>,
+    reviews: List<ReviewModel>,
     isSaving: Boolean,
-    onSaveReview: (Int, String) -> Unit
+    onSaveReview: (Int, String) -> Unit,
+    onUpdateReview: (String, Int, String) -> Unit,
+    onDeleteReview: (String) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
 
@@ -301,7 +321,11 @@ private fun ReviewsSection(
             )
         } else {
             reviews.forEach { review ->
-                ReviewItem(review)
+                ReviewItem(
+                    review = review,
+                    onEdit = { rating, comment -> onUpdateReview(review.id, rating, comment) },
+                    onDelete = { onDeleteReview(review.id) }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -309,7 +333,26 @@ private fun ReviewsSection(
 }
 
 @Composable
-private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
+private fun ReviewItem(
+    review: ReviewModel,
+    onEdit: (Int, String) -> Unit,
+    onDelete: () -> Unit
+) {
+    var showEditDialog by remember { mutableStateOf(false) }
+
+    if (showEditDialog) {
+        AddReviewDialog(
+            initialRating = review.rating,
+            initialComment = review.comment,
+            isEditing = true,
+            onDismiss = { showEditDialog = false },
+            onConfirm = { rating, comment ->
+                onEdit(rating, comment)
+                showEditDialog = false
+            }
+        )
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -318,10 +361,11 @@ private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = review.userName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     repeat(5) { index ->
                         Icon(
                             imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
@@ -329,6 +373,25 @@ private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
                             tint = Color(0xFFFFB300),
                             modifier = Modifier.size(14.dp)
                         )
+                    }
+                    if (review.userId == AppConstants.CURRENT_USER_ID) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(onClick = { showEditDialog = true }, modifier = Modifier.size(24.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar",
+                                modifier = Modifier.size(16.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Eliminar",
+                                modifier = Modifier.size(16.dp),
+                                tint = Color.Red
+                            )
+                        }
                     }
                 }
             }
@@ -342,15 +405,18 @@ private fun ReviewItem(review: edu.javeriana.fixup.ui.model.ReviewModel) {
 
 @Composable
 fun AddReviewDialog(
+    initialRating: Int = 5,
+    initialComment: String = "",
+    isEditing: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: (Int, String) -> Unit
 ) {
-    var rating by remember { mutableStateOf(5) }
-    var comment by remember { mutableStateOf("") }
+    var rating by remember { mutableStateOf(initialRating) }
+    var comment by remember { mutableStateOf(initialComment) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nueva Reseña") },
+        title = { Text(if (isEditing) "Editar Reseña" else "Nueva Reseña") },
         text = {
             Column {
                 Row(
@@ -381,7 +447,7 @@ fun AddReviewDialog(
                 onClick = { onConfirm(rating, comment) },
                 enabled = comment.isNotBlank()
             ) {
-                Text("Publicar")
+                Text(if (isEditing) "Guardar" else "Publicar")
             }
         },
         dismissButton = {

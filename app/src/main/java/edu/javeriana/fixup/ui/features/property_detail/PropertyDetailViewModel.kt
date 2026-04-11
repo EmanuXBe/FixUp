@@ -67,4 +67,28 @@ class PropertyDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateReview(reviewId: String, serviceId: Int, rating: Int, comment: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            repository.updateReview(reviewId, rating, comment).onSuccess {
+                loadReviews(serviceId)
+                _uiState.update { it.copy(isLoading = false) }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, error = error.message) }
+            }
+        }
+    }
+
+    fun deleteReview(reviewId: String, serviceId: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            repository.deleteReview(reviewId).onSuccess {
+                loadReviews(serviceId)
+                _uiState.update { it.copy(isLoading = false) }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, error = error.message) }
+            }
+        }
+    }
 }

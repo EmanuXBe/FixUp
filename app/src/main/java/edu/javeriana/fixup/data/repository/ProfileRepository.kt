@@ -35,8 +35,7 @@ class ProfileRepository @Inject constructor(
 
     suspend fun getReviewsByUserId(userId: String): Result<List<edu.javeriana.fixup.ui.model.ReviewModel>> {
         return try {
-            // Ignoramos el userId dinámico y usamos siempre "1" para Retrofit
-            val reviews = profileDataSource.getReviewsByUserId("1")
+            val reviews = profileDataSource.getReviewsByUserId(userId)
             Result.success(reviews)
         } catch (e: Exception) {
             Result.failure(e.toAppError())

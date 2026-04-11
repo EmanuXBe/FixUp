@@ -28,6 +28,9 @@ interface FixUpApiService {
     @GET("api/reviews/user/{userId}")
     suspend fun getReviewsByUserId(@Path("userId") userId: String): List<ReviewDto>
 
+    @GET("api/reviews/user/{userId}")
+    suspend fun getUserReviews(@Path("userId") userId: String): List<ReviewDto>
+
     @POST("api/reviews")
     suspend fun createReview(@Body review: ReviewRequestDto): ReviewDto
 
