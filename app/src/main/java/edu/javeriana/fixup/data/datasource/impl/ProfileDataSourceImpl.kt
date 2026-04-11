@@ -43,8 +43,9 @@ class ProfileDataSourceImpl @Inject constructor(
     override fun getCurrentUser(): FirebaseUser? = auth.currentUser
 
     override suspend fun getReviewsByUserId(userId: String): List<ReviewModel> {
-        return try {
-            apiService.getReviewsByUserId(userId).map { dto ->
+        val response = apiService.getUserReviews(userId)
+        if (response.isSuccessful) {
+            return response.body()?.map { dto ->
                 ReviewModel(
                     id = dto.id?.toString() ?: "",
                     userId = dto.userId?.toString() ?: "",
@@ -52,9 +53,9 @@ class ProfileDataSourceImpl @Inject constructor(
                     comment = dto.comment ?: "",
                     userName = dto.userName ?: "Usuario ${dto.userId}"
                 )
-            }
-        } catch (e: Exception) {
-            emptyList()
+            } ?: emptyList()
+        } else {
+            throw Exception("Error al obtener reseñas: ${response.code()}")
         }
     }
 
