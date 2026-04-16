@@ -36,9 +36,9 @@ class AuthRepository @Inject constructor(
     /**
      * Registra un nuevo usuario retornando un Result.
      */
-    suspend fun signUp(email: String, password: String): Result<FirebaseUser> {
+    suspend fun signUp(email: String, password: String, cedula: String, role: String): Result<FirebaseUser> {
         return try {
-            val user = dataSource.signUp(email, password)
+            val user = dataSource.signUp(email, password, cedula, role)
             Result.success(user)
         } catch (e: Exception) {
             // Mapeamos el error a uno amigable de nuestra app

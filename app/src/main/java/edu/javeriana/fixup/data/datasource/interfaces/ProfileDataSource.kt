@@ -14,4 +14,6 @@ interface ProfileDataSource {
     suspend fun createReview(review: edu.javeriana.fixup.ui.model.ReviewModel): edu.javeriana.fixup.ui.model.ReviewModel
     suspend fun updateReview(id: String, review: edu.javeriana.fixup.ui.model.ReviewModel): edu.javeriana.fixup.ui.model.ReviewModel
     suspend fun deleteReview(id: String)
+    suspend fun updateProfileData(name: String, email: String, phone: String, address: String)
+    suspend fun getUserData(userId: String): Map<String, Any>?
 }

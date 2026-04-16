@@ -60,7 +60,12 @@ class RegisterViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             
-            val result = authRepository.signUp(email, password)
+            val result = authRepository.signUp(
+                email = email,
+                password = password,
+                cedula = cedula,
+                role = _uiState.value.selectedRole
+            )
             
             result.onSuccess {
                 _uiState.update { it.copy(isLoading = false) }

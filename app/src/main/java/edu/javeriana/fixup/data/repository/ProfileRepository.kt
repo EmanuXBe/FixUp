@@ -33,6 +33,30 @@ class ProfileRepository @Inject constructor(
         }
     }
 
+    /**
+     * Actualiza los datos del perfil en Auth y Firestore.
+     */
+    suspend fun updateProfileData(name: String, email: String, phone: String, address: String): Result<Unit> {
+        return try {
+            profileDataSource.updateProfileData(name, email, phone, address)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e.toAppError())
+        }
+    }
+
+    /**
+     * Obtiene los datos adicionales del usuario desde Firestore.
+     */
+    suspend fun getUserData(userId: String): Result<Map<String, Any>?> {
+        return try {
+            val data = profileDataSource.getUserData(userId)
+            Result.success(data)
+        } catch (e: Exception) {
+            Result.failure(e.toAppError())
+        }
+    }
+
     suspend fun getReviewsByUserId(userId: String): Result<List<edu.javeriana.fixup.ui.model.ReviewModel>> {
         return try {
             val reviews = profileDataSource.getReviewsByUserId(userId)

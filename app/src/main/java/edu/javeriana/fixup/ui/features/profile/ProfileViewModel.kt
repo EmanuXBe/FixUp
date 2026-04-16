@@ -35,7 +35,54 @@ class ProfileViewModel @Inject constructor(
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     init {
+        loadUserData()
         loadUserReviews()
+    }
+
+    private fun loadUserData() {
+        val user = profileRepository.currentUser ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            profileRepository.getUserData(user.uid).onSuccess { data ->
+                if (data != null) {
+                    _uiState.update {
+                        it.copy(
+                            name = data["name"] as? String ?: user.displayName ?: user.email?.substringBefore("@") ?: "Usuario",
+                            phone = data["phone"] as? String ?: "Sin número",
+                            address = data["address"] as? String ?: "Sin dirección",
+                            role = data["role"] as? String ?: "Cliente",
+                            isLoading = false
+                        )
+                    }
+                } else {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
+    }
+
+    /**
+     * Actualiza la información del perfil en Auth y Firestore.
+     */
+    fun updateProfileInfo(name: String, email: String, phone: String, address: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            profileRepository.updateProfileData(name, email, phone, address).onSuccess {
+                _uiState.update { 
+                    it.copy(
+                        name = name,
+                        email = email,
+                        phone = phone,
+                        address = address,
+                        isLoading = false
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
     }
 
     private fun loadUserReviews() {

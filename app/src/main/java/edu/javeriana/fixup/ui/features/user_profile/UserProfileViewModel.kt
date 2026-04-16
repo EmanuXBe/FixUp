@@ -29,35 +29,41 @@ class UserProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             
-            // Simulamos la obtención de datos del usuario. 
-            // En una app real, el repositorio tendría un método getUserById(userId)
-            val mockUser = UserModel(
-                id = userId,
-                name = "Usuario $userId",
-                email = "user$userId@example.com",
-                phone = "+57 300 000 0000",
-                address = "Bogotá, Colombia",
-                role = "Miembro de FixUp",
-                profileImageUrl = "https://firebasestorage.googleapis.com/v0/b/fixup-f2128.firebasestorage.app/o/WhatsApp%20Image%202026-03-18%20at%205.27.50%20PM.jpeg?alt=media&token=7d9a7e23-31b0-4f0a-b705-c7c9d71abe64"
-            )
-
-            profileRepository.getReviewsByUserId(userId).onSuccess { reviews ->
-                _uiState.update { 
-                    it.copy(
-                        user = mockUser,
-                        reviews = reviews,
-                        isLoading = false,
-                        error = null
+            profileRepository.getUserData(userId).onSuccess { data ->
+                if (data != null) {
+                    val user = UserModel(
+                        id = userId,
+                        name = data["name"] as? String ?: "Usuario sin nombre",
+                        email = data["email"] as? String ?: "Sin correo",
+                        phone = data["phone"] as? String ?: "Sin teléfono",
+                        address = data["address"] as? String ?: "Sin dirección",
+                        role = data["role"] as? String ?: "Miembro",
+                        profileImageUrl = data["profileImageUrl"] as? String ?: "https://firebasestorage.googleapis.com/v0/b/fixup-f2128.firebasestorage.app/o/WhatsApp%20Image%202026-03-18%20at%205.27.50%20PM.jpeg?alt=media&token=7d9a7e23-31b0-4f0a-b705-c7c9d71abe64"
                     )
+
+                    profileRepository.getReviewsByUserId(userId).onSuccess { reviews ->
+                        _uiState.update { 
+                            it.copy(
+                                user = user,
+                                reviews = reviews,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
+                    }.onFailure { error ->
+                        _uiState.update { 
+                            it.copy(
+                                user = user,
+                                isLoading = false,
+                                error = "Error al cargar reseñas: ${error.message}"
+                            )
+                        }
+                    }
+                } else {
+                    _uiState.update { it.copy(isLoading = false, error = "Usuario no encontrado") }
                 }
             }.onFailure { error ->
-                _uiState.update { 
-                    it.copy(
-                        user = mockUser, // Aún mostramos el usuario si las reseñas fallan
-                        isLoading = false,
-                        error = "Error al cargar reseñas: ${error.message}"
-                    )
-                }
+                _uiState.update { it.copy(isLoading = false, error = error.message) }
             }
         }
     }

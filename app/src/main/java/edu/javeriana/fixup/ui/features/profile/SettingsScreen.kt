@@ -9,9 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +28,21 @@ fun SettingsScreen(
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showEditDialog by remember { mutableStateOf(false) }
+
+    if (showEditDialog) {
+        EditProfileDialog(
+            initialName = uiState.name,
+            initialEmail = uiState.email,
+            initialPhone = uiState.phone,
+            initialAddress = uiState.address,
+            onDismiss = { showEditDialog = false },
+            onConfirm = { name, email, phone, address ->
+                viewModel.updateProfileInfo(name, email, phone, address)
+                showEditDialog = false
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -42,6 +55,11 @@ fun SettingsScreen(
                             contentDescription = "Volver",
                             tint = SoftFawn
                         )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { showEditDialog = true }) {
+                        Icon(Icons.Outlined.Edit, contentDescription = "Editar Perfil", tint = SoftFawn)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -59,16 +77,23 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
-                Text(
-                    text = "Información Personal",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SoftFawn
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Información Personal",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = SoftFawn
+                    )
+                }
             }
 
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    SettingsInfoRow(icon = Icons.Outlined.Person, value = uiState.name)
                     SettingsInfoRow(icon = Icons.Outlined.LocationOn, value = uiState.address)
                     SettingsInfoRow(icon = Icons.Outlined.Phone, value = uiState.phone)
                     SettingsInfoRow(icon = Icons.Outlined.Email, value = uiState.email)
@@ -162,6 +187,64 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+@Composable
+fun EditProfileDialog(
+    initialName: String,
+    initialEmail: String,
+    initialPhone: String,
+    initialAddress: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(initialName) }
+    var email by remember { mutableStateOf(initialEmail) }
+    var phone by remember { mutableStateOf(initialPhone) }
+    var address by remember { mutableStateOf(initialAddress) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar Perfil", color = SoftFawn) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Correo Electrónico") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("Teléfono") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = { Text("Dirección") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name, email, phone, address) }) {
+                Text("Guardar", color = SoftFawn)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
 }
 
 @Composable

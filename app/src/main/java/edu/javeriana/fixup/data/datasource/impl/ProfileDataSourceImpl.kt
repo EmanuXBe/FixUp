@@ -4,6 +4,7 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import edu.javeriana.fixup.data.datasource.interfaces.ProfileDataSource
 import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
@@ -14,11 +15,12 @@ import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 /**
- * Implementación de ProfileDataSource usando Firebase Auth y Storage.
+ * Implementación de ProfileDataSource usando Firebase Auth, Storage y Firestore.
  */
 class ProfileDataSourceImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val storage: FirebaseStorage,
+    private val firestore: FirebaseFirestore,
     private val apiService: FixUpApiService
 ) : ProfileDataSource {
 
@@ -41,6 +43,34 @@ class ProfileDataSourceImpl @Inject constructor(
     }
 
     override fun getCurrentUser(): FirebaseUser? = auth.currentUser
+
+    override suspend fun updateProfileData(name: String, email: String, phone: String, address: String) {
+        val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
+        
+        // 1. Actualizar Display Name y Email en Firebase Auth
+        val profileUpdates = userProfileChangeRequest {
+            displayName = name
+        }
+        user.updateProfile(profileUpdates).await()
+        
+        // Actualizar email si es diferente
+        if (user.email != email) {
+            user.updateEmail(email).await()
+        }
+
+        // 2. Actualizar datos en Firestore
+        val updates = mapOf(
+            "name" to name,
+            "email" to email,
+            "phone" to phone,
+            "address" to address
+        )
+        firestore.collection("users").document(user.uid).update(updates).await()
+    }
+
+    override suspend fun getUserData(userId: String): Map<String, Any>? {
+        return firestore.collection("users").document(userId).get().await().data
+    }
 
     override suspend fun getReviewsByUserId(userId: String): List<ReviewModel> {
         val response = apiService.getUserReviews(userId)
