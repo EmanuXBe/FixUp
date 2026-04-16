@@ -2,14 +2,20 @@ package edu.javeriana.fixup.data.repository
 
 import com.google.firebase.auth.FirebaseUser
 import edu.javeriana.fixup.data.datasource.interfaces.AuthDataSource
+import edu.javeriana.fixup.data.network.api.FixUpApiService
+import edu.javeriana.fixup.data.network.dto.UserDto
 import edu.javeriana.fixup.data.util.toAppError
 import javax.inject.Inject
 
 /**
  * Repositorio de autenticación refactorizado con manejo de Result y errores personalizados.
+ * 
+ * Responsabilidad: Coordinar la autenticación local/Firebase y la sincronización 
+ * con el backend centralizado en PostgreSQL.
  */
 class AuthRepository @Inject constructor(
-    private val dataSource: AuthDataSource
+    private val dataSource: AuthDataSource,
+    private val apiService: FixUpApiService // Inyectamos el servicio de Retrofit para sincronización
 ) {
 
     /** Retorna el usuario actual si hay sesión activa. */
@@ -43,6 +49,24 @@ class AuthRepository @Inject constructor(
         } catch (e: Exception) {
             // Mapeamos el error a uno amigable de nuestra app
             Result.failure(e.toAppError())
+        }
+    }
+
+    /**
+     * Sincroniza los datos del usuario recién registrado con el backend en Render.
+     * Este paso es crucial para la integridad referencial en PostgreSQL, ya que
+     * vincula el Firebase UID con el resto de la lógica de negocio (servicios, reseñas, etc).
+     */
+    suspend fun syncUserToBackend(userDto: UserDto): Result<UserDto> {
+        return try {
+            val response = apiService.createUser(userDto)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Error en el servidor: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

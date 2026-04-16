@@ -11,7 +11,8 @@ import javax.inject.Inject
 
 class RentRepository @Inject constructor(
     private val dataSource: RentDataSource,
-    private val apiService: FixUpApiService
+    private val apiService: FixUpApiService,
+    private val authRepository: AuthRepository
 ) {
     suspend fun getProperties(): Result<List<PropertyModel>> {
         return try {
@@ -51,9 +52,10 @@ class RentRepository @Inject constructor(
     }
 
     suspend fun createReview(serviceId: Int, rating: Int, comment: String): Result<ReviewModel> {
+        val uid = authRepository.currentUser?.uid ?: return Result.failure(Exception("Usuario no autenticado"))
         return try {
             val request = ReviewRequestDto(
-                userId = AppConstants.CURRENT_USER_ID,
+                userId = uid,
                 serviceId = serviceId.toString(),
                 rating = rating,
                 comment = comment
@@ -74,9 +76,10 @@ class RentRepository @Inject constructor(
     }
 
     suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<ReviewModel> {
+        val uid = authRepository.currentUser?.uid ?: return Result.failure(Exception("Usuario no autenticado"))
         return try {
             val request = ReviewRequestDto(
-                userId = AppConstants.CURRENT_USER_ID,
+                userId = uid,
                 serviceId = "0", // No es necesario para update en el backend generalmente, pero se envía por el DTO
                 rating = rating,
                 comment = comment

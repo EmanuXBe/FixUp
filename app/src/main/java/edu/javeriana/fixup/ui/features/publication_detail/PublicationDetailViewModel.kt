@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
+import edu.javeriana.fixup.data.repository.AuthRepository
 import edu.javeriana.fixup.data.repository.FeedRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PublicationDetailViewModel @Inject constructor(
-    private val repository: FeedRepository
+    private val repository: FeedRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PublicationDetailUiState())
     val uiState: StateFlow<PublicationDetailUiState> = _uiState.asStateFlow()
@@ -63,13 +65,18 @@ class PublicationDetailViewModel @Inject constructor(
 
     fun sendReview(rating: Int, comment: String) {
         val serviceId = _uiState.value.publication?.id?.toIntOrNull() ?: return
+        val currentUser = authRepository.currentUser
+
+        if (currentUser == null) {
+            _uiState.update { it.copy(reviewError = "Debes iniciar sesión para dejar una reseña") }
+            return
+        }
         
         _uiState.update { it.copy(isSendingReview = true, reviewError = null, reviewSent = false) }
         
         viewModelScope.launch {
-            // Simulamos un userId por ahora (en una app real vendría de la sesión)
             val request = ReviewRequestDto(
-                userId = "1", 
+                userId = currentUser.uid,
                 serviceId = serviceId.toString(),
                 rating = rating,
                 comment = comment

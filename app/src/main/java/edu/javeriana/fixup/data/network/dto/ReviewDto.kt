@@ -15,6 +15,8 @@ data class ReviewDto(
     val rating: Double?,
     @SerializedName("comment")
     val comment: String?,
+    @SerializedName("user_profile_image")
+    val userProfileImage: String?,
     @SerializedName("created_at")
     val createdAt: String?
 )

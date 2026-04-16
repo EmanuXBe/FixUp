@@ -8,13 +8,19 @@ import edu.javeriana.fixup.ui.model.ServiceModel
 import edu.javeriana.fixup.ui.model.UserModel
 
 fun ReviewDto.toDomain(): ReviewModel {
+    /**
+     * Convierte un DTO de reseña a un modelo de dominio.
+     * Esta decisión arquitectónica (Mapper) permite que los cambios en la API (como nuevos campos)
+     * no afecten directamente a la lógica de la UI, manteniendo el desacoplamiento.
+     */
     return ReviewModel(
         id = id ?: "",
         userId = userId ?: "",
-        userName = userName ?: "",
+        userName = userName ?: "Usuario anónimo",
         articleName = articleName ?: "",
         rating = rating?.toInt() ?: 0,
         comment = comment ?: "",
+        userProfileImage = userProfileImage ?: "", // Mapeo de la nueva URL de imagen de perfil
         date = createdAt ?: ""
     )
 }
@@ -65,6 +71,7 @@ fun ReviewModel.toDto(): ReviewDto {
         articleName = articleName,
         rating = rating.toDouble(),
         comment = comment,
+        userProfileImage = userProfileImage,
         createdAt = date
     )
 }

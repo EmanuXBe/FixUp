@@ -37,4 +37,11 @@ interface FixUpApiService {
 
     @DELETE("api/reviews/{id}")
     suspend fun deleteReview(@Path("id") id: String)
+
+    /**
+     * Sincronización con el Backend: Registra un usuario en la base de datos PostgreSQL.
+     * Se usa el UID de Firebase como identificador principal para mantener la consistencia.
+     */
+    @POST("api/users")
+    suspend fun createUser(@Body user: UserDto): Response<UserDto>
 }

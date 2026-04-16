@@ -342,6 +342,11 @@ private fun ReviewsSection(reviews: List<ReviewModel>) {
 
 @Composable
 private fun ReviewItem(review: ReviewModel) {
+    /**
+     * Componente que representa una reseña individual en el LazyColumn.
+     * Utiliza Card para elevar el contenido visualmente y AsyncImage de Coil
+     * para cargar la foto de perfil del autor de la reseña de forma asíncrona.
+     */
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
@@ -350,20 +355,17 @@ private fun ReviewItem(review: ReviewModel) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
+                // Carga de la imagen de perfil usando Coil
+                AsyncImage(
+                    model = review.userProfileImage.ifBlank { R.drawable.profile_photo }, // Placeholder si no hay imagen
+                    contentDescription = "Foto de perfil de ${review.userName}",
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(SoftFawn.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = review.userName.take(1).uppercase(),
-                        color = SoftFawn,
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp
-                    )
-                }
+                    contentScale = ContentScale.Crop
+                )
+
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(

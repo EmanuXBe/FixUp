@@ -15,6 +15,8 @@ data class ReviewModel(
     val rating: Int = 0,
     @SerializedName("comment")
     val comment: String = "",
+    @SerializedName("user_profile_image")
+    val userProfileImage: String = "",
     @SerializedName("created_at")
     val date: String = ""
 )

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import com.google.firebase.auth.FirebaseAuth
 import edu.javeriana.fixup.data.repository.AuthRepository
 import edu.javeriana.fixup.data.repository.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,24 +40,35 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadUserReviews() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            _uiState.update { it.copy(reviews = emptyList(), isLoading = false) }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            // Usamos el ID del usuario logueado para filtrar en el backend o localmente
-            profileRepository.getReviewsByUserId("1").onSuccess { reviews ->
+            profileRepository.getReviewsByUserId(uid).onSuccess { reviews ->
                 _uiState.update { it.copy(reviews = reviews, isLoading = false) }
             }.onFailure { error ->
-                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+                _uiState.update { it.copy(reviews = emptyList(), isLoading = false, errorMessage = error.message) }
             }
         }
     }
 
     /**
-     * Guarda una reseña usando el ID fijo "1" configurado en el Repositorio.
+     * Guarda una reseña usando el ID dinámico del usuario autenticado.
      */
     fun saveReview(rating: Int, comment: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.createReview(rating, comment).onSuccess {
+            profileRepository.createReview(uid, rating, comment).onSuccess {
                 loadUserReviews() // Recargamos la lista
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
@@ -82,9 +94,15 @@ class ProfileViewModel @Inject constructor(
      * Actualiza una reseña y refresca la lista.
      */
     fun updateReview(reviewId: String, rating: Int, comment: String) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid == null) {
+            _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.updateReview(reviewId, rating, comment).onSuccess {
+            profileRepository.updateReview(reviewId, uid, rating, comment).onSuccess {
                 loadUserReviews()
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
