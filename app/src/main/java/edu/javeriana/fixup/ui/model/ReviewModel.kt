@@ -5,6 +5,7 @@ data class ReviewModel(
     val userId: String = "",
     val rating: Int = 0,
     val comment: String = "",
+    val userName: String = "",
     val date: String = "",
     val authorName: String = "",
     val authorProfileImageUrl: String = "",
