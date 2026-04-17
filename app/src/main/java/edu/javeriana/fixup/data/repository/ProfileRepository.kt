@@ -49,10 +49,10 @@ class ProfileRepository @Inject constructor(
         return try {
             val user = currentUser
             val reviewToSave = edu.javeriana.fixup.ui.model.ReviewModel(
-                userId = userId,
-                userName = user?.displayName ?: user?.email?.substringBefore("@") ?: "Usuario",
                 rating = rating,
                 comment = comment,
+                authorName = user?.displayName ?: user?.email?.substringBefore("@") ?: "Usuario",
+                authorProfileImageUrl = user?.photoUrl?.toString() ?: "",
                 date = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date())
             )
             val savedReview = profileDataSource.createReview(reviewToSave)
@@ -65,8 +65,7 @@ class ProfileRepository @Inject constructor(
     suspend fun updateReview(reviewId: String, userId: String, rating: Int, comment: String): Result<edu.javeriana.fixup.ui.model.ReviewModel> {
         return try {
             val reviewToUpdate = edu.javeriana.fixup.ui.model.ReviewModel(
-                id = reviewId,
-                userId = userId,
+                id = reviewId.toIntOrNull() ?: 0,
                 rating = rating,
                 comment = comment
             )

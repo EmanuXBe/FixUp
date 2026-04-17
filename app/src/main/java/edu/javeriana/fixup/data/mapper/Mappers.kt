@@ -8,29 +8,15 @@ import edu.javeriana.fixup.ui.model.ServiceModel
 import edu.javeriana.fixup.ui.model.UserModel
 
 fun ReviewDto.toDomain(): ReviewModel {
-    /**
-     * Convierte un DTO de reseña a un modelo de dominio.
-     * Esta decisión arquitectónica (Mapper) permite que los cambios en la API (como nuevos campos)
-     * no afecten directamente a la lógica de la UI, manteniendo el desacoplamiento.
-     *
-     * Responsabilidad:
-     * - ReviewDto: Objeto de Transferencia de Datos que refleja exactamente la estructura JSON del backend.
-     * - ReviewModel: Modelo de Dominio optimizado para ser consumido por la UI de Android.
-     *
-     * Se priorizan los datos anidados del objeto "User" (Sequelize) si están disponibles.
-     */
-    val finalUserName = user?.name ?: userName ?: "Usuario anónimo"
-    val finalProfileImage = user?.profileImageUrl ?: userProfileImage ?: ""
-
     return ReviewModel(
-        id = id ?: "",
-        userId = userId ?: "",
-        userName = finalUserName,
-        articleName = articleName ?: "",
-        rating = rating?.toInt() ?: 0,
+        id = id ?: 0,
+        userId = user?.id ?: "",
+        rating = rating ?: 0,
         comment = comment ?: "",
-        userProfileImage = finalProfileImage,
-        date = createdAt ?: ""
+        date = date ?: "",
+        authorName = authorName ?: user?.name ?: "Usuario desconocido",
+        authorProfileImageUrl = authorProfileImageUrl ?: user?.profileImage ?: "",
+        serviceTitle = service?.title ?: ""
     )
 }
 
@@ -75,12 +61,12 @@ fun ServiceModel.toDto(): ServiceDto {
 fun ReviewModel.toDto(): ReviewDto {
     return ReviewDto(
         id = id,
-        userId = userId,
-        userName = userName,
-        articleName = articleName,
-        rating = rating.toDouble(),
+        rating = rating,
         comment = comment,
-        userProfileImage = userProfileImage,
-        createdAt = date
+        date = date,
+        authorName = authorName,
+        authorProfileImageUrl = authorProfileImageUrl,
+        user = null,
+        service = null
     )
 }

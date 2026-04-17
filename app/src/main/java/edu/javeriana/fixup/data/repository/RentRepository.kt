@@ -37,12 +37,13 @@ class RentRepository @Inject constructor(
             val reviewDtos = apiService.getReviewsByServiceId(serviceId)
             val reviews = reviewDtos.map { dto ->
                 ReviewModel(
-                    id = dto.id ?: "",
-                    userId = dto.userId ?: "",
-                    rating = dto.rating?.toInt() ?: 0,
+                    id = dto.id ?: 0,
+                    rating = dto.rating ?: 0,
                     comment = dto.comment ?: "",
-                    userName = dto.userName ?: "Usuario ${dto.userId}",
-                    articleName = dto.articleName ?: ""
+                    date = dto.date ?: "",
+                    authorName = dto.authorName ?: dto.user?.name ?: "Usuario ${dto.user?.id ?: ""}",
+                    authorProfileImageUrl = dto.authorProfileImageUrl ?: dto.user?.profileImage ?: "",
+                    serviceTitle = dto.service?.title ?: ""
                 )
             }
             Result.success(reviews)
@@ -62,12 +63,13 @@ class RentRepository @Inject constructor(
             )
             val resultDto = apiService.createReview(request)
             val savedReview = ReviewModel(
-                id = resultDto.id ?: "",
-                userId = resultDto.userId ?: "",
-                rating = resultDto.rating?.toInt() ?: 0,
+                id = resultDto.id ?: 0,
+                rating = resultDto.rating ?: 0,
                 comment = resultDto.comment ?: "",
-                userName = resultDto.userName ?: "Usuario ${resultDto.userId}",
-                articleName = resultDto.articleName ?: ""
+                date = resultDto.date ?: "",
+                authorName = resultDto.authorName ?: resultDto.user?.name ?: "Usuario",
+                authorProfileImageUrl = resultDto.authorProfileImageUrl ?: resultDto.user?.profileImage ?: "",
+                serviceTitle = resultDto.service?.title ?: ""
             )
             Result.success(savedReview)
         } catch (e: Exception) {
@@ -86,12 +88,13 @@ class RentRepository @Inject constructor(
             )
             val resultDto = apiService.updateReview(reviewId, request)
             val updatedReview = ReviewModel(
-                id = resultDto.id ?: "",
-                userId = resultDto.userId ?: "",
-                rating = resultDto.rating?.toInt() ?: 0,
+                id = resultDto.id ?: 0,
+                rating = resultDto.rating ?: 0,
                 comment = resultDto.comment ?: "",
-                userName = resultDto.userName ?: "Usuario ${resultDto.userId}",
-                articleName = resultDto.articleName ?: ""
+                date = resultDto.date ?: "",
+                authorName = resultDto.authorName ?: resultDto.user?.name ?: "Usuario",
+                authorProfileImageUrl = resultDto.authorProfileImageUrl ?: resultDto.user?.profileImage ?: "",
+                serviceTitle = resultDto.service?.title ?: ""
             )
             Result.success(updatedReview)
         } catch (e: Exception) {

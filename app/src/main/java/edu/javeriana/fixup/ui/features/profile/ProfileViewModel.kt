@@ -79,10 +79,10 @@ class ProfileViewModel @Inject constructor(
     /**
      * Borra una reseña y actualiza la lista.
      */
-    fun deleteReview(reviewId: String) {
+    fun deleteReview(reviewId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.deleteReview(reviewId).onSuccess {
+            profileRepository.deleteReview(reviewId.toString()).onSuccess {
                 loadUserReviews()
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
@@ -93,7 +93,7 @@ class ProfileViewModel @Inject constructor(
     /**
      * Actualiza una reseña y refresca la lista.
      */
-    fun updateReview(reviewId: String, rating: Int, comment: String) {
+    fun updateReview(reviewId: Int, rating: Int, comment: String) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid
         if (uid == null) {
             _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
@@ -102,7 +102,7 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.updateReview(reviewId, uid, rating, comment).onSuccess {
+            profileRepository.updateReview(reviewId.toString(), uid, rating, comment).onSuccess {
                 loadUserReviews()
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }

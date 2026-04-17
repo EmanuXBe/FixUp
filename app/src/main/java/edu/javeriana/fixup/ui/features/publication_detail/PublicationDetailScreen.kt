@@ -357,8 +357,8 @@ private fun ReviewItem(review: ReviewModel) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Carga de la imagen de perfil usando Coil
                 AsyncImage(
-                    model = review.userProfileImage.ifBlank { R.drawable.profile_photo }, // Placeholder si no hay imagen
-                    contentDescription = "Foto de perfil de ${review.userName}",
+                    model = review.authorProfileImageUrl.ifBlank { R.drawable.profile_photo }, // Placeholder si no hay imagen
+                    contentDescription = "Foto de perfil de ${review.authorName}",
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
@@ -369,7 +369,7 @@ private fun ReviewItem(review: ReviewModel) {
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = review.userName,
+                        text = review.authorName,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold
                     )

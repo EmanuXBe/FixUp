@@ -71,7 +71,7 @@ class ProfileDataSourceImpl @Inject constructor(
          * Convierte el modelo de dominio a un objeto de solicitud (ReviewRequestDto).
          */
         val request = ReviewRequestDto(
-            userId = review.userId,
+            userId = auth.currentUser?.uid ?: "",
             serviceId = "1", // El ID del servicio está hardcoded por ahora según la lógica de negocio actual
             rating = review.rating,
             comment = review.comment
@@ -85,7 +85,7 @@ class ProfileDataSourceImpl @Inject constructor(
          * Actualiza una reseña existente.
          */
         val request = ReviewRequestDto(
-            userId = review.userId,
+            userId = auth.currentUser?.uid ?: "",
             serviceId = "1",
             rating = review.rating,
             comment = review.comment

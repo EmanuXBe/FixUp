@@ -78,10 +78,13 @@ class FeedDataSourceImpl @Inject constructor(
         return try {
             apiService.getReviewsByServiceId(serviceId).map { dto ->
                 ReviewModel(
-                    userId = dto.userId.toString(),
-                    rating = dto.rating?.toInt() ?: 0,
+                    id = dto.id ?: 0,
+                    rating = dto.rating ?: 0,
                     comment = dto.comment ?: "",
-                    userName = dto.userName ?: "Usuario ${dto.userId}"
+                    date = dto.date ?: "",
+                    authorName = dto.authorName ?: dto.user?.name ?: "Usuario",
+                    authorProfileImageUrl = dto.authorProfileImageUrl ?: dto.user?.profileImage ?: "",
+                    serviceTitle = dto.service?.title ?: ""
                 )
             }
         } catch (e: Exception) {
@@ -93,10 +96,13 @@ class FeedDataSourceImpl @Inject constructor(
     override suspend fun createReview(review: ReviewRequestDto): ReviewModel {
         val resultDto = apiService.createReview(review)
         return ReviewModel(
-            userId = resultDto.userId.toString(),
-            rating = resultDto.rating?.toInt() ?: 0,
+            id = resultDto.id ?: 0,
+            rating = resultDto.rating ?: 0,
             comment = resultDto.comment ?: "",
-            userName = resultDto.userName ?: "Usuario ${resultDto.userId}"
+            date = resultDto.date ?: "",
+            authorName = resultDto.authorName ?: resultDto.user?.name ?: "Usuario",
+            authorProfileImageUrl = resultDto.authorProfileImageUrl ?: resultDto.user?.profileImage ?: "",
+            serviceTitle = resultDto.service?.title ?: ""
         )
     }
 

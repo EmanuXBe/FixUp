@@ -102,8 +102,8 @@ fun ProfileContent(
     modifier: Modifier = Modifier,
     uiState: ProfileUiState,
     onChangePhoto: () -> Unit = {},
-    onEditReview: (String, Int, String) -> Unit = { _, _, _ -> },
-    onDeleteReview: (String) -> Unit = {}
+    onEditReview: (Int, Int, String) -> Unit = { _, _, _ -> },
+    onDeleteReview: (Int) -> Unit = {}
 ) {
     val context = LocalContext.current
     
@@ -269,7 +269,7 @@ fun ReviewItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = review.userName,
+                    text = review.authorName,
                     fontWeight = FontWeight.Bold,
                     color = SoftFawn
                 )
