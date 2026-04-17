@@ -74,7 +74,9 @@ class RegisterViewModel @Inject constructor(
             // PASO 1: Registro en Firebase
             val authResult = authRepository.signUp(
                 email = email,
-                password = password
+                password = password,
+                cedula = cedula,
+                role = role
             )
             
             authResult.onSuccess { firebaseUser ->
