@@ -61,6 +61,21 @@ fun ProfileScreen(
         }
     }
 
+    var showEditInfoDialog by remember { mutableStateOf(false) }
+
+    if (showEditInfoDialog) {
+        EditProfileDialog(
+            initialName = uiState.name,
+            initialPhone = uiState.phone,
+            initialAddress = uiState.address,
+            onDismiss = { showEditInfoDialog = false },
+            onConfirm = { name, phone, address ->
+                viewModel.updateProfileInfo(name, uiState.email, phone, address)
+                showEditInfoDialog = false
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             Box(
@@ -68,6 +83,16 @@ fun ProfileScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
+                IconButton(
+                    onClick = { showEditInfoDialog = true },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Editar Perfil",
+                        tint = SoftFawn
+                    )
+                }
                 IconButton(
                     onClick = onSettingsClick,
                     modifier = Modifier.align(Alignment.CenterEnd)
@@ -96,6 +121,57 @@ fun ProfileScreen(
         )
     }
 }
+
+@Composable
+fun EditProfileDialog(
+    initialName: String,
+    initialPhone: String,
+    initialAddress: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String, String, String) -> Unit
+) {
+    var name by remember { mutableStateOf(initialName) }
+    var phone by remember { mutableStateOf(initialPhone) }
+    var address by remember { mutableStateOf(initialAddress) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar Información Personal") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = phone,
+                    onValueChange = { phone = it },
+                    label = { Text("Teléfono") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = address,
+                    onValueChange = { address = it },
+                    label = { Text("Dirección") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(name, phone, address) }) {
+                Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
 
 @Composable
 fun ProfileContent(

@@ -40,30 +40,53 @@ class UserProfileViewModel @Inject constructor(
                         role = data["role"] as? String ?: "Miembro",
                         profileImageUrl = data["profileImageUrl"] as? String ?: "https://firebasestorage.googleapis.com/v0/b/fixup-f2128.firebasestorage.app/o/WhatsApp%20Image%202026-03-18%20at%205.27.50%20PM.jpeg?alt=media&token=7d9a7e23-31b0-4f0a-b705-c7c9d71abe64"
                     )
-
-                    profileRepository.getReviewsByUserId(userId).onSuccess { reviews ->
-                        _uiState.update { 
-                            it.copy(
-                                user = user,
-                                reviews = reviews,
-                                isLoading = false,
-                                error = null
-                            )
-                        }
-                    }.onFailure { error ->
-                        _uiState.update { 
-                            it.copy(
-                                user = user,
-                                isLoading = false,
-                                error = "Error al cargar reseñas: ${error.message}"
-                            )
-                        }
-                    }
+                    
+                    fetchReviews(userId, user)
                 } else {
-                    _uiState.update { it.copy(isLoading = false, error = "Usuario no encontrado") }
+                    // Si no está en Firestore, intentamos mostrar datos básicos del backend vía reviews
+                    profileRepository.getReviewsByUserId(userId).onSuccess { reviews ->
+                        if (reviews.isNotEmpty()) {
+                            val firstReview = reviews.first()
+                            val user = UserModel(
+                                id = userId,
+                                name = firstReview.authorName,
+                                email = "Usuario Verificado",
+                                profileImageUrl = firstReview.authorProfileImageUrl,
+                                phone = "",
+                                address = "",
+                                role = "Cliente"
+                            )
+                            _uiState.update { it.copy(user = user, reviews = reviews, isLoading = false, error = null) }
+                        } else {
+                            _uiState.update { it.copy(isLoading = false, error = "Usuario no encontrado") }
+                        }
+                    }.onFailure { 
+                        _uiState.update { it.copy(isLoading = false, error = "Usuario no encontrado") }
+                    }
                 }
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, error = error.message) }
+            }
+        }
+    }
+
+    private suspend fun fetchReviews(userId: String, user: UserModel) {
+        profileRepository.getReviewsByUserId(userId).onSuccess { reviews ->
+            _uiState.update { 
+                it.copy(
+                    user = user,
+                    reviews = reviews,
+                    isLoading = false,
+                    error = null
+                )
+            }
+        }.onFailure { error ->
+            _uiState.update { 
+                it.copy(
+                    user = user,
+                    isLoading = false,
+                    error = "Error al cargar reseñas: ${error.message}"
+                )
             }
         }
     }

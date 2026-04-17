@@ -39,6 +39,7 @@ fun PublicationDetailScreen(
     publicationId: String? = null,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
+    onUserProfileClick: (String) -> Unit, // Nuevo callback
     viewModel: PublicationDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -73,6 +74,7 @@ fun PublicationDetailScreen(
                     isSendingReview = uiState.isSendingReview,
                     onBackClick = onBackClick,
                     onContactClick = onContactClick,
+                    onUserProfileClick = onUserProfileClick, // Pasar callback
                     onSendReview = { rating, comment ->
                         viewModel.sendReview(rating, comment)
                     }
@@ -114,6 +116,7 @@ private fun PublicationContent(
     isSendingReview: Boolean,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
+    onUserProfileClick: (String) -> Unit, // Nuevo callback
     onSendReview: (Int, String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -142,7 +145,7 @@ private fun PublicationContent(
                     Spacer(modifier = Modifier.height(24.dp))
                     AddReviewSection(isSendingReview, onSendReview)
                     Spacer(modifier = Modifier.height(24.dp))
-                    ReviewsSection(reviews)
+                    ReviewsSection(reviews, onUserProfileClick) // Pasar callback
                     Spacer(modifier = Modifier.height(24.dp))
                     ActionButtons(onContactClick)
                 }
@@ -290,7 +293,10 @@ private fun AddReviewSection(
 }
 
 @Composable
-private fun ReviewsSection(reviews: List<ReviewModel>) {
+private fun ReviewsSection(
+    reviews: List<ReviewModel>,
+    onUserProfileClick: (String) -> Unit
+) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -333,7 +339,7 @@ private fun ReviewsSection(reviews: List<ReviewModel>) {
             }
         } else {
             reviews.forEach { review ->
-                ReviewItem(review)
+                ReviewItem(review, onUserProfileClick)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -341,7 +347,10 @@ private fun ReviewsSection(reviews: List<ReviewModel>) {
 }
 
 @Composable
-private fun ReviewItem(review: ReviewModel) {
+private fun ReviewItem(
+    review: ReviewModel,
+    onUserProfileClick: (String) -> Unit
+) {
     /**
      * Componente que representa una reseña individual en el LazyColumn.
      * Utiliza Card para elevar el contenido visualmente y AsyncImage de Coil
@@ -362,12 +371,15 @@ private fun ReviewItem(review: ReviewModel) {
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
-                        .background(SoftFawn.copy(alpha = 0.2f)),
+                        .background(SoftFawn.copy(alpha = 0.2f))
+                        .clickable { onUserProfileClick(review.userId) },
                     contentScale = ContentScale.Crop
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
-                Column {
+                Column(
+                    modifier = Modifier.clickable { onUserProfileClick(review.userId) }
+                ) {
                     Text(
                         text = review.authorName,
                         fontSize = 15.sp,
@@ -495,6 +507,6 @@ fun BenefitItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: Str
 @Composable
 fun PublicationDetailScreenPreview() {
     FixUpTheme {
-        PublicationDetailScreen(publicationId = "1", onBackClick = {}, onContactClick = {})
+        PublicationDetailScreen(publicationId = "1", onBackClick = {}, onContactClick = {}, onUserProfileClick = {})
     }
 }

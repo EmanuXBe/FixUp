@@ -24,6 +24,8 @@ import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
 
+import edu.javeriana.fixup.ui.features.user_profile.UserProfileScreen
+
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,
@@ -159,7 +161,10 @@ fun AppNavigation(
                 publicationId = publicationId,
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() },
-                onContactClick = { navController.navigate(AppScreens.Checkout.route) }
+                onContactClick = { navController.navigate(AppScreens.Checkout.route) },
+                onUserProfileClick = { userId ->
+                    navController.navigate(AppScreens.UserProfile.route + "/$userId")
+                }
             )
         }
 
@@ -186,6 +191,22 @@ fun AppNavigation(
             ChatScreen(
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // User Profile screen
+        composable(
+            route = AppScreens.UserProfile.route + "/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            UserProfileScreen(
+                userId = userId,
+                onBackClick = { navController.popBackStack() },
+                onServiceClick = { serviceId ->
+                    navController.navigate(AppScreens.Publication.route + "/$serviceId")
+                },
+                viewModel = hiltViewModel()
             )
         }
     }

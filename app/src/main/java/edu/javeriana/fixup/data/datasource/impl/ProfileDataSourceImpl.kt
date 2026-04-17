@@ -102,7 +102,7 @@ class ProfileDataSourceImpl @Inject constructor(
          */
         val request = ReviewRequestDto(
             userId = auth.currentUser?.uid ?: "",
-            serviceId = "1", // El ID del servicio está hardcoded por ahora según la lógica de negocio actual
+            serviceId = review.serviceId, // Ahora dinámico
             rating = review.rating,
             comment = review.comment
         )
@@ -116,7 +116,7 @@ class ProfileDataSourceImpl @Inject constructor(
          */
         val request = ReviewRequestDto(
             userId = auth.currentUser?.uid ?: "",
-            serviceId = "1",
+            serviceId = review.serviceId, // Ahora dinámico
             rating = review.rating,
             comment = review.comment
         )

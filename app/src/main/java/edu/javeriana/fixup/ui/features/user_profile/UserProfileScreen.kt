@@ -1,6 +1,7 @@
 package edu.javeriana.fixup.ui.features.user_profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,6 +35,7 @@ import edu.javeriana.fixup.ui.theme.SoftFawn
 fun UserProfileScreen(
     userId: String?,
     onBackClick: () -> Unit,
+    onServiceClick: (String) -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -101,7 +103,10 @@ fun UserProfileScreen(
                     }
                 } else {
                     items(uiState.reviews) { review ->
-                        UserReviewItem(review = review)
+                        UserReviewItem(
+                            review = review,
+                            onClick = { onServiceClick(review.serviceId) }
+                        )
                     }
                 }
             }
@@ -152,9 +157,14 @@ private fun UserHeader(
 }
 
 @Composable
-private fun UserReviewItem(review: ReviewModel) {
+private fun UserReviewItem(
+    review: ReviewModel,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
@@ -166,22 +176,32 @@ private fun UserReviewItem(review: ReviewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    repeat(5) { index ->
-                        Icon(
-                            imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
-                            contentDescription = null,
-                            tint = Color(0xFFFFB300),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                Text(
+                    text = review.serviceTitle.ifBlank { "Ver servicio" },
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = SoftFawn
+                )
                 Text(
                     text = review.date,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                repeat(5) { index ->
+                    Icon(
+                        imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
+                        contentDescription = null,
+                        tint = Color(0xFFFFB300),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = review.comment,

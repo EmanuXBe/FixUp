@@ -13,13 +13,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
-    private val repository: FeedRepository
+    private val repository: FeedRepository,
+    private val dataSeeder: edu.javeriana.fixup.data.util.DataSeeder // Inyectamos el seeder
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FeedUiState(isLoading = true))
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
     init {
-        loadFeedData()
+        // Ejecutamos el quemado de datos al iniciar (solo para pruebas)
+        viewModelScope.launch {
+            dataSeeder.seed()
+            loadFeedData()
+        }
     }
 
     private fun loadFeedData() {
