@@ -67,16 +67,16 @@ class ProfileRepository @Inject constructor(
     }
 
     /**
-     * Crea una reseña usando siempre el userId "1" según requerimiento.
+     * Crea una reseña usando el userId dinámico.
      */
-    suspend fun createReview(rating: Int, comment: String): Result<edu.javeriana.fixup.ui.model.ReviewModel> {
+    suspend fun createReview(userId: String, rating: Int, comment: String): Result<edu.javeriana.fixup.ui.model.ReviewModel> {
         return try {
             val user = currentUser
             val reviewToSave = edu.javeriana.fixup.ui.model.ReviewModel(
-                userId = "1", // ID fijo quemado
-                userName = user?.displayName ?: user?.email?.substringBefore("@") ?: "Usuario Prueba",
                 rating = rating,
                 comment = comment,
+                authorName = user?.displayName ?: user?.email?.substringBefore("@") ?: "Usuario",
+                authorProfileImageUrl = user?.photoUrl?.toString() ?: "",
                 date = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date())
             )
             val savedReview = profileDataSource.createReview(reviewToSave)
@@ -86,11 +86,10 @@ class ProfileRepository @Inject constructor(
         }
     }
 
-    suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<edu.javeriana.fixup.ui.model.ReviewModel> {
+    suspend fun updateReview(reviewId: String, userId: String, rating: Int, comment: String): Result<edu.javeriana.fixup.ui.model.ReviewModel> {
         return try {
             val reviewToUpdate = edu.javeriana.fixup.ui.model.ReviewModel(
-                id = reviewId,
-                userId = "1", // ID fijo quemado
+                id = reviewId.toIntOrNull() ?: 0,
                 rating = rating,
                 comment = comment
             )

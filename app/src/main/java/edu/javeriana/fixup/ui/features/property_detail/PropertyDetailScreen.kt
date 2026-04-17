@@ -323,8 +323,8 @@ private fun ReviewsSection(
             reviews.forEach { review ->
                 ReviewItem(
                     review = review,
-                    onEdit = { rating, comment -> onUpdateReview(review.id, rating, comment) },
-                    onDelete = { onDeleteReview(review.id) }
+                    onEdit = { rating, comment -> onUpdateReview(review.id.toString(), rating, comment) },
+                    onDelete = { onDeleteReview(review.id.toString()) }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -364,7 +364,7 @@ private fun ReviewItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = review.userName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Text(text = review.authorName, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     repeat(5) { index ->
                         Icon(

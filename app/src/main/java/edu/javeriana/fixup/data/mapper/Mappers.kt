@@ -9,13 +9,14 @@ import edu.javeriana.fixup.ui.model.UserModel
 
 fun ReviewDto.toDomain(): ReviewModel {
     return ReviewModel(
-        id = id ?: "",
-        userId = userId ?: "",
-        userName = userName ?: "",
-        articleName = articleName ?: "",
-        rating = rating?.toInt() ?: 0,
+        id = id ?: 0,
+        userId = user?.id ?: "",
+        rating = rating ?: 0,
         comment = comment ?: "",
-        date = createdAt ?: ""
+        date = date ?: "",
+        authorName = authorName ?: user?.name ?: "Usuario desconocido",
+        authorProfileImageUrl = authorProfileImageUrl ?: user?.profileImage ?: "",
+        serviceTitle = service?.title ?: ""
     )
 }
 
@@ -60,11 +61,12 @@ fun ServiceModel.toDto(): ServiceDto {
 fun ReviewModel.toDto(): ReviewDto {
     return ReviewDto(
         id = id,
-        userId = userId,
-        userName = userName,
-        articleName = articleName,
-        rating = rating.toDouble(),
+        rating = rating,
         comment = comment,
-        createdAt = date
+        date = date,
+        authorName = authorName,
+        authorProfileImageUrl = authorProfileImageUrl,
+        user = null,
+        service = null
     )
 }

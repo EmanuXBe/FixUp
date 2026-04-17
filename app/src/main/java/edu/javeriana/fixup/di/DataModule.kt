@@ -19,7 +19,7 @@ interface DataModule {
 
     @Binds
     fun bindFeedDataSource(
-        feedDataSourceImpl: FeedDataSourceImpl
+        feedDataSourceImpl: FeedFirestoreDataSourceImpl
     ): FeedDataSource
 
     @Binds
