@@ -1,7 +1,7 @@
 package edu.javeriana.fixup.ui.model
 
 data class ReviewModel(
-    val id: Int = 0,
+    val id: String = "",
     val userId: String = "",
     val serviceId: String = "",
     val rating: Int = 0,

@@ -123,13 +123,18 @@ class ProfileViewModel @Inject constructor(
     }
 
     /**
-     * Borra una reseña y actualiza la lista.
+     * Borra una reseña y actualiza la lista localmente.
      */
-    fun deleteReview(reviewId: Int) {
+    fun deleteReview(reviewId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.deleteReview(reviewId.toString()).onSuccess {
-                loadUserReviews()
+            profileRepository.deleteReview(reviewId).onSuccess {
+                _uiState.update { state ->
+                    state.copy(
+                        reviews = state.reviews.filter { it.id != reviewId },
+                        isLoading = false
+                    )
+                }
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
             }
@@ -137,19 +142,20 @@ class ProfileViewModel @Inject constructor(
     }
 
     /**
-     * Actualiza una reseña y refresca la lista.
+     * Actualiza una reseña y refresca la lista localmente.
      */
-    fun updateReview(reviewId: Int, rating: Int, comment: String) {
-        val uid = authRepository.currentUser?.uid
-        if (uid == null) {
-            _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
-            return
-        }
-
+    fun updateReview(reviewId: String, rating: Int, comment: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.updateReview(reviewId.toString(), uid, rating, comment).onSuccess {
-                loadUserReviews()
+            profileRepository.updateReview(reviewId, rating, comment).onSuccess {
+                _uiState.update { state ->
+                    state.copy(
+                        reviews = state.reviews.map { 
+                            if (it.id == reviewId) it.copy(rating = rating, comment = comment) else it
+                        },
+                        isLoading = false
+                    )
+                }
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
             }

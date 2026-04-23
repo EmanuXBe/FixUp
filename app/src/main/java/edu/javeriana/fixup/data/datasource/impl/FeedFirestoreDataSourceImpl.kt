@@ -69,6 +69,7 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
 
         return snapshot.documents.mapNotNull { doc ->
             ReviewModel(
+                id = doc.id,
                 userId = doc.getString("userId") ?: "",
                 rating = (doc.getLong("rating") ?: 0L).toInt(),
                 comment = doc.getString("comment") ?: "",
@@ -96,6 +97,7 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
         )
         docRef.set(data).await()
         return ReviewModel(
+            id = docRef.id,
             userId = review.userId,
             rating = review.rating,
             comment = review.comment,

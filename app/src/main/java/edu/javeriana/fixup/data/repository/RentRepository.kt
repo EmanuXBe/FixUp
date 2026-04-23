@@ -37,7 +37,7 @@ class RentRepository @Inject constructor(
             val reviewDtos = apiService.getReviewsByServiceId(serviceId)
             val reviews = reviewDtos.map { dto ->
                 ReviewModel(
-                    id = dto.id?.toIntOrNull() ?: 0,
+                    id = dto.id ?: "",
                     rating = dto.rating ?: 0,
                     comment = dto.comment ?: "",
                     date = dto.date ?: "",
@@ -63,7 +63,7 @@ class RentRepository @Inject constructor(
             )
             val resultDto = apiService.createReview(request)
             val savedReview = ReviewModel(
-                id = resultDto.id?.toIntOrNull() ?: 0,
+                id = resultDto.id ?: "",
                 rating = resultDto.rating ?: 0,
                 comment = resultDto.comment ?: "",
                 date = resultDto.date ?: "",
@@ -88,7 +88,7 @@ class RentRepository @Inject constructor(
             )
             val resultDto = apiService.updateReview(reviewId, request)
             val updatedReview = ReviewModel(
-                id = resultDto.id?.toIntOrNull() ?: 0,
+                id = resultDto.id ?: "",
                 rating = resultDto.rating ?: 0,
                 comment = resultDto.comment ?: "",
                 date = resultDto.date ?: "",

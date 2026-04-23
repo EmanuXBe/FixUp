@@ -92,6 +92,7 @@ class ProfileDataSourceImpl @Inject constructor(
             } ?: ""
 
             ReviewModel(
+                id = doc.id,
                 userId = userId,
                 serviceId = serviceId,
                 rating = rating,
@@ -119,21 +120,15 @@ class ProfileDataSourceImpl @Inject constructor(
         return resultDto.toDomain()
     }
 
-    override suspend fun updateReview(id: String, review: ReviewModel): ReviewModel {
-        /**
-         * Actualiza una reseña existente.
-         */
-        val request = ReviewRequestDto(
-            userId = auth.currentUser?.uid ?: "",
-            serviceId = review.serviceId, // Ahora dinámico
-            rating = review.rating,
-            comment = review.comment
+    override suspend fun updateReview(reviewId: String, newComment: String, newRating: Int) {
+        val updates = mapOf(
+            "comment" to newComment,
+            "rating" to newRating
         )
-        val resultDto = apiService.updateReview(id, request)
-        return resultDto.toDomain()
+        firestore.collection("reviews").document(reviewId).update(updates).await()
     }
 
-    override suspend fun deleteReview(id: String) {
-        apiService.deleteReview(id)
+    override suspend fun deleteReview(reviewId: String) {
+        firestore.collection("reviews").document(reviewId).delete().await()
     }
 }

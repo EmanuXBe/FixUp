@@ -23,7 +23,7 @@ fun ArticleDto.toDomain(): ArticleModel {
 
 fun ReviewDto.toDomain(): ReviewModel {
     return ReviewModel(
-        id = 0, // Id numérico para UI antigua si es necesario, o refactorizar ReviewModel
+        id = id ?: "",
         userId = userId ?: user?.id ?: "",
         rating = rating ?: 0,
         comment = comment ?: "",

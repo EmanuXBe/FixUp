@@ -178,8 +178,8 @@ fun ProfileContent(
     modifier: Modifier = Modifier,
     uiState: ProfileUiState,
     onChangePhoto: () -> Unit = {},
-    onEditReview: (Int, Int, String) -> Unit = { _, _, _ -> },
-    onDeleteReview: (Int) -> Unit = {}
+    onEditReview: (String, Int, String) -> Unit = { _, _, _ -> },
+    onDeleteReview: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     
