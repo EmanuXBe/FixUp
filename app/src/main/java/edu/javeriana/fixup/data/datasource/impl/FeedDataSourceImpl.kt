@@ -36,6 +36,14 @@ class FeedDataSourceImpl @Inject constructor(
         return services.map { it.toPublicationDto() }
     }
 
+    override suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto> {
+        if (followingIds.isEmpty()) return emptyList()
+        val services = apiService.getServices()
+        return services
+            .filter { it.providerId in followingIds }
+            .map { it.toPublicationDto() }
+    }
+
     override suspend fun getPublicationById(id: Int): PublicationDto {
         val service = apiService.getServiceById(id)
         return service.toPublicationDto()
@@ -113,6 +121,7 @@ class FeedDataSourceImpl @Inject constructor(
         priceText = "Desde $${this.price ?: 0.0}",
         description = this.description,
         location = this.category ?: "",
-        imageUrl = this.imageUrl
+        imageUrl = this.imageUrl,
+        authorId = this.providerId
     )
 }

@@ -20,6 +20,7 @@ import edu.javeriana.fixup.ui.features.profile.ProfileScreen
 import edu.javeriana.fixup.ui.features.profile.SettingsScreen
 import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
+import edu.javeriana.fixup.ui.features.following_feed.FollowingFeedScreen
 import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
@@ -82,6 +83,9 @@ fun AppNavigation(
                 },
                 onAllPublicationsClick = {
                     navController.navigate(AppScreens.AllPublications.route)
+                },
+                onFollowingClick = {
+                    navController.navigate(AppScreens.FollowingFeed.route)
                 }
             )
         }
@@ -170,6 +174,17 @@ fun AppNavigation(
         // All Publications screen
         composable(AppScreens.AllPublications.route) {
             AllPublicationsScreen(
+                onPublicationClick = { id ->
+                    navController.navigate(AppScreens.Publication.route + "/$id")
+                }
+            )
+        }
+
+        // Following Feed screen
+        composable(AppScreens.FollowingFeed.route) {
+            FollowingFeedScreen(
+                viewModel = hiltViewModel(),
+                onBackClick = { navController.popBackStack() },
                 onPublicationClick = { id ->
                     navController.navigate(AppScreens.Publication.route + "/$id")
                 }

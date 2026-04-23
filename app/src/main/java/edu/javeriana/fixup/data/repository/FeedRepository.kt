@@ -32,6 +32,15 @@ class FeedRepository @Inject constructor(
         }
     }
 
+    suspend fun getFollowingPublications(followingIds: List<String>): Result<List<PublicationCardModel>> {
+        return try {
+            val dtos = dataSource.getFollowingPublications(followingIds)
+            Result.success(dtos.map { it.toUiModel() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun getPublicationById(id: Int): Result<PublicationCardModel> {
         return try {
             val dto = dataSource.getPublicationById(id)
@@ -81,5 +90,6 @@ fun PublicationDto.toUiModel() = PublicationCardModel(
     title = this.title,
     price = this.priceText,
     description = this.description,
-    location = this.location
+    location = this.location,
+    authorId = this.authorId
 )

@@ -13,5 +13,6 @@ data class PublicationDto(
     val description: String? = "",
     val location: String? = "",
     val imageRes: Int = 0,
-    val imageUrl: String? = ""
+    val imageUrl: String? = "",
+    val authorId: String? = ""
 )

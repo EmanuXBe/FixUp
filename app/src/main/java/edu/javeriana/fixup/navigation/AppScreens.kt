@@ -16,6 +16,7 @@ sealed class AppScreens(val route: String) {
     data object Publication : AppScreens("publication")
     data object CreatePublication : AppScreens("create_publication")
     data object AllPublications : AppScreens("all_publications")
+    data object FollowingFeed : AppScreens("following_feed")
     data object Checkout : AppScreens("checkout")
     data object Notifications : AppScreens("notifications")
     data object Chat : AppScreens("chat")

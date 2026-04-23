@@ -37,6 +37,19 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
         return snapshot.documents.mapNotNull { it.toPublicationDto() }
     }
 
+    override suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto> {
+        if (followingIds.isEmpty()) return emptyList()
+        
+        // Firestore 'in' query supports up to 10 elements. 
+        // For a real app, we might need to chunk this or use a different approach.
+        // But for this requirement, we'll use the 'in' operator.
+        val snapshot = firestore.collection("articles")
+            .whereIn("authorId", followingIds)
+            .get()
+            .await()
+        return snapshot.documents.mapNotNull { it.toPublicationDto() }
+    }
+
     override suspend fun getPublicationById(id: Int): PublicationDto {
         // Los documentos en Firestore usan el id como string (ej: "1", "2")
         val snapshot = firestore.collection("articles").document(id.toString()).get().await()
@@ -55,7 +68,8 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
             "description" to property.description,
             "price" to property.price,
             "category" to property.location,
-            "imageUrl" to downloadUrl
+            "imageUrl" to downloadUrl,
+            "authorId" to auth.currentUser?.uid
         )
         docRef.set(data).await()
         return property.copy(imageUrl = downloadUrl)
@@ -117,7 +131,8 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
             priceText = "Desde $$price",
             description = getString("description"),
             location = getString("category"),
-            imageUrl = getString("imageUrl")
+            imageUrl = getString("imageUrl"),
+            authorId = getString("authorId")
         )
     }
 }

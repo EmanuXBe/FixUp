@@ -15,5 +15,6 @@ data class PublicationCardModel(
     val title: String,
     val price: String,
     val description: String? = null,
-    val location: String? = null
+    val location: String? = null,
+    val authorId: String? = null
 )

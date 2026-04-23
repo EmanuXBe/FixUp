@@ -22,7 +22,8 @@ import edu.javeriana.fixup.ui.theme.FixUpTheme
 fun FeedScreen(
     viewModel: FeedViewModel = hiltViewModel(),
     onPublicationClick: (String) -> Unit = {},
-    onAllPublicationsClick: () -> Unit = {}
+    onAllPublicationsClick: () -> Unit = {},
+    onFollowingClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -53,7 +54,7 @@ fun FeedScreen(
             }
 
             item {
-                FeaturedSection()
+                FeaturedSection(onFollowingClick = onFollowingClick)
             }
 
             item {
@@ -74,14 +75,24 @@ fun FeedScreen(
 }
 
 @Composable
-private fun FeaturedSection() {
+private fun FeaturedSection(onFollowingClick: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text(
-            text = "Remodelaciones recomendadas",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Remodelaciones recomendadas",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
+            )
+            TextButton(onClick = onFollowingClick) {
+                Text("Siguiendo")
+            }
+        }
         FeaturedImage(imageRes = R.drawable.featured_image)
     }
 }
