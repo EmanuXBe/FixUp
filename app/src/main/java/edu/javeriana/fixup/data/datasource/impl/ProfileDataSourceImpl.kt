@@ -45,12 +45,13 @@ class ProfileDataSourceImpl @Inject constructor(
 
     override fun getCurrentUser(): FirebaseUser? = auth.currentUser
 
-    override suspend fun updateProfileData(name: String, email: String, phone: String, address: String) {
+    override suspend fun updateProfileData(name: String, email: String, phone: String, address: String, profileImageUrl: String?) {
         val user = auth.currentUser ?: throw Exception("Usuario no autenticado")
         
         // 1. Actualizar Display Name y Email en Firebase Auth
         val profileUpdates = userProfileChangeRequest {
             displayName = name
+            profileImageUrl?.let { photoUri = Uri.parse(it) }
         }
         user.updateProfile(profileUpdates).await()
         
@@ -59,14 +60,36 @@ class ProfileDataSourceImpl @Inject constructor(
             user.updateEmail(email).await()
         }
 
-        // 2. Actualizar datos en Firestore
-        val updates = mapOf(
+        // 2. Preparar el Batch de Firestore
+        val batch = firestore.batch()
+
+        // 2a. Actualizar datos en la colección "users"
+        val userRef = firestore.collection("users").document(user.uid)
+        val userUpdates = mutableMapOf(
             "name" to name,
             "email" to email,
             "phone" to phone,
             "address" to address
         )
-        firestore.collection("users").document(user.uid).update(updates).await()
+        profileImageUrl?.let { userUpdates["profileImageUrl"] = it }
+        batch.update(userRef, userUpdates as Map<String, Any>)
+
+        // 2b. Buscar y actualizar todas las reseñas del usuario para mantener la consistencia
+        val reviewsSnapshot = firestore.collection("reviews")
+            .whereEqualTo("userId", user.uid)
+            .get()
+            .await()
+
+        for (reviewDoc in reviewsSnapshot.documents) {
+            val reviewUpdate = mutableMapOf<String, Any>(
+                "authorName" to name
+            )
+            profileImageUrl?.let { reviewUpdate["authorProfileImageUrl"] = it }
+            batch.update(reviewDoc.reference, reviewUpdate)
+        }
+
+        // 3. Ejecutar actualización atómica
+        batch.commit().await()
     }
 
     override suspend fun getUserData(userId: String): Map<String, Any>? {

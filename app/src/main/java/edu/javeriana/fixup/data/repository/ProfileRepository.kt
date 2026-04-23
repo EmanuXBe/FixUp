@@ -22,23 +22,30 @@ class ProfileRepository @Inject constructor(
             // 1. Subir imagen a Storage
             val downloadUrl = profileDataSource.uploadProfileImage(uri)
             
-            // 2. Actualizar el perfil del usuario con esa URL
-            profileDataSource.updateProfilePhotoUrl(downloadUrl)
+            // 2. Actualizar el perfil del usuario y sincronizar reseñas usando el nuevo flujo batch
+            val user = profileDataSource.getCurrentUser() ?: throw Exception("Usuario no autenticado")
+            val data = profileDataSource.getUserData(user.uid) ?: emptyMap()
             
-            // 3. Retornar éxito
+            profileDataSource.updateProfileData(
+                name = data["name"] as? String ?: user.displayName ?: "Usuario",
+                email = user.email ?: "",
+                phone = data["phone"] as? String ?: "",
+                address = data["address"] as? String ?: "",
+                profileImageUrl = downloadUrl
+            )
+            
             Result.success(downloadUrl)
         } catch (e: Exception) {
-            // 4. Retornar fallo mapeado
             Result.failure(e.toAppError())
         }
     }
 
     /**
-     * Actualiza los datos del perfil en Auth y Firestore.
+     * Actualiza los datos del perfil en Auth y Firestore con actualización en lote para reseñas.
      */
     suspend fun updateProfileData(name: String, email: String, phone: String, address: String): Result<Unit> {
         return try {
-            profileDataSource.updateProfileData(name, email, phone, address)
+            profileDataSource.updateProfileData(name, email, phone, address, null)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e.toAppError())
