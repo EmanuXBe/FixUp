@@ -25,8 +25,6 @@ import edu.javeriana.fixup.ui.features.rent.RentScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
 import edu.javeriana.fixup.ui.features.user_profile.UserProfileScreen
 
-import edu.javeriana.fixup.ui.features.user_profile.UserProfileScreen
-
 @Composable
 fun AppNavigation(
     modifier: Modifier = Modifier,
@@ -122,18 +120,6 @@ fun AppNavigation(
                 onSettingsClick = {
                     navController.navigate(AppScreens.Settings.route)
                 }
-            )
-        }
-
-        // User Profile screen
-        composable(
-            route = AppScreens.UserProfile.route + "/{userId}",
-            arguments = listOf(navArgument("userId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId")
-            UserProfileScreen(
-                userId = userId,
-                onBackClick = { navController.popBackStack() }
             )
         }
 

@@ -74,24 +74,33 @@ class ProfileDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getReviewsByUserId(userId: String): List<ReviewModel> {
-        /**
-         * Obtiene las reseñas filtradas por el ID del usuario.
-         * Se maneja la respuesta de Retrofit dentro de un bloque try-catch para capturar errores de red.
-         * El uso de .map { it.toDomain() } garantiza que la capa de datos no exponga DTOs a las capas superiores.
-         */
-        return try {
-            val response = apiService.getUserReviews(userId)
-            if (response.isSuccessful) {
-                // Si la respuesta es exitosa (200 OK), mapeamos los DTOs a modelos de dominio
-                response.body()?.map { it.toDomain() } ?: emptyList()
-            } else {
-                // Manejo explícito de errores del servidor para facilitar la depuración académica
-                val errorBody = response.errorBody()?.string()
-                throw Exception("Error del servidor (${response.code()}): ${errorBody ?: "Sin mensaje"}")
-            }
-        } catch (e: Exception) {
-            // Propagamos la excepción para ser capturada en el Repositorio
-            throw e
+        val snapshot = firestore.collection("reviews")
+            .whereEqualTo("userId", userId)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { doc ->
+            val rating = doc.getLong("rating")?.toInt() ?: 0
+            val comment = doc.getString("comment") ?: ""
+            val authorName = doc.getString("authorName") ?: "Usuario"
+            val authorProfileImageUrl = doc.getString("authorProfileImageUrl") ?: ""
+            val serviceTitle = doc.getString("articleName") ?: doc.getString("serviceTitle") ?: ""
+            val serviceId = doc.getString("serviceId") ?: doc.getString("articleId") ?: ""
+            val createdAt = doc.getTimestamp("createdAt")
+            val date = createdAt?.toDate()?.let { 
+                java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
+            } ?: ""
+
+            ReviewModel(
+                userId = userId,
+                serviceId = serviceId,
+                rating = rating,
+                comment = comment,
+                authorName = authorName,
+                authorProfileImageUrl = authorProfileImageUrl,
+                serviceTitle = serviceTitle,
+                date = date
+            )
         }
     }
 

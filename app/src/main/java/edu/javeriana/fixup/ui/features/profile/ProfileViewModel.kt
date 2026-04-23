@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import com.google.firebase.auth.FirebaseAuth
 import edu.javeriana.fixup.data.repository.AuthRepository
 import edu.javeriana.fixup.data.repository.ProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -87,7 +86,7 @@ class ProfileViewModel @Inject constructor(
     }
 
     private fun loadUserReviews() {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val uid = authRepository.currentUser?.uid
         if (uid == null) {
             _uiState.update { it.copy(reviews = emptyList(), isLoading = false) }
             return
@@ -107,7 +106,7 @@ class ProfileViewModel @Inject constructor(
      * Guarda una reseña usando el ID dinámico del usuario autenticado.
      */
     fun saveReview(rating: Int, comment: String) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val uid = authRepository.currentUser?.uid
         if (uid == null) {
             _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
             return
@@ -141,7 +140,7 @@ class ProfileViewModel @Inject constructor(
      * Actualiza una reseña y refresca la lista.
      */
     fun updateReview(reviewId: Int, rating: Int, comment: String) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        val uid = authRepository.currentUser?.uid
         if (uid == null) {
             _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
             return
