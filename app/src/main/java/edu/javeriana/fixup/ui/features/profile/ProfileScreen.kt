@@ -13,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.*
@@ -22,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -109,6 +110,7 @@ fun ProfileScreen(
         ProfileContent(
             modifier = Modifier.padding(padding),
             uiState = uiState,
+            currentUserId = viewModel.getCurrentUserId(),
             onChangePhoto = {
                 galleryLauncher.launch("image/*")
             },
@@ -117,6 +119,9 @@ fun ProfileScreen(
             },
             onDeleteReview = { reviewId ->
                 viewModel.deleteReview(reviewId)
+            },
+            onLikeReview = { reviewId ->
+                viewModel.toggleLikeReview(reviewId)
             }
         )
     }
@@ -177,9 +182,11 @@ fun EditProfileDialog(
 fun ProfileContent(
     modifier: Modifier = Modifier,
     uiState: ProfileUiState,
+    currentUserId: String?,
     onChangePhoto: () -> Unit = {},
     onEditReview: (String, Int, String) -> Unit = { _, _, _ -> },
-    onDeleteReview: (String) -> Unit = {}
+    onDeleteReview: (String) -> Unit = {},
+    onLikeReview: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     
@@ -299,6 +306,8 @@ fun ProfileContent(
                 uiState.reviews.forEach { review ->
                     ReviewItem(
                         review = review,
+                        currentUserId = currentUserId,
+                        onLike = { onLikeReview(review.id) },
                         onEdit = { rating, comment -> onEditReview(review.id, rating, comment) },
                         onDelete = { onDeleteReview(review.id) }
                     )
@@ -313,9 +322,12 @@ fun ProfileContent(
 @Composable
 fun ReviewItem(
     review: edu.javeriana.fixup.ui.model.ReviewModel,
+    currentUserId: String?,
+    onLike: () -> Unit = {},
     onEdit: (Int, String) -> Unit = { _, _ -> },
     onDelete: () -> Unit = {}
 ) {
+    val isLiked = currentUserId != null && review.likedBy.contains(currentUserId)
     var showEditDialog by remember { mutableStateOf(false) }
 
     if (showEditDialog) {
@@ -342,9 +354,9 @@ fun ReviewItem(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = review.authorName,
                         fontWeight = FontWeight.Bold,
@@ -359,6 +371,24 @@ fun ReviewItem(
                         )
                     }
                 }
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { showEditDialog = true }, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = SoftFawn, modifier = Modifier.size(16.dp))
+                    }
+                    IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
+                        Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     repeat(5) { index ->
                         Icon(
@@ -368,15 +398,27 @@ fun ReviewItem(
                             modifier = Modifier.size(16.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = { showEditDialog = true }, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Edit, contentDescription = "Editar", tint = SoftFawn, modifier = Modifier.size(16.dp))
-                    }
-                    IconButton(onClick = onDelete, modifier = Modifier.size(24.dp)) {
-                        Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Red.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
-                    }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onLike() }
+                ) {
+                    Icon(
+                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = "Like",
+                        tint = if (isLiked) Color.Red else MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = review.likedBy.size.toString(),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
+
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = review.comment,
@@ -400,7 +442,7 @@ fun EditReviewDialog(
     onDismiss: () -> Unit,
     onConfirm: (Int, String) -> Unit
 ) {
-    var rating by remember { mutableStateOf(initialRating) }
+    var rating by remember { mutableIntStateOf(initialRating) }
     var comment by remember { mutableStateOf(initialComment) }
 
     AlertDialog(
@@ -455,7 +497,8 @@ fun ProfileScreenPreview() {
                 email = "juan.perez@example.com",
                 role = "Cliente estrella",
                 isLoading = false
-            )
+            ),
+            currentUserId = null
         )
     }
 }

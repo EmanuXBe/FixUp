@@ -24,7 +24,9 @@ data class ReviewDto(
     @SerializedName("articleName")
     val articleName: String? = null,
     @SerializedName("userId")
-    val userId: String? = null
+    val userId: String? = null,
+    @SerializedName("likedBy")
+    val likedBy: List<String>? = emptyList()
 )
 
 data class ReviewUserDto(

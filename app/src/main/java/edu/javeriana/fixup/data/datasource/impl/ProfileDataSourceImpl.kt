@@ -110,6 +110,7 @@ class ProfileDataSourceImpl @Inject constructor(
             val serviceTitle = doc.getString("articleName") ?: doc.getString("serviceTitle") ?: ""
             val serviceId = doc.getString("serviceId") ?: doc.getString("articleId") ?: ""
             val createdAt = doc.getTimestamp("createdAt")
+            val likedBy = doc.get("likedBy") as? List<String> ?: emptyList()
             val date = createdAt?.toDate()?.let { 
                 java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
             } ?: ""
@@ -123,7 +124,8 @@ class ProfileDataSourceImpl @Inject constructor(
                 authorName = authorName,
                 authorProfileImageUrl = authorProfileImageUrl,
                 serviceTitle = serviceTitle,
-                date = date
+                date = date,
+                likedBy = likedBy
             )
         }
     }

@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -105,6 +107,8 @@ fun UserProfileScreen(
                     items(uiState.reviews) { review ->
                         UserReviewItem(
                             review = review,
+                            currentUserId = viewModel.getCurrentUserId(),
+                            onLikeClick = { viewModel.toggleLikeReview(review.id) },
                             onClick = { onServiceClick(review.serviceId) }
                         )
                     }
@@ -159,8 +163,12 @@ private fun UserHeader(
 @Composable
 private fun UserReviewItem(
     review: ReviewModel,
+    currentUserId: String?,
+    onLikeClick: () -> Unit,
     onClick: () -> Unit
 ) {
+    val isLiked = currentUserId != null && review.likedBy.contains(currentUserId)
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,13 +199,37 @@ private fun UserReviewItem(
             
             Spacer(modifier = Modifier.height(4.dp))
             
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                repeat(5) { index ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    repeat(5) { index ->
+                        Icon(
+                            imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
+                            contentDescription = null,
+                            tint = Color(0xFFFFB300),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onLikeClick() }
+                ) {
                     Icon(
-                        imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
-                        contentDescription = null,
-                        tint = Color(0xFFFFB300),
-                        modifier = Modifier.size(16.dp)
+                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = "Like",
+                        tint = if (isLiked) Color.Red else Color.Gray,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = review.likedBy.size.toString(),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

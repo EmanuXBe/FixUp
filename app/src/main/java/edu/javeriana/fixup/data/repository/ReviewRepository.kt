@@ -42,4 +42,14 @@ class ReviewRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun toggleLike(reviewId: String, isCurrentlyLiked: Boolean): Result<Unit> {
+        return try {
+            val currentUserId = authRepository.currentUser?.uid ?: throw Exception("Usuario no autenticado")
+            reviewDataSource.toggleLikeReview(reviewId, currentUserId, isCurrentlyLiked)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

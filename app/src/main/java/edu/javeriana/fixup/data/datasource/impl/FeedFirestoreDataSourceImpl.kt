@@ -75,7 +75,8 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
                 comment = doc.getString("comment") ?: "",
                 userName = doc.getString("authorName") ?: "Usuario",
                 authorName = doc.getString("authorName") ?: "Usuario",
-                authorProfileImageUrl = doc.getString("authorProfileImageUrl") ?: ""
+                authorProfileImageUrl = doc.getString("authorProfileImageUrl") ?: "",
+                likedBy = doc.get("likedBy") as? List<String> ?: emptyList()
             )
         }
     }

@@ -10,5 +10,6 @@ data class ReviewModel(
     val date: String = "",
     val authorName: String = "",
     val authorProfileImageUrl: String = "",
-    val serviceTitle: String = ""
+    val serviceTitle: String = "",
+    val likedBy: List<String> = emptyList()
 )

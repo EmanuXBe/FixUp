@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.javeriana.fixup.data.repository.AuthRepository
 import edu.javeriana.fixup.data.repository.ProfileRepository
+import edu.javeriana.fixup.data.repository.ReviewRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
+    private val reviewRepository: ReviewRepository
 ) : ViewModel() {
 
     private val defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/fixup-f2128.firebasestorage.app/o/WhatsApp%20Image%202026-03-18%20at%205.27.50%20PM.jpeg?alt=media&token=7d9a7e23-31b0-4f0a-b705-c7c9d71abe64"
@@ -203,5 +205,35 @@ class ProfileViewModel @Inject constructor(
     
     fun resetErrorMessage() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    fun getCurrentUserId(): String? = authRepository.currentUser?.uid
+
+    fun toggleLikeReview(reviewId: String) {
+        val userId = authRepository.currentUser?.uid ?: return
+        val review = _uiState.value.reviews.find { it.id == reviewId } ?: return
+        val isLiked = review.likedBy.contains(userId)
+
+        // Optimistic update
+        val oldReviews = _uiState.value.reviews
+        val newReviews = oldReviews.map {
+            if (it.id == reviewId) {
+                val newLikedBy = if (isLiked) {
+                    it.likedBy.filter { id -> id != userId }
+                } else {
+                    it.likedBy + userId
+                }
+                it.copy(likedBy = newLikedBy)
+            } else it
+        }
+
+        _uiState.update { it.copy(reviews = newReviews) }
+
+        viewModelScope.launch {
+            reviewRepository.toggleLike(reviewId, isLiked).onFailure {
+                // Rollback on failure
+                _uiState.update { it.copy(reviews = oldReviews) }
+            }
+        }
     }
 }

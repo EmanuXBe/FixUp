@@ -72,12 +72,14 @@ fun PublicationDetailScreen(
                     description = uiState.description,
                     reviews = uiState.reviews,
                     isSendingReview = uiState.isSendingReview,
+                    currentUserId = viewModel.getCurrentUserId(),
                     onBackClick = onBackClick,
                     onContactClick = onContactClick,
                     onUserProfileClick = onUserProfileClick,
                     onSendReview = { rating, comment ->
                         viewModel.sendReview(rating, comment)
-                    }
+                    },
+                    onLikeClick = { reviewId -> viewModel.toggleLikeReview(reviewId) }
                 )
                 else -> ErrorState(
                     errorText = uiState.error ?: "Publicación no encontrada",
@@ -114,10 +116,12 @@ private fun PublicationContent(
     description: String,
     reviews: List<ReviewModel>,
     isSendingReview: Boolean,
+    currentUserId: String?,
     onBackClick: () -> Unit,
     onContactClick: () -> Unit,
     onUserProfileClick: (String) -> Unit,
-    onSendReview: (Int, String) -> Unit
+    onSendReview: (Int, String) -> Unit,
+    onLikeClick: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -145,7 +149,12 @@ private fun PublicationContent(
                     Spacer(modifier = Modifier.height(24.dp))
                     AddReviewSection(isSendingReview, onSendReview)
                     Spacer(modifier = Modifier.height(24.dp))
-                    ReviewsSection(reviews, onUserProfileClick)
+                    ReviewsSection(
+                        reviews = reviews,
+                        currentUserId = currentUserId,
+                        onLikeClick = onLikeClick,
+                        onUserProfileClick = onUserProfileClick
+                    )
                     Spacer(modifier = Modifier.height(24.dp))
                     ActionButtons(onContactClick)
                 }
@@ -293,7 +302,12 @@ private fun AddReviewSection(
 }
 
 @Composable
-private fun ReviewsSection(reviews: List<ReviewModel>, onUserProfileClick: (String) -> Unit) {
+private fun ReviewsSection(
+    reviews: List<ReviewModel>,
+    currentUserId: String?,
+    onLikeClick: (String) -> Unit,
+    onUserProfileClick: (String) -> Unit
+) {
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
@@ -336,7 +350,12 @@ private fun ReviewsSection(reviews: List<ReviewModel>, onUserProfileClick: (Stri
             }
         } else {
             reviews.forEach { review ->
-                ReviewItem(review, onUserProfileClick)
+                ReviewItem(
+                    review = review,
+                    currentUserId = currentUserId,
+                    onLikeClick = { onLikeClick(review.id) },
+                    onUserProfileClick = onUserProfileClick
+                )
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
@@ -344,7 +363,14 @@ private fun ReviewsSection(reviews: List<ReviewModel>, onUserProfileClick: (Stri
 }
 
 @Composable
-private fun ReviewItem(review: ReviewModel, onUserProfileClick: (String) -> Unit) {
+private fun ReviewItem(
+    review: ReviewModel,
+    currentUserId: String?,
+    onLikeClick: () -> Unit,
+    onUserProfileClick: (String) -> Unit
+) {
+    val isLiked = currentUserId != null && review.likedBy.contains(currentUserId)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)),
@@ -353,43 +379,67 @@ private fun ReviewItem(review: ReviewModel, onUserProfileClick: (String) -> Unit
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable { onUserProfileClick(review.userId) }
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                AsyncImage(
-                    model = review.authorProfileImageUrl.ifBlank { R.drawable.profile_photo },
-                    contentDescription = "Foto de perfil de ${review.authorName}",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(SoftFawn.copy(alpha = 0.2f)),
-                    contentScale = ContentScale.Crop
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = review.authorName,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = SoftFawn
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onUserProfileClick(review.userId) }.weight(1f)
+                ) {
+                    AsyncImage(
+                        model = review.authorProfileImageUrl.ifBlank { R.drawable.profile_photo },
+                        contentDescription = "Foto de perfil de ${review.authorName}",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(SoftFawn.copy(alpha = 0.2f)),
+                        contentScale = ContentScale.Crop
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        repeat(5) { index ->
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                tint = if (index < review.rating) Color(0xFFFFC107) else MaterialTheme.colorScheme.outline,
-                                modifier = Modifier.size(14.dp)
+
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = review.authorName,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = SoftFawn
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            repeat(5) { index ->
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = if (index < review.rating) Color(0xFFFFC107) else MaterialTheme.colorScheme.outline,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = review.date,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = review.date,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onLikeClick() }.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = "Like",
+                        tint = if (isLiked) Color.Red else MaterialTheme.colorScheme.outline,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = review.likedBy.size.toString(),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
