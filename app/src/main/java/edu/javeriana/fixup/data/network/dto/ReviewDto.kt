@@ -13,6 +13,8 @@ data class ReviewDto(
     val date: String? = "",
     @SerializedName("authorName")
     val authorName: String? = "",
+    @SerializedName("serviceTitle")
+    val serviceTitle: String? = "",
     @SerializedName("authorProfileImageUrl")
     val authorProfileImageUrl: String? = "",
     @SerializedName("user")

@@ -28,9 +28,9 @@ fun ReviewDto.toDomain(): ReviewModel {
         rating = rating ?: 0,
         comment = comment ?: "",
         date = date ?: "",
-        authorName = authorName ?: user?.name ?: "Usuario desconocido",
+        authorName = authorName ?: "Usuario Desconocido",
         authorProfileImageUrl = authorProfileImageUrl ?: user?.profileImage ?: "",
-        serviceTitle = articleName ?: service?.title ?: "",
+        serviceTitle = serviceTitle ?: "Servicio Desconocido",
         serviceId = articleId ?: service?.id?.toString() ?: "",
         likedBy = likedBy ?: emptyList()
     )

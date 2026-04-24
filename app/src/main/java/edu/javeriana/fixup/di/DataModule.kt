@@ -4,56 +4,67 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import com.google.firebase.firestore.FirebaseFirestore
+import edu.javeriana.fixup.data.network.api.FixUpApiService
 import edu.javeriana.fixup.data.datasource.interfaces.*
 import edu.javeriana.fixup.data.datasource.impl.*
+import dagger.Provides
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-@Suppress("unused")
-interface DataModule {
+abstract class DataModule {
 
     @Binds
-    fun bindAuthDataSource(
+    abstract fun bindAuthDataSource(
         authDataSourceImpl: AuthDataSourceImpl
     ): AuthDataSource
 
     @Binds
-    fun bindUserDataSource(
+    abstract fun bindUserDataSource(
         userDataSourceImpl: UserDataSourceImpl
     ): UserDataSource
 
     @Binds
-    fun bindReviewDataSource(
-        reviewDataSourceImpl: ReviewDataSourceImpl
-    ): ReviewDataSource
-
-    @Binds
-    fun bindArticleDataSource(
+    abstract fun bindArticleDataSource(
         articleDataSourceImpl: ArticleDataSourceImpl
     ): ArticleDataSource
 
     @Binds
-    fun bindFeedDataSource(
+    abstract fun bindFeedDataSource(
         feedDataSourceImpl: FeedFirestoreDataSourceImpl
     ): FeedDataSource
 
     @Binds
-    fun bindRentDataSource(
+    abstract fun bindRentDataSource(
         rentDataSourceImpl: RentDataSourceImpl
     ): RentDataSource
 
     @Binds
-    fun bindChatDataSource(
+    abstract fun bindChatDataSource(
         chatDataSourceImpl: ChatDataSourceImpl
     ): ChatDataSource
 
     @Binds
-    fun bindProfileDataSource(
+    abstract fun bindProfileDataSource(
         profileDataSourceImpl: ProfileDataSourceImpl
     ): ProfileDataSource
 
     @Binds
-    fun bindCheckoutDataSource(
+    abstract fun bindCheckoutDataSource(
         checkoutDataSourceImpl: CheckoutDataSourceImpl
     ): CheckoutDataSource
+
+    companion object {
+        @Provides
+        @Singleton
+        fun provideReviewDataSource(
+            firestore: FirebaseFirestore,
+            apiService: FixUpApiService
+        ): ReviewDataSource {
+            // SWITCH DE ENTORNO: Comenta/Descomenta para cambiar la fuente de datos
+            // return ReviewExpressDataSourceImpl(apiService)
+            return ReviewFirebaseDataSourceImpl(firestore)
+        }
+    }
 }

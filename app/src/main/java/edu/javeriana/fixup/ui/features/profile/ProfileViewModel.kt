@@ -96,10 +96,12 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.getReviewsByUserId(uid).onSuccess { reviews ->
-                _uiState.update { it.copy(reviews = reviews, isLoading = false) }
-            }.onFailure { error ->
-                _uiState.update { it.copy(reviews = emptyList(), isLoading = false, errorMessage = error.message) }
+            reviewRepository.getReviewsByUserId(uid).collect { result ->
+                result.onSuccess { reviews ->
+                    _uiState.update { it.copy(reviews = reviews, isLoading = false) }
+                }.onFailure { error ->
+                    _uiState.update { it.copy(reviews = emptyList(), isLoading = false, errorMessage = error.message) }
+                }
             }
         }
     }
@@ -116,7 +118,7 @@ class ProfileViewModel @Inject constructor(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.createReview(uid, rating, comment).onSuccess {
+            reviewRepository.createReview(uid, "Servicio General", rating, comment).onSuccess {
                 loadUserReviews() // Recargamos la lista
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
@@ -130,7 +132,7 @@ class ProfileViewModel @Inject constructor(
     fun deleteReview(reviewId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.deleteReview(reviewId).onSuccess {
+            reviewRepository.deleteReview(reviewId).onSuccess {
                 _uiState.update { state ->
                     state.copy(
                         reviews = state.reviews.filter { it.id != reviewId },
@@ -149,7 +151,7 @@ class ProfileViewModel @Inject constructor(
     fun updateReview(reviewId: String, rating: Int, comment: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            profileRepository.updateReview(reviewId, rating, comment).onSuccess {
+            reviewRepository.updateReview(reviewId, rating, comment).onSuccess {
                 _uiState.update { state ->
                     state.copy(
                         reviews = state.reviews.map { 

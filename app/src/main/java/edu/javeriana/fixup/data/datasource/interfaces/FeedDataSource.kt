@@ -16,6 +16,4 @@ interface FeedDataSource {
     suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto>
     suspend fun getPublicationById(id: Int): PublicationDto
     suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel
-    suspend fun getReviewsByServiceId(serviceId: Int): List<ReviewModel>
-    suspend fun createReview(review: ReviewRequestDto): ReviewModel
 }

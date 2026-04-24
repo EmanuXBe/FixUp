@@ -1,9 +1,8 @@
 package edu.javeriana.fixup.data.datasource.interfaces
-
-import edu.javeriana.fixup.data.network.dto.ReviewDto
+import edu.javeriana.fixup.ui.model.ReviewModel
 
 interface ReviewDataSource {
-    suspend fun getReviewsByUserId(userId: String): List<ReviewDto>
-    suspend fun createReview(review: ReviewDto)
-    suspend fun toggleLikeReview(reviewId: String, currentUserId: String, isCurrentlyLiked: Boolean)
+    suspend fun getReviewsByUserId(userId: String): Result<List<ReviewModel>>
+    suspend fun getReviewsByServiceId(serviceId: String): Result<List<ReviewModel>>
+    suspend fun createReview(review: ReviewModel): Result<Boolean>
 }

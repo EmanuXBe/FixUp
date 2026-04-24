@@ -7,10 +7,6 @@ import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import edu.javeriana.fixup.data.datasource.interfaces.ProfileDataSource
-import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
-import edu.javeriana.fixup.data.mapper.toDomain
-import edu.javeriana.fixup.data.network.api.FixUpApiService
-import edu.javeriana.fixup.ui.model.ReviewModel
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
@@ -21,8 +17,7 @@ import javax.inject.Inject
 class ProfileDataSourceImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val storage: FirebaseStorage,
-    private val firestore: FirebaseFirestore,
-    private val apiService: FixUpApiService
+    private val firestore: FirebaseFirestore
 ) : ProfileDataSource {
 
     override suspend fun uploadProfileImage(uri: Uri, timeoutMillis: Long): String {
@@ -94,66 +89,5 @@ class ProfileDataSourceImpl @Inject constructor(
 
     override suspend fun getUserData(userId: String): Map<String, Any>? {
         return firestore.collection("users").document(userId).get().await().data
-    }
-
-    override suspend fun getReviewsByUserId(userId: String): List<ReviewModel> {
-        val snapshot = firestore.collection("reviews")
-            .whereEqualTo("userId", userId)
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            val rating = doc.getLong("rating")?.toInt() ?: 0
-            val comment = doc.getString("comment") ?: ""
-            val authorName = doc.getString("authorName") ?: "Usuario"
-            val authorProfileImageUrl = doc.getString("authorProfileImageUrl") ?: ""
-            val serviceTitle = doc.getString("articleName") ?: doc.getString("serviceTitle") ?: ""
-            val serviceId = doc.getString("serviceId") ?: doc.getString("articleId") ?: ""
-            val createdAt = doc.getTimestamp("createdAt")
-            val likedBy = doc.get("likedBy") as? List<String> ?: emptyList()
-            val date = createdAt?.toDate()?.let { 
-                java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(it)
-            } ?: ""
-
-            ReviewModel(
-                id = doc.id,
-                userId = userId,
-                serviceId = serviceId,
-                rating = rating,
-                comment = comment,
-                authorName = authorName,
-                authorProfileImageUrl = authorProfileImageUrl,
-                serviceTitle = serviceTitle,
-                date = date,
-                likedBy = likedBy
-            )
-        }
-    }
-
-    override suspend fun createReview(review: ReviewModel): ReviewModel {
-        /**
-         * Envía una nueva reseña al backend.
-         * Convierte el modelo de dominio a un objeto de solicitud (ReviewRequestDto).
-         */
-        val request = ReviewRequestDto(
-            userId = auth.currentUser?.uid ?: "",
-            serviceId = review.serviceId, // Ahora dinámico
-            rating = review.rating,
-            comment = review.comment
-        )
-        val resultDto = apiService.createReview(request)
-        return resultDto.toDomain()
-    }
-
-    override suspend fun updateReview(reviewId: String, newComment: String, newRating: Int) {
-        val updates = mapOf(
-            "comment" to newComment,
-            "rating" to newRating
-        )
-        firestore.collection("reviews").document(reviewId).update(updates).await()
-    }
-
-    override suspend fun deleteReview(reviewId: String) {
-        firestore.collection("reviews").document(reviewId).delete().await()
     }
 }

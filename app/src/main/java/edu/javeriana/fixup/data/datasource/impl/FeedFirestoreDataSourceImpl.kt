@@ -75,53 +75,6 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
         return property.copy(imageUrl = downloadUrl)
     }
 
-    override suspend fun getReviewsByServiceId(serviceId: Int): List<ReviewModel> {
-        val snapshot = firestore.collection("reviews")
-            .whereEqualTo("serviceId", serviceId.toString())
-            .get()
-            .await()
-
-        return snapshot.documents.mapNotNull { doc ->
-            ReviewModel(
-                id = doc.id,
-                userId = doc.getString("userId") ?: "",
-                rating = (doc.getLong("rating") ?: 0L).toInt(),
-                comment = doc.getString("comment") ?: "",
-                userName = doc.getString("authorName") ?: "Usuario",
-                authorName = doc.getString("authorName") ?: "Usuario",
-                authorProfileImageUrl = doc.getString("authorProfileImageUrl") ?: "",
-                likedBy = doc.get("likedBy") as? List<String> ?: emptyList()
-            )
-        }
-    }
-
-    override suspend fun createReview(review: ReviewRequestDto): ReviewModel {
-        val currentUser = auth.currentUser
-        val authorName = currentUser?.displayName ?: "Usuario"
-        val authorProfileImageUrl = currentUser?.photoUrl?.toString() ?: ""
-
-        val docRef = firestore.collection("reviews").document()
-        val data = mapOf(
-            "userId" to review.userId,
-            "serviceId" to review.serviceId,
-            "rating" to review.rating,
-            "comment" to review.comment,
-            "authorName" to authorName,
-            "authorProfileImageUrl" to authorProfileImageUrl,
-            "createdAt" to com.google.firebase.Timestamp.now()
-        )
-        docRef.set(data).await()
-        return ReviewModel(
-            id = docRef.id,
-            userId = review.userId,
-            rating = review.rating,
-            comment = review.comment,
-            userName = authorName,
-            authorName = authorName,
-            authorProfileImageUrl = authorProfileImageUrl
-        )
-    }
-
     private fun DocumentSnapshot.toPublicationDto(): PublicationDto? {
         val title = getString("title") ?: return null
         val price = getDouble("price") ?: 0.0

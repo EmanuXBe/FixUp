@@ -58,24 +58,6 @@ class FeedRepository @Inject constructor(
             Result.failure(e)
         }
     }
-
-    suspend fun getReviewsByServiceId(serviceId: Int): Result<List<ReviewModel>> {
-        return try {
-            val reviews = dataSource.getReviewsByServiceId(serviceId)
-            Result.success(reviews)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun createReview(review: ReviewRequestDto): Result<ReviewModel> {
-        return try {
-            val created = dataSource.createReview(review)
-            Result.success(created)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 }
 
 // Extension functions for mapping (Mappers)

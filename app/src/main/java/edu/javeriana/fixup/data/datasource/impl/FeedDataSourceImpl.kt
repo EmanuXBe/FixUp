@@ -82,38 +82,6 @@ class FeedDataSourceImpl @Inject constructor(
         )
     }
 
-    override suspend fun getReviewsByServiceId(serviceId: Int): List<ReviewModel> {
-        return try {
-            apiService.getReviewsByServiceId(serviceId).map { dto ->
-                ReviewModel(
-                    id = dto.id ?: "",
-                    rating = dto.rating ?: 0,
-                    comment = dto.comment ?: "",
-                    date = dto.date ?: "",
-                    authorName = dto.authorName ?: dto.user?.name ?: "Usuario",
-                    authorProfileImageUrl = dto.authorProfileImageUrl ?: dto.user?.profileImage ?: "",
-                    serviceTitle = dto.service?.title ?: ""
-                )
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("FeedDataSource", "Error fetching reviews", e)
-            emptyList()
-        }
-    }
-
-    override suspend fun createReview(review: ReviewRequestDto): ReviewModel {
-        val resultDto = apiService.createReview(review)
-        return ReviewModel(
-            id = resultDto.id ?: "",
-            rating = resultDto.rating ?: 0,
-            comment = resultDto.comment ?: "",
-            date = resultDto.date ?: "",
-            authorName = resultDto.authorName ?: resultDto.user?.name ?: "Usuario",
-            authorProfileImageUrl = resultDto.authorProfileImageUrl ?: resultDto.user?.profileImage ?: "",
-            serviceTitle = resultDto.service?.title ?: ""
-        )
-    }
-
     // Also handle ServiceDto to PublicationDto if needed, as getServices returns ServiceDto
     private fun ServiceDto.toPublicationDto() = PublicationDto(
         id = this.id.toString(),

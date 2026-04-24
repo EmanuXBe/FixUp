@@ -56,17 +56,19 @@ class PublicationDetailViewModel @Inject constructor(
 
     private fun loadReviews(serviceId: Int) {
         viewModelScope.launch {
-            val reviewsResult = repository.getReviewsByServiceId(serviceId)
-            reviewsResult.onSuccess { reviews ->
-                _uiState.update { it.copy(reviews = reviews, isLoading = false) }
-            }.onFailure {
-                _uiState.update { it.copy(isLoading = false) }
+            reviewRepository.getReviewsByServiceId(serviceId.toString()).collect { result ->
+                result.onSuccess { reviews ->
+                    _uiState.update { it.copy(reviews = reviews, isLoading = false) }
+                }.onFailure {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
             }
         }
     }
 
     fun sendReview(rating: Int, comment: String) {
-        val serviceId = _uiState.value.publication?.id?.toIntOrNull() ?: return
+        val serviceId = _uiState.value.publication?.id ?: return
+        val serviceTitle = _uiState.value.publication?.title ?: ""
         val currentUser = authRepository.currentUser
 
         if (currentUser == null) {
@@ -77,17 +79,10 @@ class PublicationDetailViewModel @Inject constructor(
         _uiState.update { it.copy(isSendingReview = true, reviewError = null, reviewSent = false) }
         
         viewModelScope.launch {
-            val request = ReviewRequestDto(
-                userId = currentUser.uid,
-                serviceId = serviceId.toString(),
-                rating = rating,
-                comment = comment
-            )
-            
-            val result = repository.createReview(request)
+            val result = reviewRepository.createReview(serviceId, serviceTitle, rating, comment)
             result.onSuccess { 
                 _uiState.update { it.copy(isSendingReview = false, reviewSent = true) }
-                loadReviews(serviceId) // Recargar lista
+                loadReviews(serviceId.toIntOrNull() ?: 0) // Recargar lista
             }.onFailure { error ->
                 _uiState.update { 
                     it.copy(isSendingReview = false, reviewError = "No se pudo enviar la reseña")
