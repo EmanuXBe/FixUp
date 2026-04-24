@@ -25,7 +25,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
+import coil.request.ImageRequest
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
@@ -388,13 +391,18 @@ private fun ReviewItem(
                     modifier = Modifier.clickable { onUserProfileClick(review.userId) }.weight(1f)
                 ) {
                     AsyncImage(
-                        model = review.authorProfileImageUrl.ifBlank { R.drawable.profile_photo },
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(review.authorProfileImageUrl.ifBlank { R.drawable.profile_photo })
+                            .crossfade(true)
+                            .build(),
                         contentDescription = "Foto de perfil de ${review.authorName}",
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(SoftFawn.copy(alpha = 0.2f)),
-                        contentScale = ContentScale.Crop
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.profile_photo),
+                        placeholder = painterResource(id = R.drawable.profile_photo)
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -405,6 +413,14 @@ private fun ReviewItem(
                             fontWeight = FontWeight.Bold,
                             color = SoftFawn
                         )
+                        if (review.serviceTitle.isNotEmpty()) {
+                            Text(
+                                text = "comentó sobre: ${review.serviceTitle}",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             repeat(5) { index ->
                                 Icon(

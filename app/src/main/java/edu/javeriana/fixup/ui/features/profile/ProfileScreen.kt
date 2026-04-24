@@ -356,19 +356,41 @@ fun ReviewItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = review.authorName,
-                        fontWeight = FontWeight.Bold,
-                        color = SoftFawn
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(review.authorProfileImageUrl.ifBlank { R.drawable.profile_photo })
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Foto de ${review.authorName}",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.profile_photo),
+                        placeholder = painterResource(id = R.drawable.profile_photo)
                     )
-                    if (review.serviceTitle.isNotEmpty()) {
+                    
+                    Spacer(modifier = Modifier.width(12.dp))
+                    
+                    Column {
                         Text(
-                            text = "Servicio: ${review.serviceTitle}",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
+                            text = review.authorName,
+                            fontWeight = FontWeight.Bold,
+                            color = SoftFawn
                         )
+                        if (review.serviceTitle.isNotEmpty()) {
+                            Text(
+                                text = "comentó sobre: ${review.serviceTitle}",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
                 

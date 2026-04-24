@@ -1,5 +1,6 @@
 package edu.javeriana.fixup.ui.features.user_profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +23,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+import coil.request.ImageRequest
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import edu.javeriana.fixup.R
@@ -331,14 +334,43 @@ private fun UserReviewItem(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
-                Text(
-                    text = review.serviceTitle.ifBlank { "Ver servicio" },
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SoftFawn
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(review.authorProfileImageUrl.ifBlank { R.drawable.profile_photo })
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Foto de ${review.authorName}",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.profile_photo),
+                        placeholder = painterResource(id = R.drawable.profile_photo)
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column {
+                        Text(
+                            text = review.authorName,
+                            fontWeight = FontWeight.Bold,
+                            color = SoftFawn
+                        )
+                        Text(
+                            text = "comentó sobre: ${review.serviceTitle.ifBlank { "un servicio" }}",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
                 Text(
                     text = review.date,
                     fontSize = 12.sp,
@@ -346,7 +378,7 @@ private fun UserReviewItem(
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
