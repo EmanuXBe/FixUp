@@ -42,4 +42,28 @@ class UserRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun isFollowing(currentUserId: String, targetUserId: String): Result<Boolean> {
+        return try {
+            Result.success(userDataSource.isFollowing(currentUserId, targetUserId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getFollowersCount(userId: String): Result<Long> {
+        return try {
+            Result.success(userDataSource.getFollowersCount(userId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getFollowingCount(userId: String): Result<Long> {
+        return try {
+            Result.success(userDataSource.getFollowingCount(userId))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

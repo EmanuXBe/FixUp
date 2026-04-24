@@ -40,9 +40,16 @@ class ReviewRepository @Inject constructor(
     }
 
     suspend fun toggleLike(reviewId: String, isCurrentlyLiked: Boolean): Result<Unit> {
-        // Por ahora, como toggleLikeReview no está en la interfaz ReviewDataSource, 
-        // lo dejamos como success o implementamos si es necesario.
-        return Result.success(Unit)
+        return try {
+            val currentUserId = authRepository.currentUser?.uid ?: return Result.failure(Exception("Usuario no autenticado"))
+            if (isCurrentlyLiked) {
+                reviewDataSource.removeLike(reviewId, currentUserId)
+            } else {
+                reviewDataSource.addLike(reviewId, currentUserId)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<Unit> {

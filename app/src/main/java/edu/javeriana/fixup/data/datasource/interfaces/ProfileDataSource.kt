@@ -12,4 +12,6 @@ interface ProfileDataSource {
     fun getCurrentUser(): FirebaseUser?
     suspend fun updateProfileData(name: String, email: String, phone: String, address: String, profileImageUrl: String?)
     suspend fun getUserData(userId: String): Map<String, Any>?
+    suspend fun getFollowersCount(userId: String): Long
+    suspend fun getFollowingCount(userId: String): Long
 }

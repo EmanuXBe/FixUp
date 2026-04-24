@@ -88,6 +88,28 @@ class ProfileDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getUserData(userId: String): Map<String, Any>? {
-        return firestore.collection("users").document(userId).get().await().data
+        val data = firestore.collection("users").document(userId).get().await().data ?: return null
+        val mutableData = data.toMutableMap()
+        mutableData["followersCount"] = getFollowersCount(userId)
+        mutableData["followingCount"] = getFollowingCount(userId)
+        return mutableData
+    }
+
+    override suspend fun getFollowersCount(userId: String): Long {
+        return firestore.collection("users").document(userId)
+            .collection("followers")
+            .count()
+            .get(com.google.firebase.firestore.AggregateSource.SERVER)
+            .await()
+            .count
+    }
+
+    override suspend fun getFollowingCount(userId: String): Long {
+        return firestore.collection("users").document(userId)
+            .collection("following")
+            .count()
+            .get(com.google.firebase.firestore.AggregateSource.SERVER)
+            .await()
+            .count
     }
 }

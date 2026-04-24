@@ -11,5 +11,7 @@ data class ProfileUiState(
     val profileImageUrl: String? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val reviews: List<ReviewModel> = emptyList()
+    val reviews: List<ReviewModel> = emptyList(),
+    val followersCount: Long = 0,
+    val followingCount: Long = 0
 )

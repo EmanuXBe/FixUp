@@ -51,4 +51,19 @@ class ReviewExpressDataSourceImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun addLike(reviewId: String, userId: String): Result<Unit> {
+        // Implementar si la API de Express soporta likes
+        return Result.success(Unit)
+    }
+
+    override suspend fun removeLike(reviewId: String, userId: String): Result<Unit> {
+        // Implementar si la API de Express soporta likes
+        return Result.success(Unit)
+    }
+
+    override suspend fun getLikedUsers(reviewId: String): Result<List<String>> {
+        // Implementar si la API de Express soporta likes
+        return Result.success(emptyList())
+    }
 }

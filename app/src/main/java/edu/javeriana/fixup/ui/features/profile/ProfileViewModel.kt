@@ -53,6 +53,8 @@ class ProfileViewModel @Inject constructor(
                             phone = data["phone"] as? String ?: "Sin número",
                             address = data["address"] as? String ?: "Sin dirección",
                             role = data["role"] as? String ?: "Cliente",
+                            followersCount = data["followersCount"] as? Long ?: 0L,
+                            followingCount = data["followingCount"] as? Long ?: 0L,
                             isLoading = false
                         )
                     }

@@ -29,11 +29,11 @@ class UserProfileViewModel @Inject constructor(
     fun toggleFollow() {
         val currentUserId = getCurrentUserId() ?: return
         val targetUser = _uiState.value.user ?: return
-        val isFollowing = targetUser.followers.contains(currentUserId)
+        val isCurrentlyFollowing = targetUser.followers.contains(currentUserId)
 
         // Optimistic update
         val oldUser = targetUser
-        val newFollowers = if (isFollowing) {
+        val newFollowers = if (isCurrentlyFollowing) {
             targetUser.followers.filter { it != currentUserId }
         } else {
             targetUser.followers + currentUserId
@@ -42,7 +42,7 @@ class UserProfileViewModel @Inject constructor(
         _uiState.update { it.copy(user = newUser) }
 
         viewModelScope.launch {
-            userRepository.toggleFollow(currentUserId, targetUser.id, isFollowing).onFailure {
+            userRepository.toggleFollow(currentUserId, targetUser.id, isCurrentlyFollowing).onFailure {
                 // Rollback
                 _uiState.update { it.copy(user = oldUser) }
             }
