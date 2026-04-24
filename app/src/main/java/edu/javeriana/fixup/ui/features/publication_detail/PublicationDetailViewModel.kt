@@ -4,9 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
-import edu.javeriana.fixup.data.repository.FeedRepository
-import edu.javeriana.fixup.data.repository.ReviewRepository
 import edu.javeriana.fixup.data.repository.AuthRepository
+import edu.javeriana.fixup.data.repository.FeedRepository
+import edu.javeriana.fixup.data.repository.NotificationRepository
+import edu.javeriana.fixup.data.repository.ReviewRepository
 import edu.javeriana.fixup.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,8 @@ class PublicationDetailViewModel @Inject constructor(
     private val repository: FeedRepository,
     private val reviewRepository: ReviewRepository,
     private val authRepository: AuthRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PublicationDetailUiState())
     val uiState: StateFlow<PublicationDetailUiState> = _uiState.asStateFlow()
@@ -79,9 +81,14 @@ class PublicationDetailViewModel @Inject constructor(
         _uiState.update { it.copy(isFollowingLoading = true) }
 
         viewModelScope.launch {
-            val result = userRepository.toggleFollow(currentUserId, authorId, isFollowing)
-            result.onSuccess {
+            userRepository.toggleFollow(currentUserId, authorId, isFollowing).onSuccess {
                 _uiState.update { it.copy(isFollowing = !isFollowing, isFollowingLoading = false) }
+                if (!isFollowing) {
+                    val name = authRepository.currentUser?.displayName
+                        ?: authRepository.currentUser?.email?.substringBefore("@")
+                        ?: "Usuario"
+                    notificationRepository.notifyFollow(authorId, name)
+                }
             }.onFailure {
                 _uiState.update { it.copy(isFollowingLoading = false) }
             }
@@ -147,8 +154,14 @@ class PublicationDetailViewModel @Inject constructor(
         _uiState.update { it.copy(reviews = newReviews) }
 
         viewModelScope.launch {
-            reviewRepository.toggleLike(reviewId, isLiked).onFailure {
-                // Rollback on failure
+            reviewRepository.toggleLike(reviewId, isLiked).onSuccess {
+                if (!isLiked) {
+                    val name = authRepository.currentUser?.displayName
+                        ?: authRepository.currentUser?.email?.substringBefore("@")
+                        ?: "Usuario"
+                    notificationRepository.notifyLike(reviewId, userId, name)
+                }
+            }.onFailure {
                 _uiState.update { it.copy(reviews = oldReviews) }
             }
         }

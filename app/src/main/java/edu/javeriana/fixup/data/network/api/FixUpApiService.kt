@@ -1,5 +1,7 @@
 package edu.javeriana.fixup.data.network.api
 
+import edu.javeriana.fixup.data.network.dto.FollowNotificationDto
+import edu.javeriana.fixup.data.network.dto.LikeNotificationDto
 import edu.javeriana.fixup.data.network.dto.ReviewDto
 import edu.javeriana.fixup.data.network.dto.UserDto
 import edu.javeriana.fixup.data.network.dto.PropertyDto
@@ -44,4 +46,10 @@ interface FixUpApiService {
      */
     @POST("api/users")
     suspend fun createUser(@Body user: UserDto): Response<UserDto>
+
+    @POST("notifications/like")
+    suspend fun notifyLike(@Body body: LikeNotificationDto): Response<Unit>
+
+    @POST("notifications/follow")
+    suspend fun notifyFollow(@Body body: FollowNotificationDto): Response<Unit>
 }

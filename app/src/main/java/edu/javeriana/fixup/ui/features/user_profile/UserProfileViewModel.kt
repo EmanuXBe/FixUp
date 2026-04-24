@@ -3,9 +3,10 @@ package edu.javeriana.fixup.ui.features.user_profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.javeriana.fixup.data.repository.UserRepository
-import edu.javeriana.fixup.data.repository.ReviewRepository
 import edu.javeriana.fixup.data.repository.AuthRepository
+import edu.javeriana.fixup.data.repository.NotificationRepository
+import edu.javeriana.fixup.data.repository.ReviewRepository
+import edu.javeriana.fixup.data.repository.UserRepository
 import edu.javeriana.fixup.ui.model.UserModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class UserProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val reviewRepository: ReviewRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UserProfileUiState())
@@ -42,8 +44,14 @@ class UserProfileViewModel @Inject constructor(
         _uiState.update { it.copy(user = newUser) }
 
         viewModelScope.launch {
-            userRepository.toggleFollow(currentUserId, targetUser.id, isCurrentlyFollowing).onFailure {
-                // Rollback
+            userRepository.toggleFollow(currentUserId, targetUser.id, isCurrentlyFollowing).onSuccess {
+                if (!isCurrentlyFollowing) {
+                    val name = authRepository.currentUser?.displayName
+                        ?: authRepository.currentUser?.email?.substringBefore("@")
+                        ?: "Usuario"
+                    notificationRepository.notifyFollow(targetUser.id, name)
+                }
+            }.onFailure {
                 _uiState.update { it.copy(user = oldUser) }
             }
         }
@@ -96,8 +104,14 @@ class UserProfileViewModel @Inject constructor(
         _uiState.update { it.copy(reviews = newReviews) }
 
         viewModelScope.launch {
-            reviewRepository.toggleLike(reviewId, isLiked).onFailure {
-                // Rollback on failure
+            reviewRepository.toggleLike(reviewId, isLiked).onSuccess {
+                if (!isLiked) {
+                    val name = authRepository.currentUser?.displayName
+                        ?: authRepository.currentUser?.email?.substringBefore("@")
+                        ?: "Usuario"
+                    notificationRepository.notifyLike(reviewId, userId, name)
+                }
+            }.onFailure {
                 _uiState.update { it.copy(reviews = oldReviews) }
             }
         }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.javeriana.fixup.data.repository.AuthRepository
+import edu.javeriana.fixup.data.repository.NotificationRepository
 import edu.javeriana.fixup.data.repository.ProfileRepository
 import edu.javeriana.fixup.data.repository.ReviewRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
-    private val reviewRepository: ReviewRepository
+    private val reviewRepository: ReviewRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/fixup-f2128.firebasestorage.app/o/WhatsApp%20Image%202026-03-18%20at%205.27.50%20PM.jpeg?alt=media&token=7d9a7e23-31b0-4f0a-b705-c7c9d71abe64"
@@ -232,8 +234,14 @@ class ProfileViewModel @Inject constructor(
         _uiState.update { it.copy(reviews = newReviews) }
 
         viewModelScope.launch {
-            reviewRepository.toggleLike(reviewId, isLiked).onFailure {
-                // Rollback on failure
+            reviewRepository.toggleLike(reviewId, isLiked).onSuccess {
+                if (!isLiked) {
+                    val name = authRepository.currentUser?.displayName
+                        ?: authRepository.currentUser?.email?.substringBefore("@")
+                        ?: "Usuario"
+                    notificationRepository.notifyLike(reviewId, userId, name)
+                }
+            }.onFailure {
                 _uiState.update { it.copy(reviews = oldReviews) }
             }
         }

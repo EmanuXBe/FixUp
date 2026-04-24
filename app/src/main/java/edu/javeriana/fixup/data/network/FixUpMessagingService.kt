@@ -44,11 +44,17 @@ class FixUpMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
         
-        val type = remoteMessage.data["type"]
-        if (type == "LIKE_EVENT") {
-            val title = remoteMessage.notification?.title ?: "¡Nueva interacción!"
-            val body = remoteMessage.notification?.body ?: "A alguien le gustó tu reseña."
-            showNotification(title, body)
+        when (remoteMessage.data["type"]) {
+            "LIKE_EVENT" -> {
+                val title = remoteMessage.notification?.title ?: "¡Nueva interacción!"
+                val body = remoteMessage.notification?.body ?: "A alguien le gustó tu reseña."
+                showNotification(title, body)
+            }
+            "FOLLOW_EVENT" -> {
+                val title = remoteMessage.notification?.title ?: "¡Nuevo seguidor!"
+                val body = remoteMessage.notification?.body ?: "Alguien comenzó a seguirte."
+                showNotification(title, body)
+            }
         }
     }
 
