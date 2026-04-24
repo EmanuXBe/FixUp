@@ -1,6 +1,7 @@
 package edu.javeriana.fixup.data.network.dto
 
 import com.google.gson.annotations.SerializedName
+import edu.javeriana.fixup.ui.model.FollowUser
 
 data class UserDto(
     @SerializedName("id")
@@ -21,4 +22,11 @@ data class UserDto(
     val followers: List<String>? = emptyList(),
     @SerializedName("following")
     val following: List<String>? = emptyList()
+)
+
+fun UserDto.toFollowUser(): FollowUser = FollowUser(
+    uid         = id.orEmpty(),
+    displayName = name.orEmpty(),
+    username    = email?.substringBefore("@").orEmpty(),
+    photoUrl    = profileImageUrl
 )

@@ -110,4 +110,19 @@ class ProfileRepository @Inject constructor(
             Result.failure(e.toAppError())
         }
     }
+
+    suspend fun getFollowCounts(userId: String): Result<Pair<Int, Int>> {
+        return try {
+            val data = profileDataSource.getUserData(userId)
+
+            // El "as? Long" es porque Firebase guarda los números como Long
+            // Usamos ?: 0 para que si el campo NO EXISTE en Firebase, no explote y devuelva 0
+            val followers = (data?.get("followersCount") as? Long)?.toInt() ?: 0
+            val following = (data?.get("followingCount") as? Long)?.toInt() ?: 0
+
+            Result.success(Pair(followers, following))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

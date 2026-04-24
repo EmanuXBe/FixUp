@@ -43,5 +43,24 @@ class UserDataSourceImpl @Inject constructor(
         batch.update(targetUserRef, "followers", targetUserUpdate)
         
         batch.commit().await()
+
     }
+    override suspend fun getFollowerUsers(userId: String): List<UserDto> {
+        // 1. traemos el usuario para obtener la lista de IDs de sus seguidores
+        val user = getUserById(userId) ?: return emptyList()
+        val followerIds = user.followers ?: return emptyList()
+
+        // 2. por cada ID, traemos el documento del seguidor
+        return followerIds.mapNotNull { uid -> getUserById(uid) }
+    }
+
+    override suspend fun getFollowingUsers(userId: String): List<UserDto> {
+        // 1. traemos el usuario para obtener la lista de IDs que sigue
+        val user = getUserById(userId) ?: return emptyList()
+        val followingIds = user.following ?: return emptyList()
+
+        // 2. por cada ID, traemos el documento del usuario seguido
+        return followingIds.mapNotNull { uid -> getUserById(uid) }
+    }
+
 }

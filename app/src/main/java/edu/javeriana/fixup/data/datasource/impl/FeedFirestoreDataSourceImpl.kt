@@ -57,7 +57,7 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
     }
 
     override suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel {
-        val filename = UUID.randomUUID().toString()
+        val file = UUID.randomUUID().toString()
         val ref = storage.getReference("publications/$filename.jpg")
         ref.putFile(imageUri).await()
         val downloadUrl = ref.downloadUrl.await().toString()

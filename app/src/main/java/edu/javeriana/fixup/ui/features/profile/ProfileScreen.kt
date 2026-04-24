@@ -39,14 +39,18 @@ import coil.request.ImageRequest
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
+import edu.javeriana.fixup.ui.model.ReviewModel
+
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onNavigateToFollowList: (String, String) -> Unit = { _, _ -> } // NUEVO: Para ver seguidores
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val currentUserId = viewModel.getCurrentUserId() ?: ""
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -54,11 +58,10 @@ fun ProfileScreen(
         uri?.let { viewModel.uploadProfileImage(it) }
     }
 
-    // Mostrar error y limpiarlo en el ViewModel
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            viewModel.resetErrorMessage() // Limpiamos el error después de mostrar el Toast
+            viewModel.resetErrorMessage()
         }
     }
 
@@ -88,21 +91,13 @@ fun ProfileScreen(
                     onClick = { showEditInfoDialog = true },
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar Perfil",
-                        tint = SoftFawn
-                    )
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Editar Perfil", tint = SoftFawn)
                 }
                 IconButton(
                     onClick = onSettingsClick,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Settings,
-                        contentDescription = "Ajustes",
-                        tint = SoftFawn
-                    )
+                    Icon(imageVector = Icons.Outlined.Settings, contentDescription = "Ajustes", tint = SoftFawn)
                 }
             }
         }
@@ -110,73 +105,17 @@ fun ProfileScreen(
         ProfileContent(
             modifier = Modifier.padding(padding),
             uiState = uiState,
-            currentUserId = viewModel.getCurrentUserId(),
-            onChangePhoto = {
-                galleryLauncher.launch("image/*")
-            },
-            onEditReview = { reviewId, rating, comment ->
-                viewModel.updateReview(reviewId, rating, comment)
-            },
-            onDeleteReview = { reviewId ->
-                viewModel.deleteReview(reviewId)
-            },
-            onLikeReview = { reviewId ->
-                viewModel.toggleLikeReview(reviewId)
-            }
+            currentUserId = currentUserId,
+            onChangePhoto = { galleryLauncher.launch("image/*") },
+            onEditReview = { id, r, c -> viewModel.updateReview(id, r, c) },
+            onDeleteReview = { id -> viewModel.deleteReview(id) },
+            onLikeReview = { id -> viewModel.toggleLikeReview(id) },
+            // PASAMOS LAS ACCIONES DE CLIC A LOS CHIPS
+            onFollowersClick = { onNavigateToFollowList(currentUserId, "followers") },
+            onFollowingClick = { onNavigateToFollowList(currentUserId, "following") }
         )
     }
 }
-
-@Composable
-fun EditProfileDialog(
-    initialName: String,
-    initialPhone: String,
-    initialAddress: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String, String, String) -> Unit
-) {
-    var name by remember { mutableStateOf(initialName) }
-    var phone by remember { mutableStateOf(initialPhone) }
-    var address by remember { mutableStateOf(initialAddress) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Editar Información Personal") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Nombre") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = phone,
-                    onValueChange = { phone = it },
-                    label = { Text("Teléfono") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = address,
-                    onValueChange = { address = it },
-                    label = { Text("Dirección") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(name, phone, address) }) {
-                Text("Guardar")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
-    )
-}
-
 
 @Composable
 fun ProfileContent(
@@ -186,10 +125,12 @@ fun ProfileContent(
     onChangePhoto: () -> Unit = {},
     onEditReview: (String, Int, String) -> Unit = { _, _, _ -> },
     onDeleteReview: (String) -> Unit = {},
-    onLikeReview: (String) -> Unit = {}
+    onLikeReview: (String) -> Unit = {},
+    onFollowersClick: () -> Unit = {}, // NUEVO
+    onFollowingClick: () -> Unit = {}  // NUEVO
 ) {
     val context = LocalContext.current
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -204,103 +145,65 @@ fun ProfileContent(
             modifier = Modifier
                 .size(130.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .clickable { if (!uiState.isLoading) onChangePhoto() }, // Bloqueamos clic si está cargando
+                .clickable { if (!uiState.isLoading) onChangePhoto() },
             contentAlignment = Alignment.Center
         ) {
-            // Imagen principal optimizada con Coil - Sin placeholder para carga directa
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(uiState.profileImageUrl ?: R.drawable.profile_photo)
-                    .crossfade(false) // Desactivado para que aparezca "de una"
+                    .crossfade(false)
                     .diskCachePolicy(CachePolicy.ENABLED)
                     .memoryCachePolicy(CachePolicy.ENABLED)
                     .build(),
                 contentDescription = "Foto de perfil",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
-                // Eliminamos el placeholder para cumplir con el requerimiento
                 error = painterResource(id = R.drawable.profile_photo)
             )
 
-            // Indicador de carga sobre la imagen
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.4f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = Color.White,
-                        modifier = Modifier.size(40.dp)
-                    )
+                Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(40.dp))
                 }
             }
-            
-            // Icono de edición pequeño
+
             Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(8.dp)
-                    .size(28.dp)
-                    .background(SoftFawn, CircleShape)
-                    .border(2.dp, Color.White, CircleShape),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp).size(28.dp).background(SoftFawn, CircleShape).border(2.dp, Color.White, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.CameraAlt,
-                    contentDescription = "Cambiar foto",
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp)
-                )
+                Icon(Icons.Outlined.CameraAlt, contentDescription = "Cambiar foto", tint = Color.White, modifier = Modifier.size(16.dp))
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = uiState.name,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Normal,
-            color = SoftFawn,
-            letterSpacing = 0.5.sp
-        )
-
+        Text(text = uiState.name, fontSize = 26.sp, color = SoftFawn, letterSpacing = 0.5.sp)
         Spacer(modifier = Modifier.height(4.dp))
+        Text(text = uiState.role, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
-        Text(
-            text = uiState.role,
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ── CHIPS DE SEGUIDORES (Agregados manteniendo tu estética) ────────
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            FollowStatChip(count = uiState.followersCount, label = "Seguidores", onClick = onFollowersClick)
+            FollowStatChip(count = uiState.followingCount, label = "Siguiendo", onClick = onFollowingClick)
+        }
 
         Spacer(modifier = Modifier.height(36.dp))
 
-        // ── Mis Reseñas (Movidas aquí) ──────────────────────────
+        // ── Mis Reseñas ──────────────────────────────────────────
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Mis Reseñas",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = SoftFawn
-            )
+            Text(text = "Mis Reseñas", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = SoftFawn)
 
             if (uiState.reviews.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Aún no has realizado reseñas.",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
+                    Text(text = "Aún no has realizado reseñas.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 uiState.reviews.forEach { review ->
@@ -308,20 +211,34 @@ fun ProfileContent(
                         review = review,
                         currentUserId = currentUserId,
                         onLike = { onLikeReview(review.id) },
-                        onEdit = { rating, comment -> onEditReview(review.id, rating, comment) },
+                        onEdit = { r, c -> onEditReview(review.id, r, c) },
                         onDelete = { onDeleteReview(review.id) }
                     )
                 }
             }
         }
-
         Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
 @Composable
+private fun FollowStatChip(count: Int, label: String, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = count.toString(), fontSize = 20.sp, fontWeight = FontWeight.Bold, color = SoftFawn)
+        Text(text = label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+// ... Mantén tus funciones de ReviewItem, EditReviewDialog y EditProfileDialog tal cual las tenías en tu código original ...
+
+@Composable
 fun ReviewItem(
-    review: edu.javeriana.fixup.ui.model.ReviewModel,
+    review: ReviewModel,
     currentUserId: String?,
     onLike: () -> Unit = {},
     onEdit: (Int, String) -> Unit = { _, _ -> },
@@ -345,33 +262,17 @@ fun ReviewItem(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = review.authorName,
-                        fontWeight = FontWeight.Bold,
-                        color = SoftFawn
-                    )
+                    Text(text = review.authorName, fontWeight = FontWeight.Bold, color = SoftFawn)
                     if (review.serviceTitle.isNotEmpty()) {
-                        Text(
-                            text = "Servicio: ${review.serviceTitle}",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Text(text = "Servicio: ${review.serviceTitle}", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
                     }
                 }
-                
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { showEditDialog = true }, modifier = Modifier.size(24.dp)) {
                         Icon(Icons.Default.Edit, contentDescription = "Editar", tint = SoftFawn, modifier = Modifier.size(16.dp))
@@ -381,107 +282,59 @@ fun ReviewItem(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    repeat(5) { index ->
-                        Icon(
-                            imageVector = if (index < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
-                            contentDescription = null,
-                            tint = Color(0xFFFFB300),
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onLike() }
-                ) {
-                    Icon(
-                        imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Like",
-                        tint = if (isLiked) Color.Red else MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(18.dp)
-                    )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Row { repeat(5) { i -> Icon(if (i < review.rating) Icons.Outlined.Star else Icons.Outlined.StarOutline, null, tint = Color(0xFFFFB300), modifier = Modifier.size(16.dp)) } }
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onLike() }) {
+                    Icon(if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder, null, tint = if (isLiked) Color.Red else MaterialTheme.colorScheme.outline, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = review.likedBy.size.toString(),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(text = review.likedBy.size.toString(), fontSize = 14.sp)
                 }
             }
-
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = review.comment,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = review.date,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(text = review.comment, fontSize = 14.sp)
+            Text(text = review.date, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
 
 @Composable
-fun EditReviewDialog(
-    initialRating: Int,
-    initialComment: String,
-    onDismiss: () -> Unit,
-    onConfirm: (Int, String) -> Unit
-) {
+fun EditProfileDialog(initialName: String, initialPhone: String, initialAddress: String, onDismiss: () -> Unit, onConfirm: (String, String, String) -> Unit) {
+    var name by remember { mutableStateOf(initialName) }
+    var phone by remember { mutableStateOf(initialPhone) }
+    var address by remember { mutableStateOf(initialAddress) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Editar Información Personal") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = name, onValueChange = { name = it }, label = { Text("Nombre") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(value = address, onValueChange = { address = it }, label = { Text("Dirección") }, modifier = Modifier.fillMaxWidth())
+            }
+        },
+        confirmButton = { TextButton(onClick = { onConfirm(name, phone, address) }) { Text("Guardar") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+    )
+}
+
+@Composable
+fun EditReviewDialog(initialRating: Int, initialComment: String, onDismiss: () -> Unit, onConfirm: (Int, String) -> Unit) {
     var rating by remember { mutableIntStateOf(initialRating) }
     var comment by remember { mutableStateOf(initialComment) }
-
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Editar Reseña") },
         text = {
             Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    repeat(5) { index ->
-                        IconButton(onClick = { rating = index + 1 }) {
-                            Icon(
-                                imageVector = if (index < rating) Icons.Outlined.Star else Icons.Outlined.StarOutline,
-                                contentDescription = null,
-                                tint = Color(0xFFFFB300)
-                            )
-                        }
-                    }
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                    repeat(5) { i -> IconButton(onClick = { rating = i + 1 }) { Icon(if (i < rating) Icons.Outlined.Star else Icons.Outlined.StarOutline, null, tint = Color(0xFFFFB300)) } }
                 }
-                OutlinedTextField(
-                    value = comment,
-                    onValueChange = { comment = it },
-                    label = { Text("Comentario") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                OutlinedTextField(value = comment, onValueChange = { comment = it }, label = { Text("Comentario") }, modifier = Modifier.fillMaxWidth())
             }
         },
-        confirmButton = {
-            TextButton(onClick = { onConfirm(rating, comment) }) {
-                Text("Guardar")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
-            }
-        }
+        confirmButton = { TextButton(onClick = { onConfirm(rating, comment) }) { Text("Guardar") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
     )
 }
 

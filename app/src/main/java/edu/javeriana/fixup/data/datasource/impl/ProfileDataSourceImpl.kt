@@ -65,11 +65,14 @@ class ProfileDataSourceImpl @Inject constructor(
 
         // 2a. Actualizar datos en la colección "users"
         val userRef = firestore.collection("users").document(user.uid)
+        val snapshot = userRef.get().await()
         val userUpdates = mutableMapOf(
             "name" to name,
             "email" to email,
             "phone" to phone,
-            "address" to address
+            "address" to address,
+            "followersCount" to (snapshot.getLong("followersCount") ?: 0L),
+            "followingCount" to (snapshot.getLong("followingCount") ?: 0L)
         )
         profileImageUrl?.let { userUpdates["profileImageUrl"] = it }
         batch.update(userRef, userUpdates as Map<String, Any>)

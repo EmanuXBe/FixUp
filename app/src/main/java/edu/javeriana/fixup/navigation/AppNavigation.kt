@@ -25,6 +25,7 @@ import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
 import edu.javeriana.fixup.ui.features.user_profile.UserProfileScreen
+import edu.javeriana.fixup.ui.features.followlist.FollowListScreen
 
 @Composable
 fun AppNavigation(
@@ -36,98 +37,94 @@ fun AppNavigation(
         startDestination = AppScreens.Splash.route,
         modifier = modifier
     ) {
-        // Splash screen
         composable(AppScreens.Splash.route) {
             SplashScreen(
                 onNavigateToFeed = {
                     navController.navigate(AppScreens.Feed.route) {
-                        popUpTo(AppScreens.Splash.route) { inclusive = true } }
+                        popUpTo(AppScreens.Splash.route) { inclusive = true }
+                    }
                 },
                 onNavigateToLogin = {
                     navController.navigate(AppScreens.LogIn.route) {
-                        popUpTo(AppScreens.Splash.route) { inclusive = true } }
+                        popUpTo(AppScreens.Splash.route) { inclusive = true }
+                    }
                 }
             )
         }
 
-        // Login screen
         composable(AppScreens.LogIn.route) {
             LogInScreen(
                 viewModel = hiltViewModel(),
                 onLoginSuccess = {
                     navController.navigate(AppScreens.Feed.route) {
-                        popUpTo(AppScreens.LogIn.route) { inclusive = true } }
+                        popUpTo(AppScreens.LogIn.route) { inclusive = true }
+                    }
                 },
                 onRegisterClick = { navController.navigate(AppScreens.Register.route) }
             )
         }
 
-        // Register screen
         composable(AppScreens.Register.route) {
             RegisterScreen(
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() },
                 onRegisterSuccess = {
                     navController.navigate(AppScreens.Feed.route) {
-                        popUpTo(AppScreens.LogIn.route) { inclusive = true } }
+                        popUpTo(AppScreens.LogIn.route) { inclusive = true }
+                    }
                 }
             )
         }
 
-        // Feed screen
         composable(AppScreens.Feed.route) {
             FeedScreen(
                 viewModel = hiltViewModel(),
-                onPublicationClick = { id ->
-                    navController.navigate(AppScreens.Publication.route + "/$id")
-                },
-                onAllPublicationsClick = {
-                    navController.navigate(AppScreens.AllPublications.route)
-                },
-                onFollowingClick = {
-                    navController.navigate(AppScreens.FollowingFeed.route)
-                }
+                onPublicationClick = { id -> navController.navigate(AppScreens.Publication.route + "/$id") },
+                onAllPublicationsClick = { navController.navigate(AppScreens.AllPublications.route) },
+                onFollowingClick = { navController.navigate(AppScreens.FollowingFeed.route) }
             )
         }
 
-        // Rent screen
-        composable(AppScreens.Rent.route) {
-            RentScreen(
+        composable(AppScreens.Profile.route) {
+            ProfileScreen(
                 viewModel = hiltViewModel(),
-                onSelectClick = { id ->
-                    navController.navigate(AppScreens.PropertyDetail.route + "/$id")
-                },
-                onCreateClick = {
-                    navController.navigate(AppScreens.CreatePublication.route)
+                onSettingsClick = { navController.navigate(AppScreens.Settings.route) },
+                onNavigateToFollowList = { uid, type ->
+                    navController.navigate("followList/$uid/$type")
                 }
             )
         }
 
-        // Create Publication screen
-        composable(AppScreens.CreatePublication.route) {
-            CreatePropertyScreen(
+        composable(
+            route = "followList/{userId}/{listType}",
+            arguments = listOf(
+                navArgument("userId") { type = NavType.StringType },
+                navArgument("listType") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            FollowListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onUserClick = { uid ->
+                    navController.navigate("${AppScreens.UserProfile.route}/$uid")
+                }
+            )
+        }
+
+        composable(
+            route = "${AppScreens.UserProfile.route}/{userId}",
+            arguments = listOf(navArgument("userId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            UserProfileScreen(
+                userId = userId,
                 onBackClick = { navController.popBackStack() },
-                onSuccess = { navController.popBackStack() },
+                onServiceClick = { serviceId ->
+                    navController.navigate(AppScreens.Publication.route + "/$serviceId")
+                },
                 viewModel = hiltViewModel()
             )
         }
 
-        // Notifications screen
-        composable(AppScreens.Notifications.route) {
-            NotificationsScreen(viewModel = hiltViewModel())
-        }
-
-        // Profile screen
-        composable(AppScreens.Profile.route) {
-            ProfileScreen(
-                viewModel = hiltViewModel(),
-                onSettingsClick = {
-                    navController.navigate(AppScreens.Settings.route)
-                }
-            )
-        }
-
-        // Settings screen
         composable(AppScreens.Settings.route) {
             SettingsScreen(
                 viewModel = hiltViewModel(),
@@ -140,58 +137,27 @@ fun AppNavigation(
             )
         }
 
-        // Property Detail screen
-        composable(
-            route = AppScreens.PropertyDetail.route + "/{propertyId}",
-            arguments = listOf(navArgument("propertyId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val propertyId = backStackEntry.arguments?.getString("propertyId")
-            PropertyDetailScreen(
-                propertyId = propertyId,
+        // --- Rutas restantes (Rent, Chat, Checkout, etc.) ---
+        composable(AppScreens.Rent.route) {
+            RentScreen(
                 viewModel = hiltViewModel(),
+                onSelectClick = { id -> navController.navigate(AppScreens.PropertyDetail.route + "/$id") },
+                onCreateClick = { navController.navigate(AppScreens.CreatePublication.route) }
+            )
+        }
+
+        composable(AppScreens.CreatePublication.route) {
+            CreatePropertyScreen(
                 onBackClick = { navController.popBackStack() },
-                onReserveClick = { navController.navigate(AppScreens.Checkout.route) }
+                onSuccess = { navController.popBackStack() },
+                viewModel = hiltViewModel()
             )
         }
 
-        // Publication screen
-        composable(
-            route = AppScreens.Publication.route + "/{publicationId}",
-            arguments = listOf(navArgument("publicationId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val publicationId = backStackEntry.arguments?.getString("publicationId")
-            PublicationDetailScreen(
-                publicationId = publicationId,
-                viewModel = hiltViewModel(),
-                onBackClick = { navController.popBackStack() },
-                onContactClick = { navController.navigate(AppScreens.Checkout.route) },
-                onUserProfileClick = { userId ->
-                    navController.navigate(AppScreens.UserProfile.route + "/$userId")
-                }
-            )
+        composable(AppScreens.Chat.route) {
+            ChatScreen(viewModel = hiltViewModel(), onBackClick = { navController.popBackStack() })
         }
 
-        // All Publications screen
-        composable(AppScreens.AllPublications.route) {
-            AllPublicationsScreen(
-                onPublicationClick = { id ->
-                    navController.navigate(AppScreens.Publication.route + "/$id")
-                }
-            )
-        }
-
-        // Following Feed screen
-        composable(AppScreens.FollowingFeed.route) {
-            FollowingFeedScreen(
-                viewModel = hiltViewModel(),
-                onBackClick = { navController.popBackStack() },
-                onPublicationClick = { id ->
-                    navController.navigate(AppScreens.Publication.route + "/$id")
-                }
-            )
-        }
-
-        // Checkout screen
         composable(AppScreens.Checkout.route) {
             CheckoutScreen(
                 viewModel = hiltViewModel(),
@@ -200,27 +166,19 @@ fun AppNavigation(
             )
         }
 
-        // Chat screen
-        composable(AppScreens.Chat.route) {
-            ChatScreen(
-                viewModel = hiltViewModel(),
-                onBackClick = { navController.popBackStack() }
-            )
+        composable(AppScreens.Notifications.route) {
+            NotificationsScreen(viewModel = hiltViewModel())
         }
 
-        // User Profile screen
-        composable(
-            route = AppScreens.UserProfile.route + "/{userId}",
-            arguments = listOf(navArgument("userId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId")
-            UserProfileScreen(
-                userId = userId,
+        composable(AppScreens.AllPublications.route) {
+            AllPublicationsScreen(onPublicationClick = { id -> navController.navigate(AppScreens.Publication.route + "/$id") })
+        }
+
+        composable(AppScreens.FollowingFeed.route) {
+            FollowingFeedScreen(
+                viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() },
-                onServiceClick = { serviceId ->
-                    navController.navigate(AppScreens.Publication.route + "/$serviceId")
-                },
-                viewModel = hiltViewModel()
+                onPublicationClick = { id -> navController.navigate(AppScreens.Publication.route + "/$id") }
             )
         }
     }
