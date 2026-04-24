@@ -63,8 +63,8 @@ abstract class DataModule {
             apiService: FixUpApiService
         ): ReviewDataSource {
             // SWITCH DE ENTORNO: Comenta/Descomenta para cambiar la fuente de datos
-            return ReviewExpressDataSourceImpl(apiService)
-            // return ReviewFirebaseDataSourceImpl(firestore)
+            // return ReviewExpressDataSourceImpl(apiService)
+            return ReviewFirebaseDataSourceImpl(firestore)
         }
     }
 }
