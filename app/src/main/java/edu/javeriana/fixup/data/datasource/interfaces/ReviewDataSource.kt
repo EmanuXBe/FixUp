@@ -9,4 +9,6 @@ interface ReviewDataSource {
     suspend fun addLike(reviewId: String, userId: String): Result<Unit>
     suspend fun removeLike(reviewId: String, userId: String): Result<Unit>
     suspend fun getLikedUsers(reviewId: String): Result<List<String>>
+    suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<Unit>
+    suspend fun deleteReview(reviewId: String): Result<Unit>
 }

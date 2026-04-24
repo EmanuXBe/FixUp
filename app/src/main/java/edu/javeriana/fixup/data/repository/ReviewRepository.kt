@@ -72,10 +72,18 @@ class ReviewRepository @Inject constructor(
     }
 
     suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<Unit> {
-        return Result.success(Unit)
+        return try {
+            reviewDataSource.updateReview(reviewId, rating, comment)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     suspend fun deleteReview(reviewId: String): Result<Unit> {
-        return Result.success(Unit)
+        return try {
+            reviewDataSource.deleteReview(reviewId)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

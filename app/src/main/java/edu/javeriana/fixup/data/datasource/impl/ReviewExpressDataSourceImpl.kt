@@ -71,4 +71,26 @@ class ReviewExpressDataSourceImpl @Inject constructor(
         // Implementar si la API de Express soporta likes
         return Result.success(emptyList())
     }
+
+    override suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<Unit> {
+        return try {
+            val request = ReviewRequestDto(
+                rating = rating,
+                comment = comment
+            )
+            apiService.updateReview(reviewId, request)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteReview(reviewId: String): Result<Unit> {
+        return try {
+            apiService.deleteReview(reviewId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

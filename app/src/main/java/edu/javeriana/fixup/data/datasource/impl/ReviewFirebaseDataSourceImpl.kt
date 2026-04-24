@@ -164,4 +164,33 @@ class ReviewFirebaseDataSourceImpl @Inject constructor(
             Result.failure(e)
         }
     }
+
+    override suspend fun updateReview(reviewId: String, rating: Int, comment: String): Result<Unit> {
+        return try {
+            firestore.collection("reviews")
+                .document(reviewId)
+                .update(
+                    mapOf(
+                        "rating" to rating,
+                        "comment" to comment
+                    )
+                )
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteReview(reviewId: String): Result<Unit> {
+        return try {
+            firestore.collection("reviews")
+                .document(reviewId)
+                .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
