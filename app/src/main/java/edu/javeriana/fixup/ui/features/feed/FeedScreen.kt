@@ -2,8 +2,8 @@ package edu.javeriana.fixup.ui.features.feed
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -39,37 +39,51 @@ fun FeedScreen(
             }
         }
     } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 150.dp),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 SearchBar(
                     value = uiState.searchQuery,
                     onValueChange = { viewModel.onSearchQueryChanged(it) },
-                    modifier = Modifier.padding(top = 16.dp)
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
 
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 FeaturedSection(onFollowingClick = onFollowingClick)
             }
 
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 CategoriesSection(categories = uiState.categories)
             }
 
-            item {
-                PublicationsSection(
-                    publications = uiState.publications,
-                    onAllPublicationsClick = onAllPublicationsClick,
-                    onPublicationClick = onPublicationClick
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                SectionTitle(
+                    text = "Publicaciones",
+                    showArrow = true,
+                    modifier = Modifier
+                        .clickable { onAllPublicationsClick() }
+                        .padding(top = 8.dp, bottom = 4.dp)
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            items(uiState.publications) { publication ->
+                PublicationCard(
+                    imageRes = publication.imageUrl,
+                    title = publication.title,
+                    price = publication.price,
+                    onClick = { onPublicationClick(publication.id) }
+                )
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 }
@@ -106,31 +120,6 @@ private fun CategoriesSection(categories: List<CategoryItemModel>) {
                 CategoryItem(
                     imageRes = category.imageRes,
                     title = category.title
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun PublicationsSection(
-    publications: List<PublicationCardModel>,
-    onAllPublicationsClick: () -> Unit,
-    onPublicationClick: (String) -> Unit
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionTitle(
-            text = "Publicaciones",
-            showArrow = true,
-            modifier = Modifier.clickable { onAllPublicationsClick() }
-        )
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(publications) { publication ->
-                PublicationCard(
-                    imageRes = publication.imageUrl,
-                    title = publication.title,
-                    price = publication.price,
-                    onClick = { onPublicationClick(publication.id) }
                 )
             }
         }

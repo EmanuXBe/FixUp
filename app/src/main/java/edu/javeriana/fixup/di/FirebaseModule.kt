@@ -7,6 +7,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import edu.javeriana.fixup.BuildConfig
+import edu.javeriana.fixup.data.util.AppConstants
 import javax.inject.Singleton
 
 @Module
@@ -15,13 +17,34 @@ object FirebaseModule {
 
     @Provides
     @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+    fun provideFirebaseAuth(): FirebaseAuth {
+        val auth = FirebaseAuth.getInstance()
+        // Solo conectamos al emulador si la aplicación está en modo Debug.
+        // Esto evita que accidentalmente usemos datos de producción durante el desarrollo.
+        if (BuildConfig.DEBUG) {
+            auth.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.AUTH_PORT)
+        }
+        return auth
+    }
 
     @Provides
     @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        val firestore = FirebaseFirestore.getInstance()
+        if (BuildConfig.DEBUG) {
+            // El host 10.0.2.2 es fundamental para que el emulador de Android vea el localhost de la PC.
+            firestore.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.FIRESTORE_PORT)
+        }
+        return firestore
+    }
 
     @Provides
     @Singleton
-    fun provideFirebaseStorage(): FirebaseStorage = FirebaseStorage.getInstance()
+    fun provideFirebaseStorage(): FirebaseStorage {
+        val storage = FirebaseStorage.getInstance()
+        if (BuildConfig.DEBUG) {
+            storage.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.STORAGE_PORT)
+        }
+        return storage
+    }
 }
