@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "edu.javeriana.fixup"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "edu.javeriana.fixup"
@@ -34,11 +34,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -52,7 +53,7 @@ android {
 }
 
 dependencies {
-
+    coreLibraryDesugaring(libs.desugarJdkLibs)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -86,6 +87,7 @@ dependencies {
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.firebase.firestore)
+    implementation(libs.datafaker)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

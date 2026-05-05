@@ -20,10 +20,18 @@ class FeedViewModel @Inject constructor(
     val uiState: StateFlow<FeedUiState> = _uiState.asStateFlow()
 
     init {
-        // Ejecutamos el quemado de datos al iniciar (solo para pruebas)
+        loadFeedData()
+    }
+
+    fun seedData() {
         viewModelScope.launch {
-            dataSeeder.seed()
-            loadFeedData()
+            _uiState.update { it.copy(isLoading = true) }
+            val success = dataSeeder.seed(15) // Generamos 15 elementos
+            if (success) {
+                loadFeedData()
+            } else {
+                _uiState.update { it.copy(isLoading = false) }
+            }
         }
     }
 

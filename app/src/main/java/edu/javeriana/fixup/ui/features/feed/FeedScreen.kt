@@ -55,7 +55,10 @@ fun FeedScreen(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                FeaturedSection(onFollowingClick = onFollowingClick)
+                FeaturedSection(
+                    onFollowingClick = onFollowingClick,
+                    onSeedClick = { viewModel.seedData() }
+                )
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
@@ -89,7 +92,10 @@ fun FeedScreen(
 }
 
 @Composable
-private fun FeaturedSection(onFollowingClick: () -> Unit) {
+private fun FeaturedSection(
+    onFollowingClick: () -> Unit,
+    onSeedClick: () -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -97,12 +103,22 @@ private fun FeaturedSection(onFollowingClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Remodelaciones recomendadas",
+                text = "Recomendados",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
+            
+            // Botón de Pánico para Testing
+            Button(
+                onClick = onSeedClick,
+                contentPadding = PaddingValues(horizontal = 8.dp),
+                modifier = Modifier.padding(end = 4.dp)
+            ) {
+                Text("Sembrar", fontSize = 12.sp)
+            }
+
             TextButton(onClick = onFollowingClick) {
                 Text("Siguiendo")
             }
