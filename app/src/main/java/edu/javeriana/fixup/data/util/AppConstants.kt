@@ -8,13 +8,13 @@ object AppConstants {
      * Host para el emulador de Firebase.
      * Se usa "10.0.2.2" porque es la dirección IP especial que permite al emulador de Android
      * acceder al "localhost" de la máquina anfitriona donde se ejecutan los emuladores de Firebase.
+     * Los servicios son visibles en el Dashboard: http://localhost:4000
      */
     const val EMULATOR_HOST = "10.0.2.2"
 
     /**
      * Puertos estándar configurados en el Firebase Emulator Suite.
-     * El uso de emuladores garantiza que las pruebas de desarrollo no afecten
-     * ni "ensucien" la base de datos de producción.
+     * Estos corresponden a los servicios listados en el Hub (puerto 4000).
      */
     const val AUTH_PORT = 9099
     const val FIRESTORE_PORT = 8080
