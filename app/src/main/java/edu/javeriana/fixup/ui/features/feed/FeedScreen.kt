@@ -111,12 +111,14 @@ private fun FeaturedSection(
             )
             
             // Botón de Pánico para Testing
-            Button(
-                onClick = onSeedClick,
-                contentPadding = PaddingValues(horizontal = 8.dp),
-                modifier = Modifier.padding(end = 4.dp)
-            ) {
-                Text("Sembrar", fontSize = 12.sp)
+            if (edu.javeriana.fixup.BuildConfig.DEBUG) {
+                Button(
+                    onClick = onSeedClick,
+                    contentPadding = PaddingValues(horizontal = 8.dp),
+                    modifier = Modifier.padding(end = 4.dp)
+                ) {
+                    Text("Sembrar", fontSize = 12.sp)
+                }
             }
 
             TextButton(onClick = onFollowingClick) {
