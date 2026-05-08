@@ -36,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import edu.javeriana.fixup.BuildConfig
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.ui.theme.FixUpTheme
 import edu.javeriana.fixup.ui.theme.SoftFawn
@@ -133,6 +134,9 @@ fun ProfileScreen(
                 },
                 onLikeReview = { reviewId ->
                     viewModel.toggleLikeReview(reviewId)
+                },
+                onSeedData = {
+                    viewModel.seedData()
                 }
             )
         }
@@ -198,7 +202,8 @@ fun ProfileContent(
     onChangePhoto: () -> Unit = {},
     onEditReview: (String, Int, String) -> Unit = { _, _, _ -> },
     onDeleteReview: (String) -> Unit = {},
-    onLikeReview: (String) -> Unit = {}
+    onLikeReview: (String) -> Unit = {},
+    onSeedData: () -> Unit = {}
 ) {
     val context = LocalContext.current
     
@@ -324,6 +329,21 @@ fun ProfileContent(
                         onDelete = { onDeleteReview(review.id) }
                     )
                 }
+            }
+        }
+
+        if (BuildConfig.DEBUG) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onSeedData,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Icon(Icons.Outlined.CloudUpload, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Seed Data (Debug Only)")
             }
         }
 

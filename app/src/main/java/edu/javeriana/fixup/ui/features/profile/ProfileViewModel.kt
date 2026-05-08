@@ -8,6 +8,7 @@ import edu.javeriana.fixup.data.repository.AuthRepository
 import edu.javeriana.fixup.data.repository.NotificationRepository
 import edu.javeriana.fixup.data.repository.ProfileRepository
 import edu.javeriana.fixup.data.repository.ReviewRepository
+import edu.javeriana.fixup.data.util.FirebaseSeeder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,8 @@ class ProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val profileRepository: ProfileRepository,
     private val reviewRepository: ReviewRepository,
-    private val notificationRepository: NotificationRepository
+    private val notificationRepository: NotificationRepository,
+    private val firebaseSeeder: FirebaseSeeder
 ) : ViewModel() {
 
     private val defaultImageUrl = "https://firebasestorage.googleapis.com/v0/b/fixup-f2128.firebasestorage.app/o/WhatsApp%20Image%202026-03-18%20at%205.27.50%20PM.jpeg?alt=media&token=7d9a7e23-31b0-4f0a-b705-c7c9d71abe64"
@@ -215,6 +217,19 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun getCurrentUserId(): String? = authRepository.currentUser?.uid
+
+    fun seedData() {
+        val currentUserId = authRepository.currentUser?.uid
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            firebaseSeeder.seedData(currentUserId).onSuccess {
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Datos cargados exitosamente") }
+                loadUserReviews() // Recargar para ver las nuevas reseñas
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
+    }
 
     fun toggleLikeReview(reviewId: String) {
         val userId = authRepository.currentUser?.uid ?: return
