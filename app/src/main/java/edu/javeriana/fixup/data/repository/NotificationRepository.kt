@@ -38,4 +38,8 @@ class NotificationRepository @Inject constructor(
     suspend fun saveNotification(userId: String, notification: NotificationDto): Result<Unit> {
         return notificationDataSource.saveNotification(userId, notification)
     }
+
+    suspend fun markAsRead(userId: String, notificationId: String): Result<Unit> {
+        return notificationDataSource.markAsRead(userId, notificationId)
+    }
 }

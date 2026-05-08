@@ -1,5 +1,6 @@
 package edu.javeriana.fixup.ui.features.auth.register
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -96,31 +97,28 @@ class RegisterViewModel @Inject constructor(
             )
             
             authResult.onSuccess { firebaseUser ->
-                // PASO 2: Sincronización con el Backend (PostgreSQL)
-                val userDto = UserDto(
-                    id = firebaseUser.uid,
-                    name = email.substringBefore("@"),
-                    email = email,
-                    phone = cedula,
-                    address = null,
-                    role = role,
-                    profileImageUrl = null
-                )
+                _uiState.update { it.copy(isLoading = false) }
+                onSuccess()
 
-                val syncResult = authRepository.syncUserToBackend(userDto)
-
-                syncResult.onSuccess {
-                    _uiState.update { it.copy(isLoading = false) }
-                    onSuccess()
-                }.onFailure { e ->
-                    _uiState.update { 
-                        it.copy(
-                            isLoading = false, 
-                            error = "Error al sincronizar datos: ${e.message}"
-                        ) 
+                // PASO 2: Sincronización con el Backend (PostgreSQL) - NON-BLOCKING
+                viewModelScope.launch {
+                    try {
+                        val userDto = UserDto(
+                            id = firebaseUser.uid,
+                            name = email.substringBefore("@"),
+                            email = email,
+                            phone = cedula,
+                            address = null,
+                            role = role,
+                            profileImageUrl = null
+                        )
+                        authRepository.syncUserToBackend(userDto).onFailure { e ->
+                            Log.e("RegisterViewModel", "Error en syncUserToBackend: ${e.message}")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("RegisterViewModel", "Excepción en syncUserToBackend", e)
                     }
                 }
-
             }.onFailure { e ->
                 // El repositorio ya devuelve mensajes amigables vía AppError
                 _uiState.update { it.copy(isLoading = false, error = e.message) }

@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -20,8 +19,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import java.util.Date
-import java.util.Locale
 import javax.inject.Inject
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,7 +36,6 @@ class FixUpMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("FCM", "Nuevo token: $token")
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         if (userId != null) {
             scope.launch {
@@ -60,32 +56,25 @@ class FixUpMessagingService : FirebaseMessagingService() {
     }
 
     private fun saveAndShowNotification(title: String, body: String, type: String?, targetUserId: String?) {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-        
-        // Only save and show if there's no targetUserId (broadcast) 
-        // OR if the current user is the target
-        if (targetUserId != null && targetUserId != currentUserId) {
-            Log.d("FCM", "Notification ignored: targetUserId ($targetUserId) does not match currentUserId ($currentUserId)")
-            return
-        }
-
-        if (currentUserId != null) {
-            scope.launch {
-                notificationRepository.saveNotification(
-                    currentUserId,
-                    NotificationDto(
-                        id = "",
-                        title = title,
-                        message = body,
-                        date = "hace un momento", // O formatear fecha real
-                        isRead = false,
-                        actionType = if (type == "RESPOND") "RESPOND" else null
-                    )
-                )
-            }
-        }
-        
+        // The FCM token already guarantees this message is for this device/user.
+        // No need to re-check targetUserId — doing so causes silent drops when
+        // FirebaseAuth hasn't finished initializing.
         showNotification(title, body)
+
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: targetUserId ?: return
+        scope.launch {
+            notificationRepository.saveNotification(
+                currentUserId,
+                NotificationDto(
+                    id = "",
+                    title = title,
+                    message = body,
+                    date = "hace un momento",
+                    isRead = false,
+                    actionType = if (type == "RESPOND") "RESPOND" else null
+                )
+            )
+        }
     }
 
     private fun showNotification(title: String, body: String) {

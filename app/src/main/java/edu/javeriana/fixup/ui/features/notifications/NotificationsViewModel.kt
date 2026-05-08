@@ -24,6 +24,13 @@ class NotificationsViewModel @Inject constructor(
         loadNotifications()
     }
 
+    fun markAsRead(notificationId: String) {
+        val userId = authRepository.currentUser?.uid ?: return
+        viewModelScope.launch {
+            notificationRepository.markAsRead(userId, notificationId)
+        }
+    }
+
     private fun loadNotifications() {
         viewModelScope.launch {
             val userId = authRepository.currentUser?.uid ?: ""

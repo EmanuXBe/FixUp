@@ -19,3 +19,16 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# DataFaker usa snakeyaml internamente, que referencia java.beans.* (API de Java desktop).
+# Esas clases no existen en Android pero el código nunca se ejecuta en runtime.
+-dontwarn java.beans.**
+
+# DTOs usados con Gson (Retrofit). R8 renombraría los campos y rompería la serialización JSON.
+-keep class edu.javeriana.fixup.data.network.dto.** { *; }
+
+# Gson necesita acceder a los campos por reflexión
+-keepclassmembers class edu.javeriana.fixup.data.network.dto.** { *; }
+
+# Firebase Messaging Service con Hilt
+-keep class edu.javeriana.fixup.data.network.FixUpMessagingService { *; }

@@ -69,10 +69,17 @@ class NotificationFirebaseDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun markAsRead(notificationId: String): Result<Unit> {
-        // This would require userId too if we follow the same path, 
-        // or we could search across users if notificationId is unique.
-        // For now, let's keep it simple.
-        return Result.success(Unit)
+    override suspend fun markAsRead(userId: String, notificationId: String): Result<Unit> {
+        return try {
+            firestore.collection("users")
+                .document(userId)
+                .collection("notifications")
+                .document(notificationId)
+                .update("isRead", true)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

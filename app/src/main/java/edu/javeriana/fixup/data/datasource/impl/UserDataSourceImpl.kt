@@ -16,8 +16,14 @@ class UserDataSourceImpl @Inject constructor(
         return if (document.exists()) {
             val followers = getFollowersIds(userId)
             val following = getFollowingIds(userId)
-            document.toObject(UserDto::class.java)?.copy(
+            UserDto(
                 id = document.id,
+                name = document.getString("name"),
+                email = document.getString("email"),
+                phone = document.getString("phone"),
+                address = document.getString("address"),
+                role = document.getString("role"),
+                profileImageUrl = document.getString("profileImageUrl"),
                 followers = followers,
                 following = following
             )
@@ -95,7 +101,7 @@ class UserDataSourceImpl @Inject constructor(
 
     override suspend fun updateFcmToken(userId: String, token: String) {
         firestore.collection("users").document(userId)
-            .update("fcmToken", token)
+            .set(mapOf("fcmToken" to token), com.google.firebase.firestore.SetOptions.merge())
             .await()
     }
 }

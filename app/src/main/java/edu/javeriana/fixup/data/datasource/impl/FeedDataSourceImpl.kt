@@ -1,26 +1,23 @@
 package edu.javeriana.fixup.data.datasource.impl
 
 import android.net.Uri
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import edu.javeriana.fixup.R
 import edu.javeriana.fixup.data.datasource.interfaces.FeedDataSource
 import edu.javeriana.fixup.data.network.dto.CategoryDto
 import edu.javeriana.fixup.data.network.dto.PublicationDto
-import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
 import edu.javeriana.fixup.data.network.dto.ServiceDto
 import edu.javeriana.fixup.data.network.api.FixUpApiService
 import edu.javeriana.fixup.ui.model.PropertyModel
-import edu.javeriana.fixup.ui.model.ReviewModel
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import javax.inject.Inject
 
-/**
- * Implementación de FeedDataSource que consume datos del backend real y usa Firebase Storage.
- */
 class FeedDataSourceImpl @Inject constructor(
     private val apiService: FixUpApiService,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val firestore: FirebaseFirestore
 ) : FeedDataSource {
     override suspend fun getCategories(): List<CategoryDto> {
         return listOf(
@@ -32,21 +29,44 @@ class FeedDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getPublications(): List<PublicationDto> {
-        val services = apiService.getServices()
-        return services.map { it.toPublicationDto() }
+        // Try Firestore first (populated by DataSeeder in debug, or real services in prod)
+        val snapshot = firestore.collection("services").get().await()
+        if (snapshot.documents.isNotEmpty()) {
+            return snapshot.documents.mapNotNull { doc ->
+                PublicationDto(
+                    id        = doc.id,
+                    title     = doc.getString("title") ?: "Sin título",
+                    priceText = "Desde $${doc.getDouble("price")?.toLong() ?: 0}",
+                    description = doc.getString("description"),
+                    location  = doc.getString("category") ?: "",
+                    imageUrl  = doc.getString("imageUrl"),
+                    authorId  = doc.getString("providerId")
+                )
+            }
+        }
+        // Fallback: backend (PostgreSQL) for release environments without Firestore services
+        return apiService.getServices().map { it.toPublicationDto() }
     }
 
     override suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto> {
         if (followingIds.isEmpty()) return emptyList()
-        val services = apiService.getServices()
-        return services
-            .filter { it.providerId in followingIds }
-            .map { it.toPublicationDto() }
+        return getPublications().filter { it.authorId in followingIds }
     }
 
-    override suspend fun getPublicationById(id: Int): PublicationDto {
-        val service = apiService.getServiceById(id)
-        return service.toPublicationDto()
+    override suspend fun getPublicationById(id: String): PublicationDto {
+        val doc = firestore.collection("services").document(id).get().await()
+        if (doc.exists()) {
+            return PublicationDto(
+                id        = doc.id,
+                title     = doc.getString("title") ?: "Sin título",
+                priceText = "Desde $${doc.getDouble("price")?.toLong() ?: 0}",
+                description = doc.getString("description"),
+                location  = doc.getString("category") ?: "",
+                imageUrl  = doc.getString("imageUrl"),
+                authorId  = doc.getString("providerId")
+            )
+        }
+        return apiService.getServiceById(id.toIntOrNull() ?: 0).toPublicationDto()
     }
 
     override suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel {

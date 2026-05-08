@@ -39,20 +39,19 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
 
     override suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto> {
         if (followingIds.isEmpty()) return emptyList()
-        
-        // Firestore 'in' query supports up to 10 elements. 
-        // For a real app, we might need to chunk this or use a different approach.
-        // But for this requirement, we'll use the 'in' operator.
-        val snapshot = firestore.collection("articles")
-            .whereIn("authorId", followingIds)
-            .get()
-            .await()
-        return snapshot.documents.mapNotNull { it.toPublicationDto() }
+        // Firestore whereIn limit is 10 — chunk and merge results
+        return followingIds.chunked(10).flatMap { chunk ->
+            firestore.collection("articles")
+                .whereIn("authorId", chunk)
+                .get()
+                .await()
+                .documents
+                .mapNotNull { it.toPublicationDto() }
+        }
     }
 
-    override suspend fun getPublicationById(id: Int): PublicationDto {
-        // Los documentos en Firestore usan el id como string (ej: "1", "2")
-        val snapshot = firestore.collection("articles").document(id.toString()).get().await()
+    override suspend fun getPublicationById(id: String): PublicationDto {
+        val snapshot = firestore.collection("articles").document(id).get().await()
         return snapshot.toPublicationDto() ?: throw Exception("Artículo no encontrado")
     }
 

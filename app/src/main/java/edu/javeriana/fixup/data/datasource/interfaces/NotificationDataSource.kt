@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface NotificationDataSource {
     fun getNotifications(userId: String): Flow<Result<List<NotificationDto>>>
     suspend fun saveNotification(userId: String, notification: NotificationDto): Result<Unit>
-    suspend fun markAsRead(notificationId: String): Result<Unit>
+    suspend fun markAsRead(userId: String, notificationId: String): Result<Unit>
 }

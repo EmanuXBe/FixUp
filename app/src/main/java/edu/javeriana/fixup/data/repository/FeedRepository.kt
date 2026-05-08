@@ -41,7 +41,7 @@ class FeedRepository @Inject constructor(
         }
     }
 
-    suspend fun getPublicationById(id: Int): Result<PublicationCardModel> {
+    suspend fun getPublicationById(id: String): Result<PublicationCardModel> {
         return try {
             val dto = dataSource.getPublicationById(id)
             Result.success(dto.toUiModel())

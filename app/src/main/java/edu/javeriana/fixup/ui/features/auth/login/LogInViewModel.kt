@@ -70,7 +70,10 @@ class LogInViewModel @Inject constructor(
             val result = authRepository.signIn(email, password)
             
             result.onSuccess { user ->
-                // Obtener y registrar el token de FCM
+                _uiState.update { it.copy(isLoading = false) }
+                onSuccess()
+
+                // Obtener y registrar el token de FCM - NON-BLOCKING
                 viewModelScope.launch {
                     try {
                         val token = FirebaseMessaging.getInstance().token.await()
@@ -78,8 +81,6 @@ class LogInViewModel @Inject constructor(
                     } catch (e: Exception) {
                         Log.e("LogInViewModel", "Error al obtener token FCM", e)
                     }
-                    _uiState.update { it.copy(isLoading = false) }
-                    onSuccess()
                 }
             }.onFailure { e ->
                 // Usamos directamente el mensaje que viene del repositorio (mapeado por AppError)

@@ -14,6 +14,6 @@ interface FeedDataSource {
     suspend fun getCategories(): List<CategoryDto>
     suspend fun getPublications(): List<PublicationDto>
     suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto>
-    suspend fun getPublicationById(id: Int): PublicationDto
+    suspend fun getPublicationById(id: String): PublicationDto
     suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel
 }

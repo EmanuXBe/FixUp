@@ -1,6 +1,7 @@
 package edu.javeriana.fixup.ui.features.notifications
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,7 +66,7 @@ fun NotificationsScreen(
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
                 items(uiState.requests) { request ->
-                    RequestRow(request)
+                    RequestRow(request, onMarkAsRead = viewModel::markAsRead)
                 }
             }
         }
@@ -128,10 +129,11 @@ fun ChipItemIcon() {
 }
 
 @Composable
-fun RequestRow(item: NotificationItemModel) {
+fun RequestRow(item: NotificationItemModel, onMarkAsRead: (String) -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { if (!item.isRead) onMarkAsRead(item.id) }
             .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -28,28 +28,27 @@ class PublicationDetailViewModel @Inject constructor(
     val uiState: StateFlow<PublicationDetailUiState> = _uiState.asStateFlow()
 
     fun loadPublication(publicationId: String?) {
-        val id = publicationId?.toIntOrNull()
-        if (id == null) {
+        if (publicationId.isNullOrBlank()) {
             _uiState.update { it.copy(error = "ID de publicación inválido", isLoading = false) }
             return
         }
 
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
-            val publicationResult = repository.getPublicationById(id)
-            
+            val publicationResult = repository.getPublicationById(publicationId)
+
             publicationResult.onSuccess { publication ->
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         publication = publication,
                         description = publication.description ?: "Sin descripción disponible",
                         error = null
                     )
                 }
-                loadReviews(id)
+                loadReviews(publicationId)
                 checkFollowingStatus(publication.authorId)
             }.onFailure { error ->
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         isLoading = false,
                         error = "Error al cargar la publicación: ${error.message}"
@@ -95,9 +94,9 @@ class PublicationDetailViewModel @Inject constructor(
         }
     }
 
-    private fun loadReviews(serviceId: Int) {
+    private fun loadReviews(serviceId: String) {
         viewModelScope.launch {
-            reviewRepository.getReviewsByServiceId(serviceId.toString()).collect { result ->
+            reviewRepository.getReviewsByServiceId(serviceId).collect { result ->
                 result.onSuccess { reviews ->
                     _uiState.update { it.copy(reviews = reviews, isLoading = false) }
                 }.onFailure {
