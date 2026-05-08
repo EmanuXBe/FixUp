@@ -1,5 +1,8 @@
 package edu.javeriana.fixup.data.network.api
 
+import edu.javeriana.fixup.data.network.dto.CreatePropertyRequestDto
+import edu.javeriana.fixup.data.network.dto.CreatePropertyResponseDto
+import edu.javeriana.fixup.data.network.dto.FirestorePropertyDto
 import edu.javeriana.fixup.data.network.dto.FollowNotificationDto
 import edu.javeriana.fixup.data.network.dto.LikeNotificationDto
 import edu.javeriana.fixup.data.network.dto.NotificationDto
@@ -56,4 +59,22 @@ interface FixUpApiService {
 
     @GET("api/notifications/{userId}")
     suspend fun getNotifications(@Path("userId") userId: String): List<NotificationDto>
+
+    /**
+     * POST /api/properties — Publica un nuevo inmueble en Firestore a través del backend.
+     *
+     * El cliente sube las imágenes primero a Firebase Storage y envía aquí
+     * solo las URLs resultantes (campo "imagenes"). El backend almacena el
+     * documento completo en la colección "properties" de Firestore y devuelve
+     * el ID autogenerado (propertyId).
+     *
+     * @param body Datos del inmueble validados antes de enviar (ver CreatePropertyRequestDto)
+     * @return CreatePropertyResponseDto con el propertyId generado por Firestore
+     */
+    /** GET /api/properties — Lista todos los inmuebles publicados en Firestore. */
+    @GET("api/properties")
+    suspend fun getProperties(): List<FirestorePropertyDto>
+
+    @POST("api/properties")
+    suspend fun createProperty(@Body body: CreatePropertyRequestDto): CreatePropertyResponseDto
 }

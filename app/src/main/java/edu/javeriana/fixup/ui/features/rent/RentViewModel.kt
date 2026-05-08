@@ -1,17 +1,22 @@
 package edu.javeriana.fixup.ui.features.rent
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.javeriana.fixup.data.repository.RentRepository
-import edu.javeriana.fixup.ui.model.PropertyModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel de la pantalla de listado de inmuebles (RentScreen).
+ *
+ * Responsabilidad única: cargar y exponer la lista de propiedades disponibles.
+ * La lógica de CREACIÓN de inmuebles se delegó a [CreatePropertyViewModel]
+ * para respetar el Principio de Responsabilidad Única (SRP).
+ */
 @HiltViewModel
 class RentViewModel @Inject constructor(
     private val repository: RentRepository
@@ -24,38 +29,22 @@ class RentViewModel @Inject constructor(
         loadProperties()
     }
 
-    private fun loadProperties() {
+    fun loadProperties() {
         viewModelScope.launch {
-            // No reseteamos a Loading si ya tenemos datos para evitar parpadeos, 
-            // a menos que sea la primera carga.
+            // Evitar parpadeo: solo mostrar Loading en la primera carga
             if (_uiState.value !is RentUiState.Success) {
                 _uiState.value = RentUiState.Loading
             }
 
-            val result = repository.getProperties()
-            
-            result.onSuccess { properties ->
-                _uiState.value = RentUiState.Success(properties)
-            }.onFailure { error ->
-                _uiState.value = RentUiState.Error("Ocurrió un error al cargar las propiedades: ${error.message}")
-            }
+            repository.getProperties()
+                .onSuccess { properties ->
+                    _uiState.value = RentUiState.Success(properties)
+                }
+                .onFailure { error ->
+                    _uiState.value = RentUiState.Error(
+                        "Error al cargar las propiedades: ${error.message}"
+                    )
+                }
         }
-    }
-
-    fun createProperty(property: PropertyModel, imageUri: Uri, onComplete: () -> Unit) {
-        viewModelScope.launch {
-            val result = repository.createProperty(property, imageUri)
-            result.onSuccess {
-                loadProperties()
-                onComplete()
-            }.onFailure {
-                // Manejar error de creación si es necesario
-                onComplete()
-            }
-        }
-    }
-
-    fun onPropertySelected(propertyId: String) {
-        // Lógica adicional si es necesaria
     }
 }

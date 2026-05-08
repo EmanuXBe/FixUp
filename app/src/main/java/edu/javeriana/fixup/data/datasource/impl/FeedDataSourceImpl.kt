@@ -83,17 +83,17 @@ class FeedDataSourceImpl @Inject constructor(
         val publicationWithImage = property.copy(imageUrl = downloadUrl)
         
         val dto = ServiceDto(
-            id = publicationWithImage.id,
+            id = publicationWithImage.id?.toIntOrNull(),
             title = publicationWithImage.title,
             description = publicationWithImage.description,
             price = publicationWithImage.price,
             category = publicationWithImage.location,
             imageUrl = publicationWithImage.imageUrl
         )
-        
+
         val resultDto = apiService.createService(dto)
         return PropertyModel(
-            id = resultDto.id,
+            id = resultDto.id?.toString(),
             title = resultDto.title,
             description = resultDto.description,
             price = resultDto.price,
@@ -104,7 +104,7 @@ class FeedDataSourceImpl @Inject constructor(
 
     // Also handle ServiceDto to PublicationDto if needed, as getServices returns ServiceDto
     private fun ServiceDto.toPublicationDto() = PublicationDto(
-        id = this.id.toString(),
+        id = this.id?.toString() ?: "",
         title = this.title ?: "Sin título",
         priceText = "Desde $${this.price ?: 0.0}",
         description = this.description,

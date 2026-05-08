@@ -58,15 +58,9 @@ fun RentScreen(
                     }
                 }
                 is RentUiState.Success -> {
-                    val onPropertySelected = remember(viewModel, onSelectClick) {
-                        { id: Int ->
-                            viewModel.onPropertySelected(id.toString())
-                            onSelectClick(id.toString())
-                        }
-                    }
                     RentContent(
-                        properties = state.properties,
-                        onPropertySelected = onPropertySelected
+                        properties         = state.properties,
+                        onPropertySelected = { id -> onSelectClick(id) }
                     )
                 }
                 is RentUiState.Error -> {
@@ -82,7 +76,7 @@ fun RentScreen(
 @Composable
 fun RentContent(
     properties: List<PropertyModel>,
-    onPropertySelected: (Int) -> Unit
+    onPropertySelected: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

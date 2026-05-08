@@ -3,12 +3,15 @@ package edu.javeriana.fixup.ui.model
 import com.google.gson.annotations.SerializedName
 
 /**
- * Representa una propiedad inmobiliaria o servicio.
- * Actualizado para coincidir con el contrato profesional del backend.
+ * Modelo de dominio para un inmueble.
+ *
+ * El campo [id] es String para soportar:
+ *   - IDs de Firestore: strings alfanuméricos autogenerados (ej: "Kx3pQzAb...")
+ *   - IDs de mocks locales: strings numéricos ("101", "102", ...) para backwards-compat
  */
 data class PropertyModel(
     @SerializedName("id")
-    val id: Int? = null,
+    val id: String? = null,
     @SerializedName("title")
     val title: String? = null,
     @SerializedName("description")

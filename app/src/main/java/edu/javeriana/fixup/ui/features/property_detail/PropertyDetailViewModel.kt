@@ -22,26 +22,28 @@ class PropertyDetailViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             val result = repository.getProperties()
-            
+
             result.onSuccess { properties ->
-                val idAsInt = propertyId?.toIntOrNull()
-                val property = properties.find { it.id == idAsInt }
-                _uiState.update { 
+                // Buscar por String ID (Firestore) o por String numérico (mocks: "101", "102"…)
+                val property = properties.find { it.id == propertyId }
+                _uiState.update {
                     it.copy(
-                        property = property,
+                        property  = property,
                         isLoading = false,
-                        error = if (property == null) "Propiedad no encontrada" else null
+                        error     = if (property == null) "Propiedad no encontrada" else null
                     )
                 }
-                
-                // Si la propiedad existe, cargamos sus reseñas
-                idAsInt?.let { loadReviews(it) }
-                
+
+                // Las reseñas están en PostgreSQL y se indexan por Int.
+                // Solo intentamos cargarlas para propiedades con IDs numéricos (mocks/postgres).
+                // Para IDs de Firestore (alfanuméricos) no hay reseñas en el backend Express.
+                propertyId?.toIntOrNull()?.let { loadReviews(it) }
+
             }.onFailure { error ->
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = "Error al cargar la propiedad: ${error.message}"
+                        error     = "Error al cargar la propiedad: ${error.message}"
                     )
                 }
             }

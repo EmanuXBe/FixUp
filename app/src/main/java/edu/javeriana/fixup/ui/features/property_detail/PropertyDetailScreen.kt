@@ -56,18 +56,18 @@ fun PropertyDetailScreen(
             uiState = uiState,
             onBackClick = onBackClick,
             onReserveClick = onReserveClick,
-            onSaveReview = { rating, comment -> 
-                uiState.property?.id?.let { id ->
+            onSaveReview = { rating, comment ->
+                uiState.property?.id?.toIntOrNull()?.let { id ->
                     viewModel.saveReview(id, rating, comment)
                 }
             },
             onUpdateReview = { reviewId, rating, comment ->
-                uiState.property?.id?.let { id ->
+                uiState.property?.id?.toIntOrNull()?.let { id ->
                     viewModel.updateReview(reviewId, id, rating, comment)
                 }
             },
             onDeleteReview = { reviewId ->
-                uiState.property?.id?.let { id ->
+                uiState.property?.id?.toIntOrNull()?.let { id ->
                     viewModel.deleteReview(reviewId, id)
                 }
             }
