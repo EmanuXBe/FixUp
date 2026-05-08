@@ -1,5 +1,6 @@
 package edu.javeriana.fixup.di
 
+import edu.javeriana.fixup.BuildConfig
 import edu.javeriana.fixup.data.network.api.FixUpApiService
 import dagger.Module
 import dagger.Provides
@@ -22,12 +23,18 @@ import javax.inject.Singleton
 object NetworkModule {
 
     /**
-     * URL Base del backend. 
-     * Para la defensa académica: Se utiliza HTTPS para garantizar la cifrado de datos en tránsito.
-     * En desarrollo local se suele usar "http://10.0.2.2:3000/", pero para producción en Render 
-     * se requiere la URL pública con protocolo seguro.
+     * URL base del backend según el entorno:
+     *
+     * DEBUG  → backend local en el Mac (10.0.2.2 es el alias del host desde el AVD).
+     *          El backend debe estar corriendo con `npm run dev` y conectado al emulador
+     *          de Firebase (FIRESTORE_EMULATOR_HOST=localhost:8080 en su .env).
+     *
+     * RELEASE → backend desplegado en Render con Firebase producción.
      */
-    private const val BASE_URL = "https://fixup-backend-erh9.onrender.com/"
+    private val BASE_URL = if (BuildConfig.DEBUG)
+        "http://10.0.2.2:3000/"
+    else
+        "https://fixup-backend-erh9.onrender.com/"
 
     /**
      * Provee una instancia configurada de OkHttpClient.

@@ -4,65 +4,132 @@ import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
 import edu.javeriana.fixup.data.datasource.interfaces.RentDataSource
 import edu.javeriana.fixup.data.network.api.FixUpApiService
+import edu.javeriana.fixup.data.network.dto.CreatePropertyRequestDto
 import edu.javeriana.fixup.ui.model.PropertyModel
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-/**
- * Implementación de RentDataSource con datos quemados (Mock) para Alquiler.
- * Se han migrado los servicios reales a FeedDataSource.
- */
 class RentDataSourceImpl @Inject constructor(
     private val apiService: FixUpApiService,
     private val storage: FirebaseStorage
 ) : RentDataSource {
 
+    // ─── Mock de respaldo (debug sin backend o sin datos publicados aún) ──────
+
     private val mockProperties = listOf(
         PropertyModel(
-            id = 101,
+            id = "101",
             title = "Apartamento en Chapinero",
-            description = "Hermoso apartamento amoblado, cerca a universidades y zonas comerciales. Excelente iluminación natural.",
+            description = "Hermoso apartamento amoblado, cerca a universidades y zonas comerciales.",
             price = 2500000.0,
             location = "Chapinero Alto, Bogotá",
             imageUrl = "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
         ),
         PropertyModel(
-            id = 102,
+            id = "102",
             title = "Casa Campestre en Chía",
-            description = "Amplia casa con zonas verdes, 3 habitaciones, 4 baños y estudio. Ideal para familias que buscan tranquilidad.",
+            description = "Amplia casa con zonas verdes, 3 habitaciones, 4 baños y estudio.",
             price = 4800000.0,
             location = "Vía Guaymaral, Chía",
             imageUrl = "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
         ),
         PropertyModel(
-            id = 103,
+            id = "103",
             title = "Estudio Loft en El Retiro",
-            description = "Moderno loft con acabados industriales. Edificio con gimnasio y terraza comunitaria.",
+            description = "Moderno loft con acabados industriales. Edificio con gimnasio y terraza.",
             price = 3200000.0,
             location = "Barrio El Retiro, Bogotá",
             imageUrl = "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
         ),
         PropertyModel(
-            id = 104,
+            id = "104",
             title = "Local Comercial en Usaquén",
-            description = "Excelente ubicación para negocio gastronómico. Amplio espacio y zona de alto tráfico peatonal.",
+            description = "Excelente ubicación para negocio. Alto tráfico peatonal.",
             price = 6000000.0,
             location = "Plaza de Usaquén, Bogotá",
             imageUrl = "https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=60"
         )
     )
 
+    /**
+     * Obtiene los inmuebles desde GET /api/properties (Firestore vía backend).
+     *
+     * Estrategia:
+     *   1. Intenta la API real → devuelve los inmuebles publicados por los usuarios
+     *   2. Si la API devuelve lista vacía → muestra mocks (pantalla nunca queda en blanco)
+     *   3. Si la API falla (red caída, servidor frío) → muestra mocks como respaldo
+     *
+     * Mapeo de campos: el backend persiste en español (titulo, ubicacion, etc.)
+     * y PropertyModel usa inglés para compatibilidad con el resto de la app.
+     * Se toma la primera URL de "imagenes" como imageUrl para la card de listado.
+     */
     override suspend fun getRentProperties(): List<PropertyModel> {
-        // Retornamos datos locales en lugar de llamar a la API
-        return mockProperties
+        return try {
+            val dtos = apiService.getProperties()
+            if (dtos.isEmpty()) return mockProperties
+
+            dtos.map { dto ->
+                PropertyModel(
+                    id          = dto.id,
+                    title       = dto.titulo,
+                    description = dto.descripcion,
+                    price       = dto.precio,
+                    location    = dto.ubicacion,
+                    imageUrl    = dto.imagenes?.firstOrNull()
+                )
+            }
+        } catch (e: Exception) {
+            // Red caída, servidor en cold start o emulador sin datos → mocks de respaldo
+            mockProperties
+        }
     }
 
-    override suspend fun getPropertyById(id: Int): PropertyModel {
-        return mockProperties.find { it.id == id } 
-            ?: throw Exception("Propiedad no encontrada en los datos locales")
-    }
+    override suspend fun getPropertyById(id: String): PropertyModel =
+        mockProperties.find { it.id == id }
+            ?: throw Exception("Propiedad no encontrada con id=$id")
 
-    override suspend fun createProperty(property: PropertyModel, imageUri: Uri): PropertyModel {
-        // Simulamos la creación retornando el mismo objeto con un ID generado
-        return property.copy(id = (100..999).random())
+    /**
+     * Publica un inmueble: sube imágenes a Storage y llama al backend.
+     *
+     * PASO 1: Cada Uri se sube a "properties/{userId}/{timestamp}_{i}.jpg" en Firebase Storage.
+     *   - En DEBUG: Storage emulator en 10.0.2.2:9199
+     *   - En RELEASE: Firebase Storage real
+     *
+     * PASO 2: POST /api/properties con las URLs obtenidas.
+     *   - En DEBUG y RELEASE: siempre va al backend de producción (Render)
+     *
+     * @return propertyId generado por Firestore
+     */
+    override suspend fun createProperty(
+        userId: String,
+        titulo: String,
+        ubicacion: String,
+        descripcion: String,
+        precio: Double,
+        tipo: String,
+        imageUris: List<Uri>
+    ): String {
+        val imageUrls = imageUris.mapIndexed { index, uri ->
+            val ref = storage.reference.child(
+                "properties/$userId/${System.currentTimeMillis()}_$index.jpg"
+            )
+            ref.putFile(uri).await()
+            ref.downloadUrl.await().toString()
+        }
+
+        val response = apiService.createProperty(
+            CreatePropertyRequestDto(
+                userId      = userId,
+                titulo      = titulo,
+                ubicacion   = ubicacion,
+                descripcion = descripcion,
+                precio      = precio,
+                tipo        = tipo,
+                imagenes    = imageUrls
+            )
+        )
+
+        return response.propertyId
+            ?: throw Exception("El servidor no retornó el ID del inmueble creado.")
     }
 }

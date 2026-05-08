@@ -69,12 +69,8 @@ fun RentScreen(
                 }
                 is RentUiState.Success -> {
                     RentContent(
-                        properties = state.properties,
-                        onPropertySelected = { id ->
-                            // Convertimos Int a String para el ViewModel y la Navegación
-                            viewModel.onPropertySelected(id.toString())
-                            onSelectClick(id.toString())
-                        }
+                        properties         = state.properties,
+                        onPropertySelected = { id -> onSelectClick(id) }
                     )
                 }
                 is RentUiState.Error -> {
@@ -90,7 +86,7 @@ fun RentScreen(
 @Composable
 fun RentContent(
     properties: List<PropertyModel>,
-    onPropertySelected: (Int) -> Unit
+    onPropertySelected: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),

@@ -4,7 +4,6 @@ import android.net.Uri
 import edu.javeriana.fixup.data.datasource.interfaces.RentDataSource
 import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
 import edu.javeriana.fixup.data.network.api.FixUpApiService
-import edu.javeriana.fixup.data.util.AppConstants
 import edu.javeriana.fixup.ui.model.PropertyModel
 import edu.javeriana.fixup.ui.model.ReviewModel
 import javax.inject.Inject
@@ -23,10 +22,40 @@ class RentRepository @Inject constructor(
         }
     }
 
-    suspend fun createProperty(property: PropertyModel, imageUri: Uri): Result<PropertyModel> {
+    /**
+     * Publica un nuevo inmueble delegando al DataSource la subida de imágenes y
+     * la llamada al backend.
+     *
+     * ¿Por qué el Repository obtiene el userId aquí?
+     * El ViewModel no debería acceder directamente a AuthRepository; el Repository
+     * actúa como orquestador que reúne las dependencias necesarias de múltiples
+     * fuentes (Auth + Rent) para completar la operación.
+     *
+     * @return Result.success con el propertyId generado, o Result.failure con el error.
+     */
+    suspend fun createProperty(
+        titulo: String,
+        ubicacion: String,
+        descripcion: String,
+        precio: Double,
+        tipo: String,
+        imageUris: List<Uri>
+    ): Result<String> {
+        // Verificar que el usuario esté autenticado antes de intentar la operación
+        val userId = authRepository.currentUser?.uid
+            ?: return Result.failure(Exception("Debes iniciar sesión para publicar un inmueble."))
+
         return try {
-            val created = dataSource.createProperty(property, imageUri)
-            Result.success(created)
+            val propertyId = dataSource.createProperty(
+                userId      = userId,
+                titulo      = titulo,
+                ubicacion   = ubicacion,
+                descripcion = descripcion,
+                precio      = precio,
+                tipo        = tipo,
+                imageUris   = imageUris
+            )
+            Result.success(propertyId)
         } catch (e: Exception) {
             Result.failure(e)
         }
