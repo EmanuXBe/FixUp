@@ -2,6 +2,7 @@ package edu.javeriana.fixup.data.datasource.impl
 
 
 import android.net.Uri
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.DocumentSnapshot
@@ -10,9 +11,7 @@ import edu.javeriana.fixup.R
 import edu.javeriana.fixup.data.datasource.interfaces.FeedDataSource
 import edu.javeriana.fixup.data.network.dto.CategoryDto
 import edu.javeriana.fixup.data.network.dto.PublicationDto
-import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
 import edu.javeriana.fixup.ui.model.PropertyModel
-import edu.javeriana.fixup.ui.model.ReviewModel
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 import javax.inject.Inject
@@ -34,7 +33,10 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
 
     override suspend fun getPublications(): List<PublicationDto> {
         val snapshot = firestore.collection("articles").get().await()
-        return snapshot.documents.mapNotNull { it.toPublicationDto() }
+        Log.d("FeedDataSource", "Recuperados ${snapshot.size()} documentos de 'articles'")
+        val publications = snapshot.documents.map { it.toPublicationDto() }
+        Log.d("FeedDataSource", "Total publicaciones: ${publications.size}")
+        return publications
     }
 
     override suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto> {
@@ -46,13 +48,14 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
                 .get()
                 .await()
                 .documents
-                .mapNotNull { it.toPublicationDto() }
+                .map { it.toPublicationDto() }
         }
     }
 
     override suspend fun getPublicationById(id: String): PublicationDto {
         val snapshot = firestore.collection("articles").document(id).get().await()
-        return snapshot.toPublicationDto() ?: throw Exception("Artículo no encontrado")
+        if (!snapshot.exists()) throw Exception("Artículo no encontrado: $id")
+        return snapshot.toPublicationDto()
     }
 
     override suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel {
@@ -74,17 +77,24 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
         return property.copy(imageUrl = downloadUrl)
     }
 
-    private fun DocumentSnapshot.toPublicationDto(): PublicationDto? {
-        val title = getString("title") ?: return null
-        val price = getDouble("price") ?: 0.0
+    private fun DocumentSnapshot.toPublicationDto(): PublicationDto {
+        // Intentamos variantes del campo título en español e inglés
+        val title = getString("title")
+            ?: getString("titulo")
+            ?: getString("name")
+            ?: getString("nombre")
+            ?: "Sin título"
+        val price = getDouble("price") ?: getLong("price")?.toDouble() ?: 0.0
+        val imageUrl = getString("imageUrl") ?: getString("imageurl") ?: getString("image")
+
         return PublicationDto(
             id = this.id,
             title = title,
             priceText = "Desde $$price",
-            description = getString("description"),
-            location = getString("category"),
-            imageUrl = getString("imageUrl"),
-            authorId = getString("authorId")
+            description = getString("description") ?: getString("descripcion"),
+            location = getString("category") ?: getString("categoria") ?: getString("location"),
+            imageUrl = imageUrl,
+            authorId = getString("authorId") ?: getString("userId")
         )
     }
 }

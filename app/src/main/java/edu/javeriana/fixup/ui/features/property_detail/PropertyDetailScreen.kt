@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.firebase.auth.FirebaseAuth
 import edu.javeriana.fixup.R
-import edu.javeriana.fixup.data.util.AppConstants
 import edu.javeriana.fixup.ui.model.PropertyModel
 import edu.javeriana.fixup.ui.model.ReviewModel
 import edu.javeriana.fixup.ui.theme.FixUpTheme
@@ -44,6 +44,7 @@ fun PropertyDetailScreen(
     viewModel: PropertyDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val currentUserId = remember { FirebaseAuth.getInstance().currentUser?.uid }
 
     LaunchedEffect(propertyId) {
         viewModel.loadProperty(propertyId)
@@ -54,6 +55,7 @@ fun PropertyDetailScreen(
         uiState.property != null -> PropertyContent(
             property = uiState.property!!,
             uiState = uiState,
+            currentUserId = currentUserId,
             onBackClick = onBackClick,
             onReserveClick = onReserveClick,
             onSaveReview = { rating, comment ->
@@ -111,6 +113,7 @@ private fun ErrorState(errorText: String, onBackClick: () -> Unit) {
 private fun PropertyContent(
     property: PropertyModel,
     uiState: PropertyDetailUiState,
+    currentUserId: String?,
     onBackClick: () -> Unit,
     onReserveClick: () -> Unit,
     onSaveReview: (Int, String) -> Unit,
@@ -135,6 +138,7 @@ private fun PropertyContent(
         ReviewsSection(
             reviews = uiState.reviews,
             isSaving = uiState.isSavingReview,
+            currentUserId = currentUserId,
             onSaveReview = onSaveReview,
             onUpdateReview = onUpdateReview,
             onDeleteReview = onDeleteReview
@@ -279,6 +283,7 @@ private fun PropertyAmenities() {
 private fun ReviewsSection(
     reviews: List<ReviewModel>,
     isSaving: Boolean,
+    currentUserId: String?,
     onSaveReview: (Int, String) -> Unit,
     onUpdateReview: (String, Int, String) -> Unit,
     onDeleteReview: (String) -> Unit
@@ -323,6 +328,7 @@ private fun ReviewsSection(
             reviews.forEach { review ->
                 ReviewItem(
                     review = review,
+                    currentUserId = currentUserId,
                     onEdit = { rating, comment -> onUpdateReview(review.id.toString(), rating, comment) },
                     onDelete = { onDeleteReview(review.id.toString()) }
                 )
@@ -335,6 +341,7 @@ private fun ReviewsSection(
 @Composable
 private fun ReviewItem(
     review: ReviewModel,
+    currentUserId: String?,
     onEdit: (Int, String) -> Unit,
     onDelete: () -> Unit
 ) {
@@ -374,7 +381,7 @@ private fun ReviewItem(
                             modifier = Modifier.size(14.dp)
                         )
                     }
-                    if (review.userId == AppConstants.CURRENT_USER_ID) {
+                    if (review.userId == currentUserId && currentUserId != null) {
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(onClick = { showEditDialog = true }, modifier = Modifier.size(24.dp)) {
                             Icon(

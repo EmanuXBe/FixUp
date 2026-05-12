@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,17 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import edu.javeriana.fixup.R
+import edu.javeriana.fixup.componentsUtils.PropertyCard
 import edu.javeriana.fixup.ui.model.PropertyModel
-import java.text.NumberFormat
-import java.util.*
 
 @Composable
 fun RentScreen(
@@ -65,7 +60,7 @@ fun RentScreen(
                 }
                 is RentUiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = state.message ?: "Error desconocido", color = MaterialTheme.colorScheme.error)
+                        Text(text = state.message, color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -155,74 +150,6 @@ fun FilterControls(modifier: Modifier = Modifier, resultCount: Int) {
             Text("Filtros", modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
         }
         Text(text = "$resultCount resultados", style = MaterialTheme.typography.bodySmall)
-    }
-}
-
-@Composable
-fun PropertyCard(
-    property: PropertyModel,
-    onSelectClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val currencyFormat = remember {
-        NumberFormat.getCurrencyInstance(Locale("es", "CO")).apply {
-            maximumFractionDigits = 0
-        }
-    }
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column {
-            Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(property.imageUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                    placeholder = painterResource(R.drawable.sala)
-                )
-            }
-
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = property.title ?: "Sin título",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.Gray)
-                    Text(text = property.location ?: "Sin ubicación", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = property.description ?: "Sin descripción", maxLines = 2, style = MaterialTheme.typography.bodyMedium)
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val price = property.price ?: 0.0
-                    Text(
-                        text = "${currencyFormat.format(price)} $",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Button(onClick = onSelectClick) {
-                        Text("Seleccionar")
-                    }
-                }
-            }
-        }
     }
 }
 

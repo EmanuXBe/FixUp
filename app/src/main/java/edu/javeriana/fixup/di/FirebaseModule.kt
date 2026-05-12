@@ -20,7 +20,11 @@ object FirebaseModule {
     fun provideFirebaseAuth(): FirebaseAuth {
         val auth = FirebaseAuth.getInstance()
         if (BuildConfig.DEBUG) {
-            auth.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.AUTH_PORT)
+            try {
+                auth.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.AUTH_PORT)
+            } catch (e: IllegalStateException) {
+                // Already configured, likely in tests
+            }
         }
         return auth
     }
@@ -30,7 +34,11 @@ object FirebaseModule {
     fun provideFirebaseFirestore(): FirebaseFirestore {
         val firestore = FirebaseFirestore.getInstance()
         if (BuildConfig.DEBUG) {
-            firestore.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.FIRESTORE_PORT)
+            try {
+                firestore.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.FIRESTORE_PORT)
+            } catch (e: IllegalStateException) {
+                // Already configured, likely in tests
+            }
         }
         return firestore
     }
@@ -40,7 +48,11 @@ object FirebaseModule {
     fun provideFirebaseStorage(): FirebaseStorage {
         val storage = FirebaseStorage.getInstance()
         if (BuildConfig.DEBUG) {
-            storage.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.STORAGE_PORT)
+            try {
+                storage.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.STORAGE_PORT)
+            } catch (e: IllegalStateException) {
+                // Already configured, likely in tests
+            }
         }
         return storage
     }

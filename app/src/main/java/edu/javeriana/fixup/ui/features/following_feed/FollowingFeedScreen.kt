@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import edu.javeriana.fixup.componentsUtils.PublicationCard
@@ -81,7 +82,9 @@ fun FollowingFeedScreen(
                             imageRes = publication.imageUrl,
                             title = publication.title,
                             price = publication.price,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("publication_card"),
                             onClick = { onPublicationClick(publication.id) }
                         )
                     }

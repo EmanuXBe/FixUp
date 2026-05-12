@@ -46,7 +46,7 @@ object NetworkModule {
      */
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(authInterceptor: edu.javeriana.fixup.data.network.AuthInterceptor): OkHttpClient {
         // Interceptor de logging para depuración en desarrollo (opcional pero recomendado)
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
@@ -54,6 +54,7 @@ object NetworkModule {
 
         return OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor(authInterceptor)
             // Tiempo máximo para establecer la conexión inicial con el servidor
             .connectTimeout(60, TimeUnit.SECONDS)
             // Tiempo máximo de espera entre paquetes de datos una vez establecida la conexión

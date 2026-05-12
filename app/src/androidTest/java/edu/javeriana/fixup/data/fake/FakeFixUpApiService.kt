@@ -4,6 +4,9 @@ import edu.javeriana.fixup.data.network.api.FixUpApiService
 import edu.javeriana.fixup.data.network.dto.FollowNotificationDto
 import edu.javeriana.fixup.data.network.dto.LikeNotificationDto
 import edu.javeriana.fixup.data.network.dto.NotificationDto
+import edu.javeriana.fixup.data.network.dto.CreatePropertyRequestDto
+import edu.javeriana.fixup.data.network.dto.CreatePropertyResponseDto
+import edu.javeriana.fixup.data.network.dto.FirestorePropertyDto
 import edu.javeriana.fixup.data.network.dto.ReviewDto
 import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
 import edu.javeriana.fixup.data.network.dto.ServiceDto
@@ -57,6 +60,14 @@ class FakeFixUpApiService : FixUpApiService {
     }
 
     override suspend fun getNotifications(userId: String): List<NotificationDto> {
+        throw UnsupportedOperationException("No se usa en estas pruebas")
+    }
+
+    override suspend fun getProperties(): List<FirestorePropertyDto> {
+        throw UnsupportedOperationException("No se usa en estas pruebas")
+    }
+
+    override suspend fun createProperty(body: CreatePropertyRequestDto): CreatePropertyResponseDto {
         throw UnsupportedOperationException("No se usa en estas pruebas")
     }
 }

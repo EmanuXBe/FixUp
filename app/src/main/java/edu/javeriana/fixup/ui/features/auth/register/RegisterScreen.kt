@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -71,7 +72,9 @@ fun RegisterScreen(
                     onNext = { cedulaFocusRequester.requestFocus() }
                 ),
                 isError = uiState.error != null,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("email_field")
             )
 
             FixUpTextField(
@@ -86,6 +89,7 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(cedulaFocusRequester)
+                    .testTag("cedula_field")
             )
 
             FixUpTextField(
@@ -105,6 +109,7 @@ fun RegisterScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(passwordFocusRequester)
+                    .testTag("password_field")
             )
 
             RoleSelector(
@@ -133,7 +138,7 @@ fun RegisterScreen(
             FixUpButton(
                 text = stringResource(R.string.btn_register),
                 onClick = { viewModel.signUp(onSuccess = onRegisterSuccess) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().testTag("register_button")
             )
         }
 

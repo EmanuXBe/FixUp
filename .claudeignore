@@ -1,0 +1,36 @@
+# Build artifacts
+.gradle/
+build/
+app/build/
+*.apk
+*.aar
+*.jar
+
+# IDE files
+.idea/
+*.iml
+.cxx/
+.externalNativeBuild/
+
+# Secrets and local config
+local.properties
+*.keystore
+*.jks
+
+# Assets / Binaries (Claude doesn't need to read these as text)
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.webp
+**/*.svg
+**/*.pdf
+**/*.mp4
+**/*.mov
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

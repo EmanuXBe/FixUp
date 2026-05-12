@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.sp
 import coil.request.ImageRequest
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -178,7 +179,8 @@ private fun UserHeader(
             text = user.name,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = SoftFawn
+            color = SoftFawn,
+            modifier = Modifier.testTag("profile_header_name")
         )
 
         Text(
@@ -197,7 +199,11 @@ private fun UserHeader(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable { onFollowersClick() }
             ) {
-                Text(text = user.followers.size.toString(), fontWeight = FontWeight.Bold)
+                Text(
+                    text = user.followers.size.toString(),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.testTag("followers_count")
+                )
                 Text(text = "Seguidores", fontSize = 12.sp)
             }
             Spacer(modifier = Modifier.width(32.dp))
@@ -205,7 +211,11 @@ private fun UserHeader(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable { onFollowingClick() }
             ) {
-                Text(text = user.following.size.toString(), fontWeight = FontWeight.Bold)
+                Text(
+                    text = user.following.size.toString(),
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.testTag("following_count")
+                )
                 Text(text = "Seguidos", fontSize = 12.sp)
             }
         }

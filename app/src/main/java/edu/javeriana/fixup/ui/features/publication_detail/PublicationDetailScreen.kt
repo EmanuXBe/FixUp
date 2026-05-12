@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import coil.request.ImageRequest
@@ -166,7 +167,10 @@ private fun PublicationContent(
                     FixerSection(
                         isFollowing = isFollowing,
                         isLoading = isFollowingLoading,
-                        onFollowClick = onFollowClick
+                        onFollowClick = onFollowClick,
+                        onProfileClick = {
+                            publication.authorId?.let { onUserProfileClick(it) }
+                        }
                     )
                     Spacer(modifier = Modifier.height(24.dp))
                     BenefitsSection()
@@ -467,7 +471,7 @@ private fun ReviewItem(
                 ) {
                     Icon(
                         imageVector = if (isLiked) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                        contentDescription = "Like",
+                        contentDescription = if (isLiked) "Quitar me gusta" else "Me gusta",
                         tint = if (isLiked) Color.Red else MaterialTheme.colorScheme.outline,
                         modifier = Modifier.size(20.dp)
                     )
@@ -475,7 +479,8 @@ private fun ReviewItem(
                     Text(
                         text = review.likedBy.size.toString(),
                         fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.testTag("like_count")
                     )
                 }
             }
@@ -494,7 +499,8 @@ private fun ReviewItem(
 private fun FixerSection(
     isFollowing: Boolean,
     isLoading: Boolean,
-    onFollowClick: () -> Unit
+    onFollowClick: () -> Unit,
+    onProfileClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -509,10 +515,12 @@ private fun FixerSection(
         ) {
             AsyncImage(
                 model = R.drawable.profile_photo,
-                contentDescription = null,
+                contentDescription = "Ver perfil del autor",
                 modifier = Modifier
                     .size(60.dp)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .testTag("author_profile_button")
+                    .clickable { onProfileClick() },
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(16.dp))

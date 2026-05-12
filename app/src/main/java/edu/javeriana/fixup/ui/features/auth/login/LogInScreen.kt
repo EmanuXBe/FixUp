@@ -16,6 +16,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -55,7 +56,8 @@ fun LogInScreen(
             errorMessage = uiState.error,
             onEmailChange = { viewModel.onEmailChanged(it) },
             onPasswordChange = { viewModel.onPasswordChanged(it) },
-            onContinueClick = { viewModel.signIn(onSuccess = onLoginSuccess) }
+            onContinueClick = { viewModel.signIn(onSuccess = onLoginSuccess) },
+            modifier = Modifier.testTag("login_form")
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -87,12 +89,16 @@ private fun LoginForm(
     errorMessage: String?,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val passwordFocusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         FixUpTextField(
             value = email,
             onValueChange = onEmailChange,
@@ -102,7 +108,8 @@ private fun LoginForm(
             keyboardActions = KeyboardActions(
                 onNext = { passwordFocusRequester.requestFocus() }
             ),
-            isError = errorMessage != null
+            isError = errorMessage != null,
+            modifier = Modifier.testTag("email_field")
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -121,7 +128,9 @@ private fun LoginForm(
             ),
             isPassword = true,
             isError = errorMessage != null,
-            modifier = Modifier.focusRequester(passwordFocusRequester)
+            modifier = Modifier
+                .focusRequester(passwordFocusRequester)
+                .testTag("password_field")
         )
 
         // Mensaje de error
@@ -142,7 +151,8 @@ private fun LoginForm(
         } else {
             FixUpButton(
                 text = stringResource(R.string.btn_continue),
-                onClick = onContinueClick
+                onClick = onContinueClick,
+                modifier = Modifier.testTag("login_button")
             )
         }
     }
