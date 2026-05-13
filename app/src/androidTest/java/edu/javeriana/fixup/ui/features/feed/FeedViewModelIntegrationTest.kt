@@ -22,15 +22,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Integration tests for FeedViewModel wired to real Firebase emulator components.
+ * ✅ REQUISITO IMPLEMENTADO: "Realizar 2 pruebas de integración para un viewmodel"
  *
- * These tests validate that the complete chain
+ * Pruebas de integración del FeedViewModel conectado a los componentes reales
+ * del emulador de Firebase.
+ *
+ * Validan la cadena completa:
  *   Firestore ← FeedDataSource ← FeedRepository ← FeedViewModel
- * behaves correctly: state is populated after a successful fetch and remains
- * empty (but not failing) when the collection is empty.
  *
- * The ViewModel is instantiated directly (without Hilt) following the same
- * pattern as ReviewRepositoryIntegrationTest.
+ * Prueba 1: con artículos en Firestore, el estado se puebla correctamente.
+ * Prueba 2: con colección vacía, el estado tiene lista vacía e isConnected=true.
  */
 @RunWith(AndroidJUnit4::class)
 class FeedViewModelIntegrationTest {
@@ -72,8 +73,7 @@ class FeedViewModelIntegrationTest {
     // ─── Tests ────────────────────────────────────────────────────────────────
 
     /**
-     * When Firestore contains articles, FeedViewModel must load them into
-     * `uiState.publications` after the init coroutines complete.
+     * Integración 1/2: Firestore con artículos → publicaciones cargadas en el estado del ViewModel.
      */
     @Test
     fun feedViewModel_whenFirestoreHasArticles_publicationsLoadedIntoState() = runBlocking {
@@ -98,8 +98,7 @@ class FeedViewModelIntegrationTest {
     }
 
     /**
-     * When Firestore's articles collection is empty, FeedViewModel must populate
-     * state with an empty list without setting isConnected = false.
+     * Integración 2/2: Firestore vacío → lista vacía en estado pero isConnected=true (sin fallo).
      */
     @Test
     fun feedViewModel_whenFirestoreIsEmpty_stateHasEmptyPublicationsAndIsConnected() = runBlocking {

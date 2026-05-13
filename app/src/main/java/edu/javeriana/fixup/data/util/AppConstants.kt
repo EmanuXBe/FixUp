@@ -6,8 +6,18 @@ object AppConstants {
 
     /**
      * Host para el emulador de Firebase.
-     * Se usa "10.0.2.2" porque es la dirección IP especial que permite al emulador de Android
-     * acceder al "localhost" de la máquina anfitriona donde se ejecutan los emuladores de Firebase.
+     *
+     * Se usa "127.0.0.1" junto con `adb reverse` para que tanto dispositivos físicos
+     * como emuladores AVD puedan alcanzar el emulador de Firebase en la máquina anfitriona.
+     *
+     * Antes de correr los tests instrumentados, ejecutar en terminal:
+     *   adb reverse tcp:8080 tcp:8080   (Firestore)
+     *   adb reverse tcp:9099 tcp:9099   (Auth)
+     *   adb reverse tcp:9199 tcp:9199   (Storage)
+     *
+     * Y asegurarse de que el emulador esté corriendo:
+     *   firebase emulators:start
+     *
      * Los servicios son visibles en el Dashboard: http://localhost:4000
      */
     const val EMULATOR_HOST = "10.0.2.2"

@@ -16,10 +16,11 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * Unit tests for FeedViewModel using MockK mocks and UnconfinedTestDispatcher.
+ * ✅ REQUISITO IMPLEMENTADO: "Realizar 8 pruebas con mocks para los viewmodel"
  *
- * Each test exercises a distinct ViewModel behavior or state transition, ensuring
- * the ViewModel reacts correctly to repository results without touching Firebase.
+ * Pruebas unitarias del FeedViewModel con MockK y UnconfinedTestDispatcher.
+ * Cada prueba verifica un comportamiento o transición de estado distinto,
+ * asegurando que el ViewModel reaccione correctamente sin tocar Firebase.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class FeedViewModelUnitTest {
@@ -39,7 +40,7 @@ class FeedViewModelUnitTest {
     }
 
     // ─── Tests ────────────────────────────────────────────────────────────────
-
+    // Prueba 1/8: estado inicial — isLoading=false y publicaciones vacías
     @Test
     fun initialState_isLoadingFalse_publicationsEmpty() {
         runTest {
@@ -53,6 +54,7 @@ class FeedViewModelUnitTest {
         }
     }
 
+    // Prueba 2/8: las publicaciones del repositorio se almacenan en el estado
     @Test
     fun init_whenRepositorySucceeds_publicationsAreStoredInState() {
         runTest {
@@ -72,6 +74,7 @@ class FeedViewModelUnitTest {
         }
     }
 
+    // Prueba 3/8: las categorías del repositorio se almacenan en el estado
     @Test
     fun init_whenRepositorySucceeds_categoriesAreStoredInState() {
         runTest {
@@ -90,6 +93,7 @@ class FeedViewModelUnitTest {
         }
     }
 
+    // Prueba 4/8: si el repositorio de publicaciones falla, isConnected=false
     @Test
     fun init_whenPublicationsRepositoryFails_isConnectedSetToFalse() {
         runTest {
@@ -106,6 +110,7 @@ class FeedViewModelUnitTest {
         }
     }
 
+    // Prueba 5/8: si las categorías tienen éxito, isConnected=true
     @Test
     fun init_whenCategoriesSucceed_isConnectedSetToTrue() {
         runTest {
@@ -119,6 +124,7 @@ class FeedViewModelUnitTest {
         }
     }
 
+    // Prueba 6/8: onSearchQueryChanged actualiza el searchQuery en el estado
     @Test
     fun onSearchQueryChanged_updatesSearchQueryInState() {
         runTest {
@@ -132,6 +138,7 @@ class FeedViewModelUnitTest {
         }
     }
 
+    // Prueba 7/8: onSearchQueryChanged no filtra la lista de publicaciones en el estado
     @Test
     fun onSearchQueryChanged_doesNotModifyPublicationsList() {
         runTest {
@@ -151,6 +158,7 @@ class FeedViewModelUnitTest {
         }
     }
 
+    // Prueba 8/8: seedData con seeder fallido devuelve isLoading=false sin crash
     @Test
     fun seedData_whenSeederFails_isLoadingReturnsToFalse() {
         runTest {

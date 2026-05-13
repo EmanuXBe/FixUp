@@ -12,11 +12,11 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * Unit tests for FeedRepository using MockK to isolate from Firebase.
+ * ✅ REQUISITO IMPLEMENTADO: "Tener 8 pruebas con mocks del repositorio" + "Probar mapeos"
  *
- * Focus: verify the PublicationDto → PublicationCardModel mapping defined in
- * FeedRepository (extension function PublicationDto.toUiModel()) and the
- * Result wrapping contract.
+ * Pruebas unitarias del FeedRepository usando MockK para aislar Firebase.
+ * Cubre el contrato Result (success/failure) y el mapeo completo
+ * PublicationDto → PublicationCardModel (id, title, price, imageUrl, authorId).
  */
 class FeedRepositoryUnitTest {
 
@@ -32,7 +32,7 @@ class FeedRepositoryUnitTest {
     }
 
     // ─── Tests ────────────────────────────────────────────────────────────────
-
+    // Prueba 1/8: contrato Result.success cuando el datasource retorna datos
     @Test
     fun getPublications_whenDatasourceReturnsData_wrapsInResultSuccess() = runTest {
         val dtos = listOf(buildDto("1", "Cocina Premium", "Desde $500000"))
@@ -44,6 +44,7 @@ class FeedRepositoryUnitTest {
         assertEquals(1, result.getOrThrow().size)
     }
 
+    // Prueba 2/8: contrato Result.failure cuando el datasource lanza excepción
     @Test
     fun getPublications_whenDatasourceThrows_returnsResultFailure() = runTest {
         coEvery { dataSource.getPublications() } throws RuntimeException("Network error")
@@ -54,6 +55,7 @@ class FeedRepositoryUnitTest {
         assertEquals("Network error", result.exceptionOrNull()?.message)
     }
 
+    // Prueba 3/8 — MAPEO: el id del DTO se preserva en el modelo de UI
     @Test
     fun getPublications_mapping_preservesId() = runTest {
         coEvery { dataSource.getPublications() } returns listOf(buildDto(id = "article-42"))
@@ -63,6 +65,7 @@ class FeedRepositoryUnitTest {
         assertEquals("article-42", card.id)
     }
 
+    // Prueba 4/8 — MAPEO: el title del DTO se preserva en el modelo de UI
     @Test
     fun getPublications_mapping_preservesTitle() = runTest {
         coEvery { dataSource.getPublications() } returns listOf(buildDto(title = "Remodelación Integral"))
@@ -72,6 +75,7 @@ class FeedRepositoryUnitTest {
         assertEquals("Remodelación Integral", card.title)
     }
 
+    // Prueba 5/8 — MAPEO: el priceText del DTO se preserva en el modelo de UI
     @Test
     fun getPublications_mapping_preservesPriceText() = runTest {
         coEvery { dataSource.getPublications() } returns listOf(buildDto(priceText = "Desde $1200000"))
@@ -81,6 +85,7 @@ class FeedRepositoryUnitTest {
         assertEquals("Desde \$1200000", card.price)
     }
 
+    // Prueba 6/8 — MAPEO: el imageUrl del DTO se preserva en el modelo de UI
     @Test
     fun getPublications_mapping_preservesImageUrl() = runTest {
         val url = "https://example.com/img/photo.jpg"
@@ -91,6 +96,7 @@ class FeedRepositoryUnitTest {
         assertEquals(url, card.imageUrl)
     }
 
+    // Prueba 7/8 — MAPEO: el authorId del DTO se preserva en el modelo de UI
     @Test
     fun getPublications_mapping_preservesAuthorId() = runTest {
         coEvery { dataSource.getPublications() } returns listOf(buildDto(authorId = "user-firebase-uid"))
@@ -100,6 +106,7 @@ class FeedRepositoryUnitTest {
         assertEquals("user-firebase-uid", card.authorId)
     }
 
+    // Prueba 8/8: delega la lista de IDs de seguidos al datasource sin transformación
     @Test
     fun getFollowingPublications_delegatesFollowingIdListToDataSource() = runTest {
         val followingIds = listOf("uid-1", "uid-2", "uid-3")

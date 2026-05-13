@@ -24,7 +24,18 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * End-to-End test suite for FixUp using Firebase local emulator + Compose UI test framework.
+ *  REQUISITO IMPLEMENTADO: Casos de uso E2E
+ *
+ * Flujo E2E 1 (e2eFlow1): Usuario nuevo se registra con contraseña inválida (1234) →
+ *   verifica mensaje de error → corrige a 123456 → ingresa a la app → abre primera
+ *   publicación → verifica información del detalle → da like a primer comentario →
+ *   verifica aumento de likes → vuelve → reabre publicación → quita like → verifica
+ *   disminución de likes.
+ *
+ * Flujo E2E 2 (e2eFlow2): Usuario registrado hace login → va al perfil del autor de
+ *   una publicación → verifica información del usuario → da follow → verifica aumento
+ *   de seguidores → vuelve al home → va a sección "Siguiendo" → verifica que aparece
+ *   al menos una publicación del usuario seguido.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -135,6 +146,7 @@ class E2EFlowTest {
         println("E2E: tearDown finished")
     }
 
+    // ✅ REQUISITO E2E 1: Registro con contraseña inválida → corrección → like/unlike en review
     @Test
     fun e2eFlow1_register_invalidPassword_showsError_thenCorrect_likeAndUnlike() {
         println("E2E: Starting test 1")
@@ -155,6 +167,8 @@ class E2EFlowTest {
         composeRule.onNodeWithTag("register_button").performClick()
         composeRule.waitForIdle()
 
+        // ✅ REQUISITO: "la primera vez escribe como contraseña 1234, por lo cual no se puede
+        //   registrar. Verificar el mensaje de error."
         composeRule.onNodeWithText("La contraseña debe tener al menos 6 caracteres").assertIsDisplayed()
         println("E2E: Error message verified")
 
@@ -172,6 +186,15 @@ class E2EFlowTest {
         composeRule.onAllNodes(hasTestTag("publication_card")).onFirst().performClick()
         composeRule.waitForIdle()
 
+        // ✅ REQUISITO: "Verificar que la información de detalle sea correcta"
+        // Esperar a que el título del artículo aparezca en la pantalla de detalle
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodesWithText("Artículo del usuario seguido", ignoreCase = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Artículo del usuario seguido", ignoreCase = true).assertIsDisplayed()
+        println("E2E: Información de detalle verificada correctamente")
+
         // Like
         println("E2E: Liking publication")
         composeRule.onNodeWithContentDescription("Me gusta", useUnmergedTree = true)
@@ -179,31 +202,33 @@ class E2EFlowTest {
             .performClick()
         composeRule.waitForIdle()
 
-        // Wait for count to update to "1"
+        // ✅ REQUISITO: "Verificar que aumente la cantidad de likes"
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.onAllNodes(hasTestTag("like_count").and(hasText("1"))).fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Back and reopen
+        // ✅ REQUISITO: "El usuario va atrás, y vuelve a seleccionar la publicación"
         composeRule.onNodeWithContentDescription("Volver", useUnmergedTree = true).performClick()
         composeRule.waitForIdle()
         composeRule.onAllNodes(hasTestTag("publication_card")).onFirst().performClick()
         composeRule.waitForIdle()
 
-        // Unlike
+        // ✅ REQUISITO: "ahora quita el like"
         println("E2E: Unliking publication")
         composeRule.onNodeWithContentDescription("Quitar me gusta", useUnmergedTree = true)
             .performScrollTo()
             .performClick()
         composeRule.waitForIdle()
 
-        // Wait for count to update to "0"
+        // ✅ REQUISITO: "se verifica que la cantidad de likes disminuya"
         composeRule.waitUntil(timeoutMillis = 5_000) {
             composeRule.onAllNodes(hasTestTag("like_count").and(hasText("0"))).fetchSemanticsNodes().isNotEmpty()
         }
         println("E2E: Test 1 finished successfully")
     }
 
+    // ✅ REQUISITO E2E 2: Login → perfil de usuario → verificar info → follow → verificar
+    //   seguidores → following feed muestra publicación del usuario seguido
     @Test
     fun e2eFlow2_login_followUser_verifyFollowingFeedShowsPublication() {
         println("E2E: Starting test 2")
@@ -231,6 +256,14 @@ class E2EFlowTest {
         composeRule.onNodeWithTag("author_profile_button").performScrollTo().performClick()
         composeRule.waitForIdle()
 
+        // ✅ REQUISITO: "Verificar que la información del usuario sea correcta"
+        // Esperar a que el nombre del usuario aparezca en la pantalla de perfil
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodes(hasTestTag("profile_header_name")).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithTag("profile_header_name").assertTextEquals("Target E2E User")
+        println("E2E: Información del perfil de usuario verificada correctamente")
+
         // Follow
         println("E2E: Following user")
         composeRule.waitUntil(timeoutMillis = 10_000) {
@@ -238,24 +271,25 @@ class E2EFlowTest {
         }
         composeRule.onNodeWithText("Seguir", ignoreCase = true).performClick()
 
-        // Wait for Dejar de seguir and count 1
+        // ✅ REQUISITO: "Le da follow y se verifica que aumenta la cantidad de seguidores"
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Dejar de seguir", ignoreCase = true).fetchSemanticsNodes().isNotEmpty() &&
             composeRule.onAllNodes(hasTestTag("followers_count").and(hasText("1"))).fetchSemanticsNodes().isNotEmpty()
         }
 
-        // Back to Feed
+        // ✅ REQUISITO: "El usuario vuelve al home"
         composeRule.onNodeWithContentDescription("Volver", useUnmergedTree = true).performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithContentDescription("Volver", useUnmergedTree = true).performClick()
         composeRule.waitForIdle()
 
-        // Following Feed
+        // ✅ REQUISITO: "va a la sección de publicaciones de seguidos"
         println("E2E: Checking following feed")
         composeRule.onNodeWithText("Siguiendo", ignoreCase = true).performClick()
         composeRule.waitForIdle()
 
-        // Wait for article in Following Feed (longer timeout and explicit check)
+        // ✅ REQUISITO: "se verifica que aparezca al menos una publicación del usuario que
+        //   acabó de seguir"
         composeRule.waitUntil(timeoutMillis = 20_000) {
             composeRule.onAllNodes(hasTestTag("publication_card")).fetchSemanticsNodes().isNotEmpty()
         }
