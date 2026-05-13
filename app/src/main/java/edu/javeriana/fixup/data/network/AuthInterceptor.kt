@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.android.gms.tasks.Tasks
 import okhttp3.Interceptor
 import okhttp3.Response
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,10 +30,10 @@ class AuthInterceptor @Inject constructor(
         }
 
         return try {
-            // Obtenemos el token JWT de forma síncrona
-            // forceRefresh = false para usar el token en caché si es válido
+            // Obtenemos el token JWT de forma síncrona con un timeout de 5 segundos
+            // para evitar que la petición de red se quede bloqueada indefinidamente.
             val task = user.getIdToken(false)
-            val tokenResult = Tasks.await(task)
+            val tokenResult = Tasks.await(task, 5, TimeUnit.SECONDS)
             val token = tokenResult.token
 
             if (token != null) {

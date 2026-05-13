@@ -1,0 +1,124 @@
+May 12, 2026 12:04:44 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+INFO: Started WebSocket server on ws://127.0.0.1:9150
+
+API endpoint: http://127.0.0.1:8080
+Database Edition: STANDARD
+Database Mode: CLOUD_FIRESTORE
+
+If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
+
+   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+
+If you are running a Firestore in Datastore Mode project, run:
+
+   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080
+
+Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
+Dev App Server is now running.
+
+May 12, 2026 12:19:05 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:19:05 PM io.grpc.netty.TcpMetrics loadEpollInfo
+INFO: Epoll available during static init of TcpMetrics:false
+May 12, 2026 12:22:45 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:24:51 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:33:48 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:40:06 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:40:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:40:54 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:41:55 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:44:56 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:50:14 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 12:56:23 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:00:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:10:16 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:13:16 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:16:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:17:22 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:24:54 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:25:17 PM io.grpc.internal.ServerCallImpl handleInternalError
+WARNING: Cancelling the stream because of internal error
+io.grpc.StatusRuntimeException: INTERNAL: Failed to frame message
+	at io.grpc.Status.asRuntimeException(Status.java:524)
+	at io.grpc.internal.MessageFramer.writePayload(MessageFramer.java:161)
+	at io.grpc.internal.AbstractStream.writeMessage(AbstractStream.java:70)
+	at io.grpc.internal.ServerCallImpl.sendMessageInternal(ServerCallImpl.java:168)
+	at io.grpc.internal.ServerCallImpl.sendMessage(ServerCallImpl.java:152)
+	at io.grpc.stub.ServerCalls$ServerCallStreamObserverImpl.onNext(ServerCalls.java:380)
+	at com.google.cloud.datastore.emulator.impl.util.WrappedStreamObserver.onNext(WrappedStreamObserver.java:28)
+	at com.google.cloud.datastore.emulator.impl.firestore.CloudFirestoreV1ListenStream.notify(CloudFirestoreV1ListenStream.java:139)
+	at com.google.cloud.datastore.emulator.impl.firestore.CloudFirestoreV1ListenStream.addTarget(CloudFirestoreV1ListenStream.java:376)
+	at com.google.cloud.datastore.emulator.impl.firestore.CloudFirestoreV1ListenStream.onNext(CloudFirestoreV1ListenStream.java:204)
+	at com.google.cloud.datastore.emulator.impl.firestore.CloudFirestoreV1ListenStream.onNext(CloudFirestoreV1ListenStream.java:66)
+	at io.grpc.stub.ServerCalls$StreamingServerCallHandler$StreamingServerCallListener.onMessage(ServerCalls.java:262)
+	at io.grpc.ForwardingServerCallListener.onMessage(ForwardingServerCallListener.java:33)
+	at io.grpc.Contexts$ContextualizedServerCallListener.onMessage(Contexts.java:76)
+	at io.grpc.ForwardingServerCallListener.onMessage(ForwardingServerCallListener.java:33)
+	at io.grpc.Contexts$ContextualizedServerCallListener.onMessage(Contexts.java:76)
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.messagesAvailableInternal(ServerCallImpl.java:334)
+	at io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.messagesAvailable(ServerCallImpl.java:319)
+	at io.grpc.internal.ServerImpl$JumpToApplicationThreadServerStreamListener$1MessagesAvailable.runInContext(ServerImpl.java:834)
+	at io.grpc.internal.ContextRunnable.run(ContextRunnable.java:37)
+	at io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:133)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.IllegalStateException: knownLengthPendingAllocation reached 0
+	at com.google.common.base.Preconditions.checkState(Preconditions.java:570)
+	at io.grpc.internal.MessageFramer.writeRaw(MessageFramer.java:293)
+	at io.grpc.internal.MessageFramer$OutputStreamAdapter.write(MessageFramer.java:385)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.doFlush(CodedOutputStream.java:2253)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeStringNoTag(CodedOutputStream.java:2132)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeString(CodedOutputStream.java:1983)
+	at com.google.protobuf.GeneratedMessage.writeString(GeneratedMessage.java:4683)
+	at com.google.firestore.v1.Value.writeTo(Value.java:1016)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeMessageNoTag(CodedOutputStream.java:2062)
+	at com.google.protobuf.FieldSet.writeElementNoTag(FieldSet.java:730)
+	at com.google.protobuf.FieldSet.writeElement(FieldSet.java:686)
+	at com.google.protobuf.MapEntryLite.writeTo(MapEntryLite.java:87)
+	at com.google.protobuf.MapEntry.writeTo(MapEntry.java:131)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeMessageNoTag(CodedOutputStream.java:2062)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeMessage(CodedOutputStream.java:2038)
+	at com.google.protobuf.GeneratedMessage.serializeMapTo(GeneratedMessage.java:4803)
+	at com.google.protobuf.GeneratedMessage.serializeStringMapTo(GeneratedMessage.java:4755)
+	at com.google.firestore.v1.Document.writeTo(Document.java:435)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeMessageNoTag(CodedOutputStream.java:2062)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeMessage(CodedOutputStream.java:2038)
+	at com.google.firestore.v1.DocumentChange.writeTo(DocumentChange.java:208)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeMessageNoTag(CodedOutputStream.java:2062)
+	at com.google.protobuf.CodedOutputStream$OutputStreamEncoder.writeMessage(CodedOutputStream.java:2038)
+	at com.google.firestore.v1.ListenResponse.writeTo(ListenResponse.java:391)
+	at com.google.protobuf.AbstractMessageLite.writeTo(AbstractMessageLite.java:78)
+	at io.grpc.protobuf.lite.ProtoInputStream.drainTo(ProtoInputStream.java:52)
+	at io.grpc.internal.MessageFramer.writeToOutputStream(MessageFramer.java:276)
+	at io.grpc.internal.MessageFramer.writeKnownLengthUncompressed(MessageFramer.java:231)
+	at io.grpc.internal.MessageFramer.writeUncompressed(MessageFramer.java:176)
+	at io.grpc.internal.MessageFramer.writePayload(MessageFramer.java:147)
+	... 22 more
+
+May 12, 2026 5:29:08 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:40:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 5:45:07 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+May 12, 2026 6:15:18 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+*** shutting down gRPC server since JVM is shutting down
+*** server shut down

@@ -1,0 +1,132 @@
+package edu.javeriana.fixup.data.repository
+
+import edu.javeriana.fixup.data.datasource.interfaces.FeedDataSource
+import edu.javeriana.fixup.data.network.dto.PublicationDto
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+/**
+ * Unit tests for FeedRepository using MockK to isolate from Firebase.
+ *
+ * Focus: verify the PublicationDto → PublicationCardModel mapping defined in
+ * FeedRepository (extension function PublicationDto.toUiModel()) and the
+ * Result wrapping contract.
+ */
+class FeedRepositoryUnitTest {
+
+    private lateinit var dataSource: FeedDataSource
+    private lateinit var repository: FeedRepository
+
+    // ─── Setup ────────────────────────────────────────────────────────────────
+
+    @Before
+    fun setUp() {
+        dataSource = mockk()
+        repository = FeedRepository(dataSource)
+    }
+
+    // ─── Tests ────────────────────────────────────────────────────────────────
+
+    @Test
+    fun getPublications_whenDatasourceReturnsData_wrapsInResultSuccess() = runTest {
+        val dtos = listOf(buildDto("1", "Cocina Premium", "Desde $500000"))
+        coEvery { dataSource.getPublications() } returns dtos
+
+        val result = repository.getPublications()
+
+        assertTrue("Must return Result.success", result.isSuccess)
+        assertEquals(1, result.getOrThrow().size)
+    }
+
+    @Test
+    fun getPublications_whenDatasourceThrows_returnsResultFailure() = runTest {
+        coEvery { dataSource.getPublications() } throws RuntimeException("Network error")
+
+        val result = repository.getPublications()
+
+        assertTrue("Must return Result.failure on exception", result.isFailure)
+        assertEquals("Network error", result.exceptionOrNull()?.message)
+    }
+
+    @Test
+    fun getPublications_mapping_preservesId() = runTest {
+        coEvery { dataSource.getPublications() } returns listOf(buildDto(id = "article-42"))
+
+        val card = repository.getPublications().getOrThrow().first()
+
+        assertEquals("article-42", card.id)
+    }
+
+    @Test
+    fun getPublications_mapping_preservesTitle() = runTest {
+        coEvery { dataSource.getPublications() } returns listOf(buildDto(title = "Remodelación Integral"))
+
+        val card = repository.getPublications().getOrThrow().first()
+
+        assertEquals("Remodelación Integral", card.title)
+    }
+
+    @Test
+    fun getPublications_mapping_preservesPriceText() = runTest {
+        coEvery { dataSource.getPublications() } returns listOf(buildDto(priceText = "Desde $1200000"))
+
+        val card = repository.getPublications().getOrThrow().first()
+
+        assertEquals("Desde \$1200000", card.price)
+    }
+
+    @Test
+    fun getPublications_mapping_preservesImageUrl() = runTest {
+        val url = "https://example.com/img/photo.jpg"
+        coEvery { dataSource.getPublications() } returns listOf(buildDto(imageUrl = url))
+
+        val card = repository.getPublications().getOrThrow().first()
+
+        assertEquals(url, card.imageUrl)
+    }
+
+    @Test
+    fun getPublications_mapping_preservesAuthorId() = runTest {
+        coEvery { dataSource.getPublications() } returns listOf(buildDto(authorId = "user-firebase-uid"))
+
+        val card = repository.getPublications().getOrThrow().first()
+
+        assertEquals("user-firebase-uid", card.authorId)
+    }
+
+    @Test
+    fun getFollowingPublications_delegatesFollowingIdListToDataSource() = runTest {
+        val followingIds = listOf("uid-1", "uid-2", "uid-3")
+        coEvery { dataSource.getFollowingPublications(followingIds) } returns emptyList()
+
+        repository.getFollowingPublications(followingIds)
+
+        coVerify(exactly = 1) { dataSource.getFollowingPublications(followingIds) }
+    }
+
+    // ─── Builder ──────────────────────────────────────────────────────────────
+
+    private fun buildDto(
+        id: String = "default-id",
+        title: String = "Default Title",
+        priceText: String = "Desde \$0",
+        imageUrl: String = "https://picsum.photos/400/300",
+        authorId: String = "default-author",
+        description: String = "Descripción",
+        location: String = "Bogotá"
+    ) = PublicationDto(
+        id = id,
+        title = title,
+        priceText = priceText,
+        imageUrl = imageUrl,
+        authorId = authorId,
+        description = description,
+        location = location
+    )
+}
