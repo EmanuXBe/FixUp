@@ -1,8 +1,10 @@
 package edu.javeriana.fixup.data.datasource.impl
 
 import android.net.Uri
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import edu.javeriana.fixup.data.datasource.interfaces.RentDataSource
+import edu.javeriana.fixup.data.mapper.toDomain
 import edu.javeriana.fixup.data.network.api.FixUpApiService
 import edu.javeriana.fixup.data.network.dto.CreatePropertyRequestDto
 import edu.javeriana.fixup.ui.model.PropertyModel
@@ -11,7 +13,8 @@ import javax.inject.Inject
 
 class RentDataSourceImpl @Inject constructor(
     private val apiService: FixUpApiService,
-    private val storage: FirebaseStorage
+    private val storage: FirebaseStorage,
+    private val firestore: FirebaseFirestore
 ) : RentDataSource {
 
     // ─── Mock de respaldo (debug sin backend o sin datos publicados aún) ──────
@@ -51,42 +54,38 @@ class RentDataSourceImpl @Inject constructor(
         )
     )
 
-    /**
-     * Obtiene los inmuebles desde GET /api/properties (Firestore vía backend).
-     *
-     * Estrategia:
-     *   1. Intenta la API real → devuelve los inmuebles publicados por los usuarios
-     *   2. Si la API devuelve lista vacía → muestra mocks (pantalla nunca queda en blanco)
-     *   3. Si la API falla (red caída, servidor frío) → muestra mocks como respaldo
-     *
-     * Mapeo de campos: el backend persiste en español (titulo, ubicacion, etc.)
-     * y PropertyModel usa inglés para compatibilidad con el resto de la app.
-     * Se toma la primera URL de "imagenes" como imageUrl para la card de listado.
-     */
     override suspend fun getRentProperties(): List<PropertyModel> {
         return try {
-            val dtos = apiService.getProperties()
-            if (dtos.isEmpty()) return mockProperties
-
-            dtos.map { dto ->
-                PropertyModel(
-                    id          = dto.id,
-                    title       = dto.titulo,
-                    description = dto.descripcion,
-                    price       = dto.precio,
-                    location    = dto.ubicacion,
-                    imageUrl    = dto.imagenes?.firstOrNull()
-                )
-            }
+            apiService.getProperties().map { it.toDomain() }
         } catch (e: Exception) {
-            // Red caída, servidor en cold start o emulador sin datos → mocks de respaldo
             mockProperties
         }
     }
 
-    override suspend fun getPropertyById(id: String): PropertyModel =
-        mockProperties.find { it.id == id }
-            ?: throw Exception("Propiedad no encontrada con id=$id")
+    override suspend fun getPropertyById(id: String): PropertyModel {
+        return try {
+            val doc = firestore.collection("properties").document(id).get().await()
+            if (!doc.exists()) return mockProperties.find { it.id == id }
+                ?: throw Exception("Propiedad no encontrada con id=$id")
+            val title = doc.getString("titulo") ?: doc.getString("title") ?: "Sin título"
+            val price = doc.getDouble("precio") ?: doc.getDouble("price") ?: 0.0
+            val imageUrl = (doc.get("imagenes") as? List<*>)?.firstOrNull() as? String
+                ?: doc.getString("imageUrl")
+            PropertyModel(
+                id          = doc.id,
+                title       = title,
+                description = doc.getString("descripcion") ?: doc.getString("description"),
+                price       = price,
+                location    = doc.getString("ubicacion") ?: doc.getString("location"),
+                imageUrl    = imageUrl,
+                latitude    = doc.getDouble("latitude"),
+                longitude   = doc.getDouble("longitude")
+            )
+        } catch (e: Exception) {
+            mockProperties.find { it.id == id }
+                ?: throw Exception("Propiedad no encontrada con id=$id")
+        }
+    }
 
     /**
      * Publica un inmueble: sube imágenes a Storage y llama al backend.

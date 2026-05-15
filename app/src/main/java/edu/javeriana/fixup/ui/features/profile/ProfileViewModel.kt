@@ -224,9 +224,21 @@ class ProfileViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
             firebaseSeeder.seedData(currentUserId).onSuccess {
                 _uiState.update { it.copy(isLoading = false, errorMessage = "Datos cargados exitosamente") }
-                loadUserReviews() // Recargar para ver las nuevas reseñas
+                loadUserReviews()
             }.onFailure { error ->
                 _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
+        }
+    }
+
+    fun seedProperties() {
+        val currentUserId = authRepository.currentUser?.uid
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            firebaseSeeder.seedProperties(currentUserId).onSuccess {
+                _uiState.update { it.copy(isLoading = false, errorMessage = "5 propiedades sembradas en Bogotá ✓") }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isLoading = false, errorMessage = "Error: ${error.message}") }
             }
         }
     }

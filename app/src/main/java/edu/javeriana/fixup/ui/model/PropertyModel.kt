@@ -21,5 +21,9 @@ data class PropertyModel(
     @SerializedName("location")
     val location: String? = null,
     @SerializedName("image_url")
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    @SerializedName("latitude")
+    val latitude: Double? = null,
+    @SerializedName("longitude")
+    val longitude: Double? = null
 )

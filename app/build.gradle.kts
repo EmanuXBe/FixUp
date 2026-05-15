@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.coil.compose)
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.location)
 
     // Retrofit
     implementation(libs.retrofit)

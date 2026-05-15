@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.javeriana.fixup.ui.theme.SoftFawn
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +30,15 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showEditDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { msg ->
+            scope.launch { snackbarHostState.showSnackbar(msg) }
+            viewModel.resetErrorMessage()
+        }
+    }
 
     if (showEditDialog) {
         EditProfileDialog(
@@ -45,6 +55,7 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text("Ajustes", color = SoftFawn) },
@@ -146,6 +157,60 @@ fun SettingsScreen(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Outlined.Refresh,
                             text = "Pedidos"
+                        )
+                    }
+                }
+            }
+
+            // ── Zona Debug ─────────────────────────────────────────────
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Zona Debug",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFF57C00)
+                )
+            }
+
+            item {
+                Button(
+                    onClick = { viewModel.seedProperties() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF57C00),
+                        contentColor = Color.White
+                    ),
+                    enabled = !uiState.isLoading
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        if (uiState.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .align(Alignment.CenterStart),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Outlined.Map,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(18.dp)
+                                    .align(Alignment.CenterStart)
+                            )
+                        }
+                        Text(
+                            text = "Sembrar propiedades en mapa",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
                         )
                     }
                 }

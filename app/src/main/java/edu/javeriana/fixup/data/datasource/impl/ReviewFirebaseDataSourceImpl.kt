@@ -161,7 +161,8 @@ class ReviewFirebaseDataSourceImpl @Inject constructor(
             val userIds = snapshot.documents.map { it.id }
             Result.success(userIds)
         } catch (e: Exception) {
-            Result.failure(e)
+            // Handle offline state or server errors gracefully
+            Result.success(emptyList())
         }
     }
 

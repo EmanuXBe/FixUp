@@ -21,6 +21,7 @@ import edu.javeriana.fixup.ui.features.profile.SettingsScreen
 import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
 import edu.javeriana.fixup.ui.features.following_feed.FollowingFeedScreen
+import edu.javeriana.fixup.ui.features.map.MapScreen
 import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
@@ -99,7 +100,21 @@ fun AppNavigation(
                 },
                 onCreateClick = {
                     navController.navigate(AppScreens.CreatePublication.route)
+                },
+                onMapClick = {
+                    navController.navigate(AppScreens.MapScreen.route)
                 }
+            )
+        }
+
+        // Map screen
+        composable(AppScreens.MapScreen.route) {
+            MapScreen(
+                viewModel = hiltViewModel(),
+                onMarkerClick = { propertyId ->
+                    navController.navigate(AppScreens.PropertyDetail.route + "/$propertyId")
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
 

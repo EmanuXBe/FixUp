@@ -102,6 +102,14 @@ class FeedDataSourceImpl @Inject constructor(
         )
     }
 
+    override suspend fun getRecentPublications(): List<PublicationDto> {
+        return getPublications()
+    }
+
+    override suspend fun togglePublicationLike(publicationId: String, userId: String, liked: Boolean) {
+        // To be implemented: toggle like in Firestore or API
+    }
+
     // Also handle ServiceDto to PublicationDto if needed, as getServices returns ServiceDto
     private fun ServiceDto.toPublicationDto() = PublicationDto(
         id = this.id?.toString() ?: "",
