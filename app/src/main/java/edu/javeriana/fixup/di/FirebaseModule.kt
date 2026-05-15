@@ -2,6 +2,7 @@ package edu.javeriana.fixup.di
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreSettings
 import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
@@ -22,9 +23,10 @@ object FirebaseModule {
         if (BuildConfig.DEBUG) {
             try {
                 auth.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.AUTH_PORT)
-            } catch (e: IllegalStateException) {
-                // Already configured, likely in tests
-            }
+            } catch (e: IllegalStateException) { }
+            // Clear any real-Firebase session so the emulator GRPC stream
+            // doesn't fail with INVALID_REFRESH_TOKEN on every write.
+            auth.signOut()
         }
         return auth
     }
@@ -35,10 +37,13 @@ object FirebaseModule {
         val firestore = FirebaseFirestore.getInstance()
         if (BuildConfig.DEBUG) {
             try {
+                firestore.firestoreSettings = FirebaseFirestoreSettings.Builder()
+                    .setPersistenceEnabled(false)
+                    .build()
+            } catch (e: IllegalStateException) { }
+            try {
                 firestore.useEmulator(AppConstants.EMULATOR_HOST, AppConstants.FIRESTORE_PORT)
-            } catch (e: IllegalStateException) {
-                // Already configured, likely in tests
-            }
+            } catch (e: IllegalStateException) { }
         }
         return firestore
     }

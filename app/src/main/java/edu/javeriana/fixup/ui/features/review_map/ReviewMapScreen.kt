@@ -1,11 +1,10 @@
 package edu.javeriana.fixup.ui.features.review_map
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
-import edu.javeriana.fixup.ui.model.ReviewMapModel
+import edu.javeriana.fixup.ui.model.ArticleMapModel
 
 private val BOGOTA = LatLng(4.6097, -74.0817)
 
@@ -35,21 +34,19 @@ fun ReviewMapScreen(
             cameraPositionState = cameraPositionState,
             uiSettings = MapUiSettings(zoomControlsEnabled = true)
         ) {
-            uiState.reviews.forEach { review ->
-                val position = LatLng(review.latitude, review.longitude)
+            uiState.articles.forEach { article ->
                 Marker(
-                    state = MarkerState(position = position),
-                    title = review.serviceTitle.ifBlank { "Review" },
-                    snippet = "⭐ ${review.rating} · ${review.authorName}",
+                    state = MarkerState(LatLng(article.latitude, article.longitude)),
+                    title = article.title,
+                    snippet = "${article.category} · ${article.price}",
                     onClick = {
-                        viewModel.onMarkerClick(review)
+                        viewModel.onMarkerClick(article)
                         false
                     }
                 )
             }
         }
 
-        // Header badge
         Surface(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -59,16 +56,15 @@ fun ReviewMapScreen(
             shadowElevation = 4.dp
         ) {
             Text(
-                text = "${uiState.reviews.size} reviews · últimas 24h",
+                text = "${uiState.articles.size} propiedades en el mapa",
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimary
             )
         }
 
-        // FAB reload
         FloatingActionButton(
-            onClick = { viewModel.loadReviews() },
+            onClick = { viewModel.loadArticles() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(end = 16.dp, bottom = 80.dp),
@@ -77,33 +73,23 @@ fun ReviewMapScreen(
             Icon(Icons.Default.Refresh, contentDescription = "Recargar")
         }
 
-        // Loading overlay
         if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
 
-        // Error snackbar area
         if (uiState.error != null) {
             Snackbar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
             ) {
-                Text("Sin datos disponibles: ${uiState.error}")
+                Text("Error: ${uiState.error}")
             }
         }
 
-        // Info card cuando el usuario toca un marcador
-        uiState.selectedReview?.let { review ->
-            ReviewInfoCard(
-                review = review,
+        uiState.selectedArticle?.let { article ->
+            PropertyInfoCard(
+                article = article,
                 onDismiss = { viewModel.onDismissInfo() },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -114,8 +100,8 @@ fun ReviewMapScreen(
 }
 
 @Composable
-private fun ReviewInfoCard(
-    review: ReviewMapModel,
+private fun PropertyInfoCard(
+    article: ArticleMapModel,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -131,7 +117,7 @@ private fun ReviewInfoCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = review.serviceTitle.ifBlank { "Servicio" },
+                    text = article.title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
@@ -141,31 +127,37 @@ private fun ReviewInfoCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                repeat(review.rating) {
+            AssistChip(
+                onClick = {},
+                label = { Text(article.category) }
+            )
+
+            if (article.location.isNotBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Star,
+                        Icons.Default.LocationOn,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = article.location,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = review.authorName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
 
-            if (review.comment.isNotBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "\"${review.comment}\"",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = article.price,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

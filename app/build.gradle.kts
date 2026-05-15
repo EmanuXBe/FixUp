@@ -46,6 +46,10 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+    testOptions {
+        animationsDisabled = true
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
@@ -104,6 +108,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.datafaker)
     implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+    implementation(libs.play.services.location)
 
     // Unit testing
     testImplementation(libs.junit)
@@ -116,6 +122,7 @@ dependencies {
     // Instrumented / integration testing
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -123,6 +130,7 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.turbine)
     androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.androidx.test.uiautomator)
     kspAndroidTest(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.ui.tooling)

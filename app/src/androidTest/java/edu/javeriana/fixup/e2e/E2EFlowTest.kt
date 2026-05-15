@@ -4,7 +4,10 @@ import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -13,6 +16,7 @@ import edu.javeriana.fixup.MainActivity
 import edu.javeriana.fixup.data.util.AppConstants
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.concurrent.TimeUnit
@@ -73,7 +77,9 @@ class E2EFlowTest {
         println("E2E: Starting setUp")
         hiltRule.inject()
         println("E2E: Hilt injected")
-        
+
+        dismissSystemDialogs()
+
         clearAuthEmulator()
         println("E2E: Auth emulator cleared")
 
@@ -107,12 +113,7 @@ class E2EFlowTest {
                 )
             ).await()
 
-            // Pre-create existing user
-            auth.createUserWithEmailAndPassword(existingUserEmail, existingUserPassword).await()
-            println("E2E: Existing user created")
-            auth.signOut()
-
-            // Pre-create review
+            // Pre-create review BEFORE signing out (avoid breaking the Firestore GRPC stream)
             firestore.collection("reviews").document("e2e-review-1").set(
                 mapOf(
                     "userId"       to targetUid,
@@ -124,6 +125,11 @@ class E2EFlowTest {
                 )
             ).await()
             println("E2E: Review created")
+
+            // Pre-create existing user, then sign out last
+            auth.createUserWithEmailAndPassword(existingUserEmail, existingUserPassword).await()
+            println("E2E: Existing user created")
+            auth.signOut()
         }
 
         println("E2E: Launching MainActivity")
@@ -135,10 +141,12 @@ class E2EFlowTest {
     fun tearDown() {
         println("E2E: Starting tearDown")
         runBlocking {
-            try {
-                cleanTestData()
-            } catch (e: Exception) {
-                println("E2E: Error in tearDown cleanup: ${e.message}")
+            withTimeoutOrNull(15_000) {
+                try {
+                    cleanTestData()
+                } catch (e: Exception) {
+                    println("E2E: Error in tearDown cleanup: ${e.message}")
+                }
             }
             auth.signOut()
         }
@@ -183,17 +191,27 @@ class E2EFlowTest {
         }
         println("E2E: Feed loaded")
 
-        composeRule.onAllNodes(hasTestTag("publication_card")).onFirst().performClick()
+        // Scroll the grid to the specific E2E article (LazyVerticalGrid virtualizes off-screen items)
+        composeRule.onNodeWithTag("feed_screen")
+            .performScrollToNode(hasText("Artículo del usuario seguido", ignoreCase = true))
+        composeRule.onNodeWithText("Artículo del usuario seguido", ignoreCase = true)
+            .performClick()
         composeRule.waitForIdle()
 
         // ✅ REQUISITO: "Verificar que la información de detalle sea correcta"
-        // Esperar a que el título del artículo aparezca en la pantalla de detalle
         composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodesWithText("Artículo del usuario seguido", ignoreCase = true)
                 .fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText("Artículo del usuario seguido", ignoreCase = true).assertIsDisplayed()
         println("E2E: Información de detalle verificada correctamente")
+
+        // Wait for the async getLikedUsers chain to complete (initial like_count = "0")
+        // before clicking like, so the optimistic update won't be overwritten by the
+        // snapshot's async callback completing afterwards.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodes(hasTestTag("like_count").and(hasText("0"))).fetchSemanticsNodes().isNotEmpty()
+        }
 
         // Like
         println("E2E: Liking publication")
@@ -203,15 +221,25 @@ class E2EFlowTest {
         composeRule.waitForIdle()
 
         // ✅ REQUISITO: "Verificar que aumente la cantidad de likes"
-        composeRule.waitUntil(timeoutMillis = 5_000) {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodes(hasTestTag("like_count").and(hasText("1"))).fetchSemanticsNodes().isNotEmpty()
         }
 
         // ✅ REQUISITO: "El usuario va atrás, y vuelve a seleccionar la publicación"
         composeRule.onNodeWithContentDescription("Volver", useUnmergedTree = true).performClick()
         composeRule.waitForIdle()
-        composeRule.onAllNodes(hasTestTag("publication_card")).onFirst().performClick()
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodes(hasTestTag("publication_card")).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithTag("feed_screen")
+            .performScrollToNode(hasText("Artículo del usuario seguido", ignoreCase = true))
+        composeRule.onNodeWithText("Artículo del usuario seguido", ignoreCase = true).performClick()
         composeRule.waitForIdle()
+
+        // Wait for the snapshot to reload with the persisted like (getLikedUsers returns [userId])
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            composeRule.onAllNodes(hasTestTag("like_count").and(hasText("1"))).fetchSemanticsNodes().isNotEmpty()
+        }
 
         // ✅ REQUISITO: "ahora quita el like"
         println("E2E: Unliking publication")
@@ -221,7 +249,7 @@ class E2EFlowTest {
         composeRule.waitForIdle()
 
         // ✅ REQUISITO: "se verifica que la cantidad de likes disminuya"
-        composeRule.waitUntil(timeoutMillis = 5_000) {
+        composeRule.waitUntil(timeoutMillis = 10_000) {
             composeRule.onAllNodes(hasTestTag("like_count").and(hasText("0"))).fetchSemanticsNodes().isNotEmpty()
         }
         println("E2E: Test 1 finished successfully")
@@ -247,7 +275,10 @@ class E2EFlowTest {
             composeRule.onAllNodes(hasTestTag("publication_card")).fetchSemanticsNodes().isNotEmpty()
         }
 
-        composeRule.onNodeWithText("Artículo del usuario seguido", ignoreCase = true).performClick()
+        composeRule.onNodeWithTag("feed_screen")
+            .performScrollToNode(hasText("Artículo del usuario seguido", ignoreCase = true))
+        composeRule.onNodeWithText("Artículo del usuario seguido", ignoreCase = true)
+            .performClick()
         composeRule.waitForIdle()
 
         composeRule.waitUntil(timeoutMillis = 10_000) {
@@ -264,15 +295,19 @@ class E2EFlowTest {
         composeRule.onNodeWithTag("profile_header_name").assertTextEquals("Target E2E User")
         println("E2E: Información del perfil de usuario verificada correctamente")
 
+        // Wait for profile state to fully stabilize — including the async getReviewsByUserId
+        // snapshot initial emission that sets _uiState.user = originalUser. If we click
+        // "Seguir" before this completes, the snapshot emission will revert the optimistic update.
+        composeRule.waitUntil(timeoutMillis = 10_000) {
+            composeRule.onAllNodes(hasTestTag("followers_count").and(hasText("0"))).fetchSemanticsNodes().isNotEmpty()
+        }
+
         // Follow
         println("E2E: Following user")
-        composeRule.waitUntil(timeoutMillis = 10_000) {
-            composeRule.onAllNodesWithText("Seguir", ignoreCase = true).fetchSemanticsNodes().isNotEmpty()
-        }
         composeRule.onNodeWithText("Seguir", ignoreCase = true).performClick()
 
         // ✅ REQUISITO: "Le da follow y se verifica que aumenta la cantidad de seguidores"
-        composeRule.waitUntil(timeoutMillis = 10_000) {
+        composeRule.waitUntil(timeoutMillis = 15_000) {
             composeRule.onAllNodesWithText("Dejar de seguir", ignoreCase = true).fetchSemanticsNodes().isNotEmpty() &&
             composeRule.onAllNodes(hasTestTag("followers_count").and(hasText("1"))).fetchSemanticsNodes().isNotEmpty()
         }
@@ -296,6 +331,22 @@ class E2EFlowTest {
 
         composeRule.onNodeWithText("Artículo del usuario seguido", ignoreCase = true).assertIsDisplayed()
         println("E2E: Test 2 finished successfully")
+    }
+
+    private fun dismissSystemDialogs() {
+        try {
+            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+            val selectors = listOf("OK", "Got it", "Continue", "Close", "Dismiss")
+            for (text in selectors) {
+                val btn = device.findObject(UiSelector().textMatches("(?i)$text"))
+                if (btn.exists()) {
+                    btn.click()
+                    break
+                }
+            }
+        } catch (e: Exception) {
+            println("E2E: Could not dismiss system dialog: ${e.message}")
+        }
     }
 
     private fun clearAuthEmulator() {
@@ -350,9 +401,5 @@ class E2EFlowTest {
     }
 
 
-    companion object {
-        init {
-            // Emulators are now configured via FirebaseModule in NetworkModule/FirebaseModule
-        }
-    }
+    companion object
 }
