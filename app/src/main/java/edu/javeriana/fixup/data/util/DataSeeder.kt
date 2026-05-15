@@ -76,11 +76,16 @@ class DataSeeder @Inject constructor(
                     )
                 ).await()
 
-                // 3. Reseñas del artículo — usa "serviceId" y "serviceTitle" porque así
-                //    los consulta ReviewFirebaseDataSourceImpl.getReviewsByServiceId
+                // 3. Reseñas del artículo — incluye coordenadas y timestamp para el mapa
                 repeat(Random.nextInt(1, 4)) { r ->
                     val reviewId = "review_fake_${index}_$r"
                     val reviewerId = userIds.random()
+                    // Coordenadas aleatorias en área de Bogotá
+                    val lat = 4.5 + Random.nextDouble() * 0.35
+                    val lng = -74.2 + Random.nextDouble() * 0.35
+                    // Timestamp en las últimas 24h
+                    val hoursAgo = Random.nextLong(0L, 24L)
+                    val ts = System.currentTimeMillis() - hoursAgo * 60 * 60 * 1000L
                     firestore.collection("reviews").document(reviewId).set(
                         mapOf(
                             "serviceId"    to articleId,
@@ -88,7 +93,10 @@ class DataSeeder @Inject constructor(
                             "rating"       to Random.nextInt(3, 6),
                             "comment"      to faker.lorem().sentence(10),
                             "authorName"   to faker.name().fullName(),
-                            "serviceTitle" to "Artículo prueba $index"
+                            "serviceTitle" to "Artículo prueba $index",
+                            "latitude"     to lat,
+                            "longitude"    to lng,
+                            "timestamp"    to ts
                         )
                     ).await()
                 }

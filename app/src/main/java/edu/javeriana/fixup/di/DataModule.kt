@@ -60,6 +60,11 @@ abstract class DataModule {
         notificationFirebaseDataSourceImpl: NotificationFirebaseDataSourceImpl
     ): NotificationDataSource
 
+    @Binds
+    abstract fun bindReviewMapDataSource(
+        impl: ReviewMapFirestoreDataSourceImpl
+    ): ReviewMapDataSource
+
     companion object {
         @Provides
         @Singleton

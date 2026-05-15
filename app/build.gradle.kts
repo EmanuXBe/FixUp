@@ -7,6 +7,14 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+import java.util.Properties
+
+val localProperties = Properties().also { props ->
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { stream ->
+        props.load(stream)
+    }
+}
+
 android {
     namespace = "edu.javeriana.fixup"
     compileSdk = 35
@@ -22,6 +30,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
     }
 
     buildTypes {
@@ -94,6 +103,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.firebase.firestore)
     implementation(libs.datafaker)
+    implementation(libs.maps.compose)
 
     // Unit testing
     testImplementation(libs.junit)

@@ -23,6 +23,7 @@ import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScree
 import edu.javeriana.fixup.ui.features.following_feed.FollowingFeedScreen
 import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
+import edu.javeriana.fixup.ui.features.review_map.ReviewMapScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
 import edu.javeriana.fixup.ui.features.user_profile.UserProfileScreen
 
@@ -206,6 +207,11 @@ fun AppNavigation(
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() }
             )
+        }
+
+        // Review Map screen
+        composable(AppScreens.ReviewMap.route) {
+            ReviewMapScreen(viewModel = hiltViewModel())
         }
 
         // User Profile screen

@@ -113,7 +113,10 @@ class ReviewFirebaseDataSourceImpl @Inject constructor(
                 "comment" to review.comment,
                 "authorName" to review.authorName,
                 "authorProfileImageUrl" to review.authorProfileImageUrl,
-                "serviceTitle" to review.serviceTitle
+                "serviceTitle" to review.serviceTitle,
+                "timestamp" to System.currentTimeMillis(),
+                "latitude" to review.latitude,
+                "longitude" to review.longitude
             )
             firestore.collection("reviews").add(reviewMap).await()
             Result.success(true)
