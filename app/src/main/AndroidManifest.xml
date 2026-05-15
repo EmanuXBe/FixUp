@@ -21,9 +21,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.FixUp"
         android:usesCleartextTraffic="true">
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyD2YERmS03DFW-dVML6yGTV-rjt0tcMvGA" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
