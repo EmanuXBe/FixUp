@@ -162,60 +162,6 @@ fun SettingsScreen(
                 }
             }
 
-            // ── Zona Debug ─────────────────────────────────────────────
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Zona Debug",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFF57C00)
-                )
-            }
-
-            item {
-                Button(
-                    onClick = { viewModel.seedProperties() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFF57C00),
-                        contentColor = Color.White
-                    ),
-                    enabled = !uiState.isLoading
-                ) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .align(Alignment.CenterStart),
-                                color = Color.White,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Outlined.Map,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(18.dp)
-                                    .align(Alignment.CenterStart)
-                            )
-                        }
-                        Text(
-                            text = "Sembrar propiedades en mapa",
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-
             item {
                 Spacer(modifier = Modifier.height(24.dp))
                 // ── Botón de Cerrar Sesión ──────────────────────────────

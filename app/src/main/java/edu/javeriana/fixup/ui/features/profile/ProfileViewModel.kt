@@ -231,18 +231,6 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun seedProperties() {
-        val currentUserId = authRepository.currentUser?.uid
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            firebaseSeeder.seedProperties(currentUserId).onSuccess {
-                _uiState.update { it.copy(isLoading = false, errorMessage = "5 propiedades sembradas en Bogotá ✓") }
-            }.onFailure { error ->
-                _uiState.update { it.copy(isLoading = false, errorMessage = "Error: ${error.message}") }
-            }
-        }
-    }
-
     fun toggleLikeReview(reviewId: String) {
         val userId = authRepository.currentUser?.uid ?: return
         val review = _uiState.value.reviews.find { it.id == reviewId } ?: return
