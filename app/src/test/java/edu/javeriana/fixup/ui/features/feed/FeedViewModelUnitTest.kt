@@ -16,11 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * ✅ REQUISITO IMPLEMENTADO: "Realizar 8 pruebas con mocks para los viewmodel"
- *
- * Pruebas unitarias del FeedViewModel con MockK y UnconfinedTestDispatcher.
- * Cada prueba verifica un comportamiento o transición de estado distinto,
- * asegurando que el ViewModel reaccione correctamente sin tocar Firebase.
+ *"Realizar 8 pruebas con mocks para los viewmodel"
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class FeedViewModelUnitTest {
