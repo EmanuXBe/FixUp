@@ -59,10 +59,42 @@ class DataSeeder @Inject constructor(
 
             val categories = listOf("Baños", "Iluminación", "Cocina", "Pintura", "Jardinería", "Remodelación General")
 
-            // 2. Artículos y reseñas (collection "articles" que lee FeedFirestoreDataSourceImpl)
+            // 2. Propiedades en arriendo (collection "properties" que lee el mapa)
+            val propertyTypes = listOf("Apartamento", "Casa", "Estudio", "Local Comercial", "Habitación")
+            val bogotaNeighborhoods = listOf(
+                "Chapinero Alto, Bogotá", "Usaquén, Bogotá", "El Retiro, Bogotá",
+                "La Candelaria, Bogotá", "Teusaquillo, Bogotá", "Suba, Bogotá",
+                "Kennedy, Bogotá", "Fontibón, Bogotá", "Engativá, Bogotá", "Bosa, Bogotá"
+            )
+            repeat(count) { index ->
+                val propertyId = "property_fake_$index"
+                val propLat = 4.58 + Random.nextDouble() * 0.15
+                val propLng = -74.18 + Random.nextDouble() * 0.16
+                val tipo = propertyTypes.random()
+                firestore.collection("properties").document(propertyId).set(
+                    mapOf(
+                        "titulo"     to "$tipo ${faker.options().option("Moderno", "Amplio", "Acogedor", "Nuevo", "Renovado")}",
+                        "ubicacion"  to bogotaNeighborhoods.random(),
+                        "descripcion" to faker.lorem().paragraph(2),
+                        "precio"     to Random.nextDouble(800_000.0, 5_000_000.0),
+                        "tipo"       to tipo,
+                        "imagenes"   to listOf("https://picsum.photos/seed/$propertyId/800/600"),
+                        "userId"     to userIds.random(),
+                        "latitude"   to propLat,
+                        "longitude"  to propLng,
+                        "createdAt"  to System.currentTimeMillis().toString()
+                    )
+                ).await()
+            }
+
+            // 3. Artículos y reseñas (collection "articles" que lee FeedFirestoreDataSourceImpl)
             repeat(count) { index ->
                 val articleId = "article_fake_$index"
                 val authorId = userIds.random()
+
+                // Coordenadas dentro del perímetro urbano de Bogotá
+                val articleLat = 4.58 + Random.nextDouble() * 0.15   // 4.58 – 4.73
+                val articleLng = -74.18 + Random.nextDouble() * 0.16  // -74.18 – -74.02
 
                 firestore.collection("articles").document(articleId).set(
                     mapOf(
@@ -72,15 +104,22 @@ class DataSeeder @Inject constructor(
                         "category"    to categories.random(),
                         "imageUrl"    to "https://picsum.photos/seed/$articleId/800/600",
                         "authorId"    to authorId,
-                        "rating"      to Random.nextDouble(3.0, 5.0)
+                        "rating"      to Random.nextDouble(3.0, 5.0),
+                        "latitude"    to articleLat,
+                        "longitude"   to articleLng
                     )
                 ).await()
 
-                // 3. Reseñas del artículo — usa "serviceId" y "serviceTitle" porque así
-                //    los consulta ReviewFirebaseDataSourceImpl.getReviewsByServiceId
+                // 3. Reseñas del artículo — incluye coordenadas y timestamp para el mapa
                 repeat(Random.nextInt(1, 4)) { r ->
                     val reviewId = "review_fake_${index}_$r"
                     val reviewerId = userIds.random()
+                    // Coordenadas dentro del perímetro urbano de Bogotá
+                    val lat = 4.58 + Random.nextDouble() * 0.15   // 4.58 – 4.73
+                    val lng = -74.18 + Random.nextDouble() * 0.16  // -74.18 – -74.02
+                    // Timestamp en las últimas 24h
+                    val hoursAgo = Random.nextLong(0L, 24L)
+                    val ts = System.currentTimeMillis() - hoursAgo * 60 * 60 * 1000L
                     firestore.collection("reviews").document(reviewId).set(
                         mapOf(
                             "serviceId"    to articleId,
@@ -88,7 +127,10 @@ class DataSeeder @Inject constructor(
                             "rating"       to Random.nextInt(3, 6),
                             "comment"      to faker.lorem().sentence(10),
                             "authorName"   to faker.name().fullName(),
-                            "serviceTitle" to "Artículo prueba $index"
+                            "serviceTitle" to "Artículo prueba $index",
+                            "latitude"     to lat,
+                            "longitude"    to lng,
+                            "timestamp"    to ts
                         )
                     ).await()
                 }
@@ -107,7 +149,7 @@ class DataSeeder @Inject constructor(
                     .collection("followers").document(currentUserId).set(timestamp).await()
             }
 
-            Log.d(TAG, "Sembrado completado: $count artículos, usuarios, reseñas y ${fakeUserIds.size} seguimientos en Firestore")
+            Log.d(TAG, "Sembrado completado: $count propiedades, artículos, usuarios, reseñas y ${fakeUserIds.size} seguimientos en Firestore")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Error en DataSeeder: ${e.message}", e)

@@ -7,6 +7,14 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+import java.util.Properties
+
+val localProperties = Properties().also { props ->
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { stream ->
+        props.load(stream)
+    }
+}
+
 android {
     namespace = "edu.javeriana.fixup"
     compileSdk = 35
@@ -22,6 +30,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        manifestPlaceholders["MAPS_API_KEY"] = localProperties.getProperty("MAPS_API_KEY", "")
     }
 
     buildTypes {
@@ -37,6 +46,10 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+    testOptions {
+        animationsDisabled = true
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
@@ -73,9 +86,6 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.coil.compose)
-    implementation(libs.maps.compose)
-    implementation(libs.maps.compose.utils)
-    implementation(libs.play.services.location)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -95,8 +105,10 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.firebase.firestore)
     implementation(libs.datafaker)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
+    implementation(libs.play.services.location)
 
     // Unit testing
     testImplementation(libs.junit)
@@ -109,6 +121,7 @@ dependencies {
     // Instrumented / integration testing
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
@@ -116,6 +129,7 @@ dependencies {
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.turbine)
     androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.androidx.test.uiautomator)
     kspAndroidTest(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.ui.tooling)

@@ -22,9 +22,9 @@ import edu.javeriana.fixup.ui.features.profile.SettingsScreen
 import edu.javeriana.fixup.ui.features.property_detail.PropertyDetailScreen
 import edu.javeriana.fixup.ui.features.publication_detail.PublicationDetailScreen
 import edu.javeriana.fixup.ui.features.following_feed.FollowingFeedScreen
-import edu.javeriana.fixup.ui.features.map.MapScreen
 import edu.javeriana.fixup.ui.features.rent.CreatePropertyScreen
 import edu.javeriana.fixup.ui.features.rent.RentScreen
+import edu.javeriana.fixup.ui.features.review_map.ReviewMapScreen
 import edu.javeriana.fixup.ui.features.splash.SplashScreen
 import edu.javeriana.fixup.ui.features.user_profile.UserProfileScreen
 
@@ -117,19 +117,8 @@ fun AppNavigation(
                     navController.navigate(AppScreens.CreatePublication.route)
                 },
                 onMapClick = {
-                    navController.navigate(AppScreens.MapScreen.route)
+                    navController.navigate(AppScreens.ReviewMap.route)
                 }
-            )
-        }
-
-        // Map screen
-        composable(AppScreens.MapScreen.route) {
-            MapScreen(
-                viewModel = hiltViewModel(),
-                onMarkerClick = { propertyId ->
-                    navController.navigate(AppScreens.PropertyDetail.route + "/$propertyId")
-                },
-                onBackClick = { navController.popBackStack() }
             )
         }
 
@@ -236,6 +225,11 @@ fun AppNavigation(
                 viewModel = hiltViewModel(),
                 onBackClick = { navController.popBackStack() }
             )
+        }
+
+        // Review Map screen
+        composable(AppScreens.ReviewMap.route) {
+            ReviewMapScreen(viewModel = hiltViewModel())
         }
 
         // User Profile screen

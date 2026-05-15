@@ -11,5 +11,8 @@ data class ReviewModel(
     val authorName: String = "",
     val authorProfileImageUrl: String = "",
     val serviceTitle: String = "",
-    val likedBy: List<String> = emptyList()
+    val likedBy: List<String> = emptyList(),
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val timestamp: Long = 0L
 )

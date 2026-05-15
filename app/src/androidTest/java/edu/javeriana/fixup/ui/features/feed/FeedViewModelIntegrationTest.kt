@@ -22,16 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * ✅ REQUISITO IMPLEMENTADO: "Realizar 2 pruebas de integración para un viewmodel"
- *
- * Pruebas de integración del FeedViewModel conectado a los componentes reales
- * del emulador de Firebase.
- *
- * Validan la cadena completa:
- *   Firestore ← FeedDataSource ← FeedRepository ← FeedViewModel
- *
- * Prueba 1: con artículos en Firestore, el estado se puebla correctamente.
- * Prueba 2: con colección vacía, el estado tiene lista vacía e isConnected=true.
+ * "Realizar 2 pruebas de integración para un viewmodel"
  */
 @RunWith(AndroidJUnit4::class)
 class FeedViewModelIntegrationTest {

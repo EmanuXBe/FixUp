@@ -3,6 +3,7 @@ package edu.javeriana.fixup.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
@@ -82,6 +83,28 @@ fun BottomNavigationBar(
             ),
             onClick = {
                 navController.navigate(AppScreens.Notifications.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+
+        NavigationBarItem(
+            icon = { Icon(Icons.Outlined.LocationOn, contentDescription = "Map") },
+            label = { Text("Mapa") },
+            selected = currentRoute == AppScreens.ReviewMap.route,
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = SoftFawn,
+                selectedTextColor = SoftFawn,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                indicatorColor = MaterialTheme.colorScheme.secondaryContainer
+            ),
+            onClick = {
+                navController.navigate(AppScreens.ReviewMap.route) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }
