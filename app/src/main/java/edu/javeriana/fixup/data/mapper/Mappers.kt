@@ -1,14 +1,28 @@
 package edu.javeriana.fixup.data.mapper
 
+import edu.javeriana.fixup.data.network.dto.ArticleDto
+import edu.javeriana.fixup.data.network.dto.FirestorePropertyDto
 import edu.javeriana.fixup.data.network.dto.ReviewDto
-import edu.javeriana.fixup.data.network.dto.UserDto
 import edu.javeriana.fixup.data.network.dto.ServiceDto
+import edu.javeriana.fixup.data.network.dto.UserDto
+import edu.javeriana.fixup.ui.model.ArticleModel
+import edu.javeriana.fixup.ui.model.PropertyModel
 import edu.javeriana.fixup.ui.model.ReviewModel
 import edu.javeriana.fixup.ui.model.ServiceModel
 import edu.javeriana.fixup.ui.model.UserModel
 
-import edu.javeriana.fixup.data.network.dto.ArticleDto
-import edu.javeriana.fixup.ui.model.ArticleModel
+fun FirestorePropertyDto.toDomain(): PropertyModel {
+    return PropertyModel(
+        id = id ?: "",
+        title = titulo ?: "",
+        description = descripcion,
+        price = precio,
+        location = ubicacion,
+        imageUrl = imagenes?.firstOrNull(),
+        latitude = latitude ?: location?.latitude,
+        longitude = longitude ?: location?.longitude
+    )
+}
 
 fun ArticleDto.toDomain(): ArticleModel {
     return ArticleModel(

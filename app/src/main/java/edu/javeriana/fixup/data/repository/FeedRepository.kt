@@ -58,6 +58,24 @@ class FeedRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    suspend fun getRecentPublications(): Result<List<PublicationCardModel>> {
+        return try {
+            val dtos = dataSource.getRecentPublications()
+            Result.success(dtos.map { it.toUiModel() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun togglePublicationLike(publicationId: String, userId: String, liked: Boolean): Result<Unit> {
+        return try {
+            dataSource.togglePublicationLike(publicationId, userId, liked)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 // Extension functions for mapping (Mappers)
@@ -73,5 +91,10 @@ fun PublicationDto.toUiModel() = PublicationCardModel(
     price = this.priceText,
     description = this.description,
     location = this.location,
-    authorId = this.authorId
+    authorId = this.authorId,
+    latitude = this.latitude,
+    longitude = this.longitude,
+    createdAt = this.createdAt,
+    likeCount = this.likeCount,
+    likedByCurrentUser = this.likedByCurrentUser
 )

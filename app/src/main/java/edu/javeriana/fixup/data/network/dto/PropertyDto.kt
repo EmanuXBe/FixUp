@@ -1,5 +1,6 @@
 package edu.javeriana.fixup.data.network.dto
 
+import com.google.firebase.firestore.GeoPoint
 import com.google.gson.annotations.SerializedName
 
 /** DTO legado — mantiene compatibilidad con endpoints que usan nombres en inglés. */
@@ -40,5 +41,12 @@ data class FirestorePropertyDto(
     @SerializedName("userId")
     val userId: String? = null,
     @SerializedName("createdAt")
-    val createdAt: String? = null
+    val createdAt: String? = null,
+    @SerializedName("latitude")
+    val latitude: Double? = null,
+    @SerializedName("longitude")
+    val longitude: Double? = null,
+    // GeoPoint nativo de Firestore — no usa @SerializedName porque Gson no soporta este tipo.
+    // Se lee con DocumentSnapshot.getGeoPoint("location") en la capa de datos.
+    val location: GeoPoint? = null
 )

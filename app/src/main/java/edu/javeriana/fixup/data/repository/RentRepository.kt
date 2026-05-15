@@ -22,6 +22,14 @@ class RentRepository @Inject constructor(
         }
     }
 
+    suspend fun getPropertyById(id: String): Result<PropertyModel> {
+        return try {
+            Result.success(dataSource.getPropertyById(id))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     /**
      * Publica un nuevo inmueble delegando al DataSource la subida de imágenes y
      * la llamada al backend.

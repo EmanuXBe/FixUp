@@ -12,11 +12,7 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * ✅ REQUISITO IMPLEMENTADO: "Tener 8 pruebas con mocks del repositorio" + "Probar mapeos"
- *
- * Pruebas unitarias del FeedRepository usando MockK para aislar Firebase.
- * Cubre el contrato Result (success/failure) y el mapeo completo
- * PublicationDto → PublicationCardModel (id, title, price, imageUrl, authorId).
+"Tener 8 pruebas con mocks del repositorio" + "Probar mapeos"
  */
 class FeedRepositoryUnitTest {
 

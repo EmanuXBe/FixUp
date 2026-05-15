@@ -1,10 +1,14 @@
 package edu.javeriana.fixup.data.util
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.tasks.await
 import net.datafaker.Faker
+import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.random.Random
 
 class FirebaseSeeder @Inject constructor(
     private val firestore: FirebaseFirestore
@@ -50,6 +54,109 @@ class FirebaseSeeder @Inject constructor(
                 "authorId" to UUID.randomUUID().toString()
             )
             articlesCollection.add(articleMap).await()
+        }
+    }
+
+    /**
+     * Inserta 5 propiedades de prueba en la colección "properties" con:
+     *  - Coordenadas dentro de Bogotá (lat 4.55–4.75 / lng -74.15–-74.00)
+     *  - GeoPoint en el campo "location" (tipo nativo Firestore)
+     *  - "latitude" y "longitude" como Double independientes (requeridos por FeedFirestoreDataSourceImpl)
+     *  - "createdAt" con timestamp aleatorio dentro de las últimas 24 horas (para pasar el filtro del mapa)
+     */
+    suspend fun seedProperties(currentUserId: String? = null): Result<Unit> {
+        return try {
+            val userId = currentUserId ?: UUID.randomUUID().toString()
+            val now = System.currentTimeMillis()
+            val twentyFourHoursMs = 86_400_000L
+
+            data class BogotaProperty(
+                val title: String,
+                val description: String,
+                val price: Double,
+                val category: String,
+                val imageUrl: String,
+                val latitude: Double,
+                val longitude: Double
+            )
+
+            val properties = listOf(
+                BogotaProperty(
+                    title = "Apartamento moderno en Chapinero Alto",
+                    description = "Hermoso apartamento de 2 habitaciones con balcón y vista panorámica de la ciudad. Cocina integral completamente equipada, sala-comedor amplio y parqueadero cubierto incluido. A 5 minutos del Parque de los Hippies.",
+                    price = 2_800_000.0,
+                    category = "Apartamento",
+                    imageUrl = "https://picsum.photos/seed/bogota_chapinero/800/600",
+                    latitude = 4.6477,
+                    longitude = -74.0631
+                ),
+                BogotaProperty(
+                    title = "Estudio amoblado en Usaquén",
+                    description = "Acogedor estudio totalmente amoblado en el corazón de Usaquén. A pasos de restaurantes, cafeterías y comercio. Administración y servicios públicos incluidos en el canon. Edificio con portería 24 horas.",
+                    price = 1_500_000.0,
+                    category = "Estudio",
+                    imageUrl = "https://picsum.photos/seed/bogota_usaquen/800/600",
+                    latitude = 4.6940,
+                    longitude = -74.0318
+                ),
+                BogotaProperty(
+                    title = "Apartamento familiar en Suba Compartir",
+                    description = "Espacioso apartamento de 3 habitaciones y 2 baños, zona de lavandería, depósito y dos parqueaderos. Conjunto cerrado con piscina, salón comunal y cancha múltiple. Ideal para familias.",
+                    price = 2_200_000.0,
+                    category = "Apartamento",
+                    imageUrl = "https://picsum.photos/seed/bogota_suba/800/600",
+                    latitude = 4.7405,
+                    longitude = -74.0835
+                ),
+                BogotaProperty(
+                    title = "Penthouse exclusivo en El Chicó",
+                    description = "Impresionante penthouse de 4 habitaciones con terraza privada, jacuzzi exterior y vista 360° de Bogotá. Edificio de lujo con portería 24 horas, gimnasio, spa y salón de eventos.",
+                    price = 8_500_000.0,
+                    category = "Penthouse",
+                    imageUrl = "https://picsum.photos/seed/bogota_chico/800/600",
+                    latitude = 4.6688,
+                    longitude = -74.0532
+                ),
+                BogotaProperty(
+                    title = "Apartamento en Teusaquillo cerca al metro",
+                    description = "Bien ubicado apartamento de 2 habitaciones a 3 minutos a pie de la estación de TransMilenio. Cocina equipada, depósito incluido y edificio con vigilancia. Barrio tranquilo y seguro, cerca a universidades.",
+                    price = 1_900_000.0,
+                    category = "Apartamento",
+                    imageUrl = "https://picsum.photos/seed/bogota_teusaquillo/800/600",
+                    latitude = 4.6362,
+                    longitude = -74.0855
+                )
+            )
+
+            val batch = firestore.batch()
+            properties.forEach { prop ->
+                val docRef = firestore.collection("properties").document()
+                val randomOffsetMs = Random.nextLong(0L, twentyFourHoursMs)
+                val geoPoint = GeoPoint(prop.latitude, prop.longitude)
+                batch.set(
+                    docRef,
+                    hashMapOf(
+                        "title"       to prop.title,
+                        "description" to prop.description,
+                        "price"       to prop.price,
+                        "category"    to prop.category,
+                        "imageUrl"    to prop.imageUrl,
+                        "authorId"    to userId,
+                        "likeCount"   to 0,
+                        // Coordenadas como GeoPoint nativo (Firestore)
+                        "location"    to geoPoint,
+                        // Coordenadas como Double individuales (requeridas por FeedFirestoreDataSourceImpl.toPublicationDto)
+                        "latitude"    to prop.latitude,
+                        "longitude"   to prop.longitude,
+                        // Timestamp dentro de las últimas 24 horas para pasar el filtro de getRecentPublications()
+                        "createdAt"   to Timestamp(Date(now - randomOffsetMs))
+                    )
+                )
+            }
+            batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

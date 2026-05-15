@@ -1,10 +1,10 @@
 package edu.javeriana.fixup.ui.features.review_map
 
-import edu.javeriana.fixup.ui.model.ReviewMapModel
+import edu.javeriana.fixup.ui.model.ArticleMapModel
 
 data class ReviewMapUiState(
     val isLoading: Boolean = true,
-    val reviews: List<ReviewMapModel> = emptyList(),
-    val selectedReview: ReviewMapModel? = null,
+    val articles: List<ArticleMapModel> = emptyList(),
+    val selectedArticle: ArticleMapModel? = null,
     val error: String? = null
 )

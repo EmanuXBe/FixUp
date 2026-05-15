@@ -65,6 +65,11 @@ abstract class DataModule {
         impl: ReviewMapFirestoreDataSourceImpl
     ): ReviewMapDataSource
 
+    @Binds
+    abstract fun bindArticleMapDataSource(
+        impl: ArticleMapFirestoreDataSourceImpl
+    ): ArticleMapDataSource
+
     companion object {
         @Provides
         @Singleton

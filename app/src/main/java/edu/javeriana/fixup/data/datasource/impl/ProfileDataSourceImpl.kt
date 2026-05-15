@@ -88,28 +88,41 @@ class ProfileDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getUserData(userId: String): Map<String, Any>? {
-        val data = firestore.collection("users").document(userId).get().await().data ?: return null
-        val mutableData = data.toMutableMap()
-        mutableData["followersCount"] = getFollowersCount(userId)
-        mutableData["followingCount"] = getFollowingCount(userId)
-        return mutableData
+        return try {
+            val data = firestore.collection("users").document(userId).get().await().data ?: return null
+            val mutableData = data.toMutableMap()
+            mutableData["followersCount"] = getFollowersCount(userId)
+            mutableData["followingCount"] = getFollowingCount(userId)
+            mutableData
+        } catch (e: Exception) {
+            // Log error or handle offline state
+            null
+        }
     }
 
     override suspend fun getFollowersCount(userId: String): Long {
-        return firestore.collection("users").document(userId)
-            .collection("followers")
-            .count()
-            .get(com.google.firebase.firestore.AggregateSource.SERVER)
-            .await()
-            .count
+        return try {
+            firestore.collection("users").document(userId)
+                .collection("followers")
+                .count()
+                .get(com.google.firebase.firestore.AggregateSource.SERVER)
+                .await()
+                .count
+        } catch (e: Exception) {
+            0L
+        }
     }
 
     override suspend fun getFollowingCount(userId: String): Long {
-        return firestore.collection("users").document(userId)
-            .collection("following")
-            .count()
-            .get(com.google.firebase.firestore.AggregateSource.SERVER)
-            .await()
-            .count
+        return try {
+            firestore.collection("users").document(userId)
+                .collection("following")
+                .count()
+                .get(com.google.firebase.firestore.AggregateSource.SERVER)
+                .await()
+                .count
+        } catch (e: Exception) {
+            0L
+        }
     }
 }

@@ -16,5 +16,10 @@ data class PublicationCardModel(
     val price: String,
     val description: String? = null,
     val location: String? = null,
-    val authorId: String? = null
+    val authorId: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val createdAt: Long? = null,
+    val likeCount: Int = 0,
+    val likedByCurrentUser: Boolean = false
 )

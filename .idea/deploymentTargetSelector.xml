@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-05-08T11:15:11.806219Z">
+        <DropdownSelection timestamp="2026-05-15T12:58:49.200265Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/emanuelbenavides/.android/avd/Pixel_10_Pro.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/josemadrigal/.android/avd/Pixel_5_2.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,10 +15,10 @@
       </SelectionState>
       <SelectionState runConfigName="E2EFlowTest">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-05-08T11:15:11.806219Z">
+        <DropdownSelection timestamp="2026-05-14T14:48:17.011251Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/emanuelbenavides/.android/avd/Pixel_10_Pro.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/Users/josemadrigal/.android/avd/Pixel_5_2.avd" />
             </handle>
           </Target>
         </DropdownSelection>
