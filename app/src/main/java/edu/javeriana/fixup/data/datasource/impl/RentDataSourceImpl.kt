@@ -106,7 +106,9 @@ class RentDataSourceImpl @Inject constructor(
         descripcion: String,
         precio: Double,
         tipo: String,
-        imageUris: List<Uri>
+        imageUris: List<Uri>,
+        latitude: Double,
+        longitude: Double
     ): String {
         val imageUrls = imageUris.mapIndexed { index, uri ->
             val ref = storage.reference.child(
@@ -124,11 +126,24 @@ class RentDataSourceImpl @Inject constructor(
                 descripcion = descripcion,
                 precio      = precio,
                 tipo        = tipo,
-                imagenes    = imageUrls
+                imagenes    = imageUrls,
+                latitude    = latitude,
+                longitude   = longitude
             )
         )
 
-        return response.propertyId
+        val propertyId = response.propertyId
             ?: throw Exception("El servidor no retornó el ID del inmueble creado.")
+
+        // Garantía cliente-side: si el backend Express no propagó las coordenadas
+        // al documento de Firestore, las escribimos aquí. Así getPropertyById
+        // (que lee latitude/longitude del doc) siempre encuentra la ubicación.
+        runCatching {
+            firestore.collection("properties").document(propertyId)
+                .update(mapOf("latitude" to latitude, "longitude" to longitude))
+                .await()
+        }
+
+        return propertyId
     }
 }

@@ -160,6 +160,52 @@ class FirebaseSeeder @Inject constructor(
         }
     }
 
+    /**
+     * Crea fixers cubriendo todas las combinaciones categoría×urgencia que usa el
+     * Fixer Assistant (4 categorías × 2 urgencias = 16 perfiles), para que cualquier
+     * filtro devuelva resultados. Idempotente: usa IDs deterministas y `set()`, así
+     * llamarlo múltiples veces no genera duplicados — solo refresca los documentos.
+     */
+    suspend fun seedFixers(): Result<Unit> {
+        return try {
+            data class FixerSpec(val category: String, val slug: String)
+            val categories = listOf(
+                FixerSpec("Plomería", "plomeria"),
+                FixerSpec("Electricidad", "electricidad"),
+                FixerSpec("Aseo", "aseo"),
+                FixerSpec("Remodelación", "remodelacion")
+            )
+            val urgencies = listOf("Inmediato" to "inmediato", "Programado" to "programado")
+            val usersCollection = firestore.collection("users")
+            val batch = firestore.batch()
+            categories.forEach { cat ->
+                urgencies.forEach { (urgValue, urgSlug) ->
+                    repeat(2) { idx ->
+                        val docId = "assistant_fixer_${cat.slug}_${urgSlug}_${idx + 1}"
+                        val docRef = usersCollection.document(docId)
+                        batch.set(
+                            docRef,
+                            hashMapOf(
+                                "name" to faker.name().fullName(),
+                                "email" to faker.internet().emailAddress(),
+                                "phone" to faker.phoneNumber().phoneNumber(),
+                                "address" to "${faker.address().streetAddress()}, Bogotá",
+                                "role" to "Fixer",
+                                "category" to cat.category,
+                                "availability" to urgValue,
+                                "profileImageUrl" to "https://i.pravatar.cc/200?u=$docId"
+                            )
+                        )
+                    }
+                }
+            }
+            batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private suspend fun seedReviews(count: Int, currentUserId: String?) {
         val reviewsCollection = firestore.collection("reviews")
         repeat(count) {
