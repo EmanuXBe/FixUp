@@ -2,6 +2,7 @@ package edu.javeriana.fixup.ui.features.rent
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,7 +28,8 @@ import edu.javeriana.fixup.ui.model.PropertyModel
 fun RentScreen(
     viewModel: RentViewModel = hiltViewModel(),
     onSelectClick: (String) -> Unit,
-    onCreateClick: () -> Unit = {}
+    onCreateClick: () -> Unit = {},
+    onMapClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -55,7 +57,8 @@ fun RentScreen(
                 is RentUiState.Success -> {
                     RentContent(
                         properties         = state.properties,
-                        onPropertySelected = { id -> onSelectClick(id) }
+                        onPropertySelected = { id -> onSelectClick(id) },
+                        onMapClick         = onMapClick
                     )
                 }
                 is RentUiState.Error -> {
@@ -71,7 +74,8 @@ fun RentScreen(
 @Composable
 fun RentContent(
     properties: List<PropertyModel>,
-    onPropertySelected: (String) -> Unit
+    onPropertySelected: (String) -> Unit,
+    onMapClick: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -83,7 +87,7 @@ fun RentContent(
         }
 
         item {
-            MapAreaPlaceholder(modifier = Modifier.height(240.dp))
+            MapAreaPlaceholder(modifier = Modifier.height(240.dp), onClick = onMapClick)
         }
 
         items(
@@ -154,8 +158,14 @@ fun FilterControls(modifier: Modifier = Modifier, resultCount: Int) {
 }
 
 @Composable
-fun MapAreaPlaceholder(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxWidth().background(Color(0xFFE0E7FF))) {
+fun MapAreaPlaceholder(modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(Color(0xFFE0E7FF))
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
         Image(
             painter = painterResource(id = R.drawable.map),
             contentDescription = null,
@@ -163,5 +173,19 @@ fun MapAreaPlaceholder(modifier: Modifier = Modifier) {
             contentScale = ContentScale.FillBounds,
             alpha = 0.5f
         )
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 12.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = Color.Black.copy(alpha = 0.55f)
+        ) {
+            Text(
+                text = "Abrir mapa →",
+                color = Color.White,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+            )
+        }
     }
 }

@@ -10,9 +10,14 @@ data class PublicationDto(
     val id: String = "",
     val title: String = "",
     val priceText: String = "",
-    val description: String? = "",
-    val location: String? = "",
+    val description: String? = null,
+    val location: String? = null,
     val imageRes: Int = 0,
-    val imageUrl: String? = "",
-    val authorId: String? = ""
+    val imageUrl: String? = null,
+    val authorId: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val createdAt: Long? = null,
+    val likeCount: Int = 0,
+    val likedByCurrentUser: Boolean = false
 )

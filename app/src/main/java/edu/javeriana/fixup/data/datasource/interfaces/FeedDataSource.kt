@@ -16,4 +16,6 @@ interface FeedDataSource {
     suspend fun getFollowingPublications(followingIds: List<String>): List<PublicationDto>
     suspend fun getPublicationById(id: String): PublicationDto
     suspend fun createPublication(property: PropertyModel, imageUri: Uri): PropertyModel
+    suspend fun getRecentPublications(): List<PublicationDto>
+    suspend fun togglePublicationLike(publicationId: String, userId: String, liked: Boolean)
 }

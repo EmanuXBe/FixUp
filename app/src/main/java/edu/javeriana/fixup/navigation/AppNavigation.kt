@@ -100,6 +100,9 @@ fun AppNavigation(
                 },
                 onCreateClick = {
                     navController.navigate(AppScreens.CreatePublication.route)
+                },
+                onMapClick = {
+                    navController.navigate(AppScreens.ReviewMap.route)
                 }
             )
         }

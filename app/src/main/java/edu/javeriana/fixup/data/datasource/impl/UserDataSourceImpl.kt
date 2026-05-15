@@ -12,22 +12,26 @@ class UserDataSourceImpl @Inject constructor(
 ) : UserDataSource {
 
     override suspend fun getUserById(userId: String): UserDto? {
-        val document = firestore.collection("users").document(userId).get().await()
-        return if (document.exists()) {
-            val followers = getFollowersIds(userId)
-            val following = getFollowingIds(userId)
-            UserDto(
-                id = document.id,
-                name = document.getString("name"),
-                email = document.getString("email"),
-                phone = document.getString("phone"),
-                address = document.getString("address"),
-                role = document.getString("role"),
-                profileImageUrl = document.getString("profileImageUrl"),
-                followers = followers,
-                following = following
-            )
-        } else {
+        return try {
+            val document = firestore.collection("users").document(userId).get().await()
+            if (document.exists()) {
+                val followers = getFollowersIds(userId)
+                val following = getFollowingIds(userId)
+                UserDto(
+                    id = document.id,
+                    name = document.getString("name"),
+                    email = document.getString("email"),
+                    phone = document.getString("phone"),
+                    address = document.getString("address"),
+                    role = document.getString("role"),
+                    profileImageUrl = document.getString("profileImageUrl"),
+                    followers = followers,
+                    following = following
+                )
+            } else {
+                null
+            }
+        } catch (e: Exception) {
             null
         }
     }
@@ -66,21 +70,29 @@ class UserDataSourceImpl @Inject constructor(
     }
 
     override suspend fun getFollowersCount(userId: String): Long {
-        return firestore.collection("users").document(userId)
-            .collection("followers")
-            .count()
-            .get(AggregateSource.SERVER)
-            .await()
-            .count
+        return try {
+            firestore.collection("users").document(userId)
+                .collection("followers")
+                .count()
+                .get(AggregateSource.SERVER)
+                .await()
+                .count
+        } catch (e: Exception) {
+            0L
+        }
     }
 
     override suspend fun getFollowingCount(userId: String): Long {
-        return firestore.collection("users").document(userId)
-            .collection("following")
-            .count()
-            .get(AggregateSource.SERVER)
-            .await()
-            .count
+        return try {
+            firestore.collection("users").document(userId)
+                .collection("following")
+                .count()
+                .get(AggregateSource.SERVER)
+                .await()
+                .count
+        } catch (e: Exception) {
+            0L
+        }
     }
 
     override suspend fun getFollowersIds(userId: String): List<String> {

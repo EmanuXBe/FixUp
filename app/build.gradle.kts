@@ -105,7 +105,6 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.firebase.messaging)
     implementation(libs.kotlinx.coroutines.play.services)
-    implementation(libs.firebase.firestore)
     implementation(libs.datafaker)
     implementation(libs.maps.compose)
     implementation(libs.maps.compose.utils)
