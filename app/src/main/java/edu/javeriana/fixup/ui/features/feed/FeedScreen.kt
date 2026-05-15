@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +26,8 @@ fun FeedScreen(
     viewModel: FeedViewModel = hiltViewModel(),
     onPublicationClick: (String) -> Unit = {},
     onAllPublicationsClick: () -> Unit = {},
-    onFollowingClick: () -> Unit = {}
+    onFollowingClick: () -> Unit = {},
+    onAssistantClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -58,6 +61,7 @@ fun FeedScreen(
             item(span = { GridItemSpan(maxLineSpan) }) {
                 FeaturedSection(
                     onFollowingClick = onFollowingClick,
+                    onAssistantClick = onAssistantClick,
                     onSeedClick = { viewModel.seedData() }
                 )
             }
@@ -96,6 +100,7 @@ fun FeedScreen(
 @Composable
 private fun FeaturedSection(
     onFollowingClick: () -> Unit,
+    onAssistantClick: () -> Unit,
     onSeedClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -111,7 +116,7 @@ private fun FeaturedSection(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
-            
+
             // Botón de Pánico para Testing
             if (edu.javeriana.fixup.BuildConfig.DEBUG) {
                 Button(
@@ -121,6 +126,19 @@ private fun FeaturedSection(
                 ) {
                     Text("Sembrar", fontSize = 12.sp)
                 }
+            }
+
+            TextButton(
+                onClick = onAssistantClick,
+                contentPadding = PaddingValues(horizontal = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.AutoAwesome,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Asistente", fontSize = 13.sp)
             }
 
             TextButton(onClick = onFollowingClick) {

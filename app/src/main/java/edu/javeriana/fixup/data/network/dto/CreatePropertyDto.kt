@@ -47,7 +47,15 @@ data class CreatePropertyRequestDto(
      * y envía aquí solo las URLs resultantes, nunca los binarios.
      */
     @SerializedName("imagenes")
-    val imagenes: List<String> = emptyList()
+    val imagenes: List<String> = emptyList(),
+
+    /** Latitud seleccionada por el usuario en el mapa. */
+    @SerializedName("latitude")
+    val latitude: Double? = null,
+
+    /** Longitud seleccionada por el usuario en el mapa. */
+    @SerializedName("longitude")
+    val longitude: Double? = null
 )
 
 /**

@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import edu.javeriana.fixup.ui.features.assistant.AssistantScreen
 import edu.javeriana.fixup.ui.features.auth.login.LogInScreen
 import edu.javeriana.fixup.ui.features.auth.register.RegisterScreen
 import edu.javeriana.fixup.ui.features.chat.ChatScreen
@@ -87,7 +88,21 @@ fun AppNavigation(
                 },
                 onFollowingClick = {
                     navController.navigate(AppScreens.FollowingFeed.route)
+                },
+                onAssistantClick = {
+                    navController.navigate(AppScreens.Assistant.route)
                 }
+            )
+        }
+
+        // Assistant screen
+        composable(AppScreens.Assistant.route) {
+            AssistantScreen(
+                viewModel = hiltViewModel(),
+                onProfileClick = { userId ->
+                    navController.navigate(AppScreens.UserProfile.route + "/$userId")
+                },
+                onBackClick = { navController.popBackStack() }
             )
         }
 

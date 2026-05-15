@@ -29,6 +29,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 
 /**
  * Pantalla para publicar un nuevo inmueble.
@@ -63,12 +71,13 @@ fun CreatePropertyRoute(
     }
 
     CreatePropertyScreen(
-        uiState      = uiState,
-        onBackClick  = onBackClick,
-        onSubmit     = { titulo, ubicacion, descripcion, precio, tipo, uris ->
+        uiState            = uiState,
+        onBackClick        = onBackClick,
+        onSubmit           = { titulo, ubicacion, descripcion, precio, tipo, uris ->
             viewModel.submitProperty(titulo, ubicacion, descripcion, precio, tipo, uris)
         },
-        onClearError = viewModel::clearError
+        onLocationSelected = viewModel::onLocationSelected,
+        onClearError       = viewModel::clearError
     )
 }
 
@@ -99,6 +108,7 @@ private fun CreatePropertyScreen(
     onBackClick: () -> Unit,
     onSubmit: (titulo: String, ubicacion: String, descripcion: String,
                precio: String, tipo: String, imageUris: List<Uri>) -> Unit,
+    onLocationSelected: (LatLng) -> Unit,
     onClearError: () -> Unit
 ) {
     // ─── Estado local del formulario ─────────────────────────────────────────
@@ -271,7 +281,46 @@ private fun CreatePropertyScreen(
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-            // ─── Sección 3: Fotos del inmueble ───────────────────────────────
+            // ─── Sección 3: Ubicación en el mapa ─────────────────────────────
+            // Las coordenadas se persisten en el UiState (selectedLocation),
+            // por lo que sobreviven a recomposiciones y rotaciones.
+            FormSection(title = "Ubicación en el mapa") {
+                Text(
+                    text     = "Toca el mapa para marcar la ubicación exacta del inmueble.",
+                    style    = MaterialTheme.typography.bodySmall,
+                    color    = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+                LocationPickerMap(
+                    selectedLocation   = uiState.selectedLocation,
+                    onLocationSelected = onLocationSelected,
+                    enabled            = !uiState.isLoading
+                )
+                AnimatedVisibility(
+                    visible = uiState.ubicacionMapaError != null,
+                    enter   = fadeIn(),
+                    exit    = fadeOut()
+                ) {
+                    Text(
+                        text  = uiState.ubicacionMapaError ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+                uiState.selectedLocation?.let { loc ->
+                    Text(
+                        text     = "Lat: %.5f  Lng: %.5f".format(loc.latitude, loc.longitude),
+                        style    = MaterialTheme.typography.labelSmall,
+                        color    = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            // ─── Sección 4: Fotos del inmueble ───────────────────────────────
             FormSection(title = "Fotos del inmueble") {
 
                 // Botón para abrir el selector de imágenes del sistema
@@ -366,9 +415,72 @@ private fun CreatePropertyScreen(
     }
 }
 
+// Centro inicial del mapa cuando el usuario aún no ha seleccionado ubicación.
+// Bogotá es un punto razonable para la mayoría de los inmuebles de la app.
+private val BOGOTA_DEFAULT = LatLng(4.711, -74.0721)
+
 // ─────────────────────────────────────────────────────────────────────────────────────────────
 // Componentes reutilizables privados de esta pantalla
 // ─────────────────────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mapa interactivo que permite al usuario marcar la ubicación del inmueble.
+ *
+ * - onMapClick: captura el LatLng del toque y lo eleva al ViewModel para que
+ *   persista en el UiState (sobrevive a recomposiciones y rotaciones).
+ * - Marker: confirmación visual; solo se dibuja cuando hay coordenada elegida.
+ *
+ * ¿Por qué la cámara depende de selectedLocation con un key explícito?
+ * Para que, si el ViewModel ya tenía una coordenada (vuelta a la pantalla,
+ * cambio de configuración), la cámara abra centrada sobre el marker existente
+ * en vez de en Bogotá por defecto.
+ */
+@Composable
+private fun LocationPickerMap(
+    selectedLocation: LatLng?,
+    onLocationSelected: (LatLng) -> Unit,
+    enabled: Boolean
+) {
+    val initialPosition = selectedLocation ?: BOGOTA_DEFAULT
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(initialPosition, 14f)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant,
+                shape = RoundedCornerShape(12.dp)
+            )
+    ) {
+        GoogleMap(
+            modifier            = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties          = MapProperties(isMyLocationEnabled = false),
+            uiSettings          = MapUiSettings(
+                zoomControlsEnabled  = false,
+                myLocationButtonEnabled = false
+            ),
+            onMapClick = { latLng ->
+                if (enabled) onLocationSelected(latLng)
+            }
+        ) {
+            // Marker dibujado únicamente cuando ya hay una coordenada elegida.
+            // MarkerState(position = ...) basta porque el LatLng proviene del
+            // UiState, que es la fuente de verdad — no necesitamos rememberSaveable.
+            selectedLocation?.let { loc ->
+                Marker(
+                    state = MarkerState(position = loc),
+                    title = "Ubicación seleccionada"
+                )
+            }
+        }
+    }
+}
 
 /**
  * Contenedor con título de sección y slots para los campos.

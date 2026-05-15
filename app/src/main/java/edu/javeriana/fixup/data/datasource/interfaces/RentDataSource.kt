@@ -24,6 +24,8 @@ interface RentDataSource {
         descripcion: String,
         precio: Double,
         tipo: String,
-        imageUris: List<Uri>
+        imageUris: List<Uri>,
+        latitude: Double,
+        longitude: Double
     ): String
 }

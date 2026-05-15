@@ -47,7 +47,9 @@ class RentRepository @Inject constructor(
         descripcion: String,
         precio: Double,
         tipo: String,
-        imageUris: List<Uri>
+        imageUris: List<Uri>,
+        latitude: Double,
+        longitude: Double
     ): Result<String> {
         // Verificar que el usuario esté autenticado antes de intentar la operación
         val userId = authRepository.currentUser?.uid
@@ -61,7 +63,9 @@ class RentRepository @Inject constructor(
                 descripcion = descripcion,
                 precio      = precio,
                 tipo        = tipo,
-                imageUris   = imageUris
+                imageUris   = imageUris,
+                latitude    = latitude,
+                longitude   = longitude
             )
             Result.success(propertyId)
         } catch (e: Exception) {

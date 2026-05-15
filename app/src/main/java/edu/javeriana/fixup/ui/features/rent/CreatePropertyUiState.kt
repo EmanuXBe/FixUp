@@ -1,5 +1,7 @@
 package edu.javeriana.fixup.ui.features.rent
 
+import com.google.android.gms.maps.model.LatLng
+
 /**
  * Estado de UI para el formulario de publicación de inmuebles (CreatePropertyScreen).
  *
@@ -20,6 +22,10 @@ package edu.javeriana.fixup.ui.features.rent
  * @param precioError       mensaje de error para el campo Precio
  * @param tipoError         mensaje de error para el selector Tipo (Arriendo/Venta)
  * @param imagenesError     mensaje de error si no se seleccionó ninguna foto
+ * @param selectedLocation  Coordenadas elegidas por el usuario en el mapa.
+ *                          Se persisten en el ViewModel para sobrevivir a
+ *                          recomposiciones y cambios de configuración.
+ * @param ubicacionMapaError mensaje de error si el usuario no marcó un punto en el mapa
  */
 data class CreatePropertyUiState(
     val isLoading: Boolean = false,
@@ -30,8 +36,18 @@ data class CreatePropertyUiState(
     val descripcionError: String? = null,
     val precioError: String? = null,
     val tipoError: String? = null,
-    val imagenesError: String? = null
+    val imagenesError: String? = null,
+    val selectedLocation: LatLng? = null,
+    val ubicacionMapaError: String? = null
 ) {
+    /** Latitud seleccionada o null si el usuario no ha tocado el mapa. */
+    val latitude: Double?
+        get() = selectedLocation?.latitude
+
+    /** Longitud seleccionada o null si el usuario no ha tocado el mapa. */
+    val longitude: Double?
+        get() = selectedLocation?.longitude
+
     /**
      * Propiedad computada: true si NO hay ningún error de validación activo.
      * Usada en la Screen para saber si el formulario es envíable.
@@ -42,5 +58,6 @@ data class CreatePropertyUiState(
                 descripcionError == null &&
                 precioError == null &&
                 tipoError == null &&
-                imagenesError == null
+                imagenesError == null &&
+                ubicacionMapaError == null
 }
