@@ -77,9 +77,6 @@ class E2EFlowTest {
         println("E2E: Starting setUp")
         hiltRule.inject()
         println("E2E: Hilt injected")
-
-        dismissSystemDialogs()
-
         clearAuthEmulator()
         println("E2E: Auth emulator cleared")
 
@@ -135,6 +132,7 @@ class E2EFlowTest {
         println("E2E: Launching MainActivity")
         scenario = ActivityScenario.launch(MainActivity::class.java)
         println("E2E: MainActivity launched")
+        dismissSystemDialogs()
     }
 
     @After
@@ -336,14 +334,29 @@ class E2EFlowTest {
     private fun dismissSystemDialogs() {
         try {
             val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-            val selectors = listOf("OK", "Got it", "Continue", "Close", "Dismiss")
-            for (text in selectors) {
-                val btn = device.findObject(UiSelector().textMatches("(?i)$text"))
-                if (btn.exists()) {
-                    btn.click()
-                    break
+            // Include Spanish button texts (Aceptar, Entendido, etc.) since device may be in Spanish
+            val buttonTexts = listOf(
+                "OK", "Aceptar", "Got it", "Entendido",
+                "Continue", "Continuar", "Dismiss", "Descartar",
+                "Close", "Cerrar", "Run anyway", "Proceed"
+            )
+            repeat(3) { attempt ->
+                Thread.sleep(800)
+                for (text in buttonTexts) {
+                    try {
+                        val btn = device.findObject(UiSelector().textContains(text).clickable(true))
+                        if (btn.exists()) {
+                            btn.click()
+                            device.waitForIdle(500)
+                            println("E2E: Dismissed dialog with button '$text' (attempt ${attempt + 1})")
+                            return
+                        }
+                    } catch (_: Exception) {}
                 }
             }
+            // Fallback: press back once to close any blocking overlay
+            device.pressBack()
+            device.waitForIdle(500)
         } catch (e: Exception) {
             println("E2E: Could not dismiss system dialog: ${e.message}")
         }
