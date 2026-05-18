@@ -59,7 +59,8 @@ class ReviewRepository @Inject constructor(
                                     reviewId = reviewId,
                                     likerId = currentUserId,
                                     likerName = authRepository.currentUser?.displayName ?: "Un usuario",
-                                    targetUserId = targetUserId
+                                    targetUserId = targetUserId,
+                                    likerProfileImageUrl = authRepository.currentUser?.photoUrl?.toString()
                                 )
                             )
                         } catch (e: Exception) {

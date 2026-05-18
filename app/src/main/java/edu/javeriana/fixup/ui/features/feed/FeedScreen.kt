@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -29,7 +30,7 @@ fun FeedScreen(
     onFollowingClick: () -> Unit = {},
     onAssistantClick: () -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     if (!uiState.isConnected) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -80,7 +81,10 @@ fun FeedScreen(
                 )
             }
 
-            items(uiState.publications) { publication ->
+            items(
+                items = uiState.publications,
+                key = { it.id }
+            ) { publication ->
                 PublicationCard(
                     imageRes = publication.imageUrl,
                     title = publication.title,

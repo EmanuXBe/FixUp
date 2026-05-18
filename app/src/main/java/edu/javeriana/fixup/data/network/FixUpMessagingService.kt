@@ -46,19 +46,30 @@ class FixUpMessagingService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        
-        val type = remoteMessage.data["type"]
-        val targetUserId = remoteMessage.data["targetUserId"]
+
+        val data = remoteMessage.data
+        val type = data["type"]
+        val targetUserId = data["targetUserId"]
+        // El backend puede enviar cualquiera de estas claves según el tipo de evento
+        val actorId = data["actorId"] ?: data["likerId"] ?: data["followerId"]
+        val actorProfileImageUrl = data["actorProfileImageUrl"]
+            ?: data["likerProfileImageUrl"]
+            ?: data["followerProfileImageUrl"]
         val title = remoteMessage.notification?.title ?: "FixUp"
         val body = remoteMessage.notification?.body ?: "Tienes una nueva notificación"
-        
-        saveAndShowNotification(title, body, type, targetUserId)
+
+        saveAndShowNotification(title, body, type, targetUserId, actorId, actorProfileImageUrl)
     }
 
-    private fun saveAndShowNotification(title: String, body: String, type: String?, targetUserId: String?) {
+    private fun saveAndShowNotification(
+        title: String,
+        body: String,
+        type: String?,
+        targetUserId: String?,
+        actorId: String?,
+        actorProfileImageUrl: String?
+    ) {
         // The FCM token already guarantees this message is for this device/user.
-        // No need to re-check targetUserId — doing so causes silent drops when
-        // FirebaseAuth hasn't finished initializing.
         showNotification(title, body)
 
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: targetUserId ?: return
@@ -71,7 +82,14 @@ class FixUpMessagingService : FirebaseMessagingService() {
                     message = body,
                     date = "hace un momento",
                     isRead = false,
-                    actionType = if (type == "RESPOND") "RESPOND" else null
+                    profileImageUrl = actorProfileImageUrl,
+                    actionType = when (type) {
+                        "RESPOND" -> "RESPOND"
+                        "LIKE" -> "LIKE"
+                        "FOLLOW" -> "FOLLOW"
+                        else -> null
+                    },
+                    actorId = actorId
                 )
             )
         }

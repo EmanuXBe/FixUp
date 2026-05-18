@@ -6,6 +6,7 @@ import edu.javeriana.fixup.data.network.dto.ReviewRequestDto
 import edu.javeriana.fixup.data.network.api.FixUpApiService
 import edu.javeriana.fixup.ui.model.PropertyModel
 import edu.javeriana.fixup.ui.model.ReviewModel
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class RentRepository @Inject constructor(
@@ -21,6 +22,9 @@ class RentRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
+    /** Stream en tiempo real de inmuebles para vistas que necesitan ver cambios al instante (mapa). */
+    fun observeProperties(): Flow<List<PropertyModel>> = dataSource.observeRentProperties()
 
     suspend fun getPropertyById(id: String): Result<PropertyModel> {
         return try {
