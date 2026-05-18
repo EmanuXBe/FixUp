@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -31,7 +32,7 @@ fun FixUpApp(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Sincronizar la ruta actual con el ViewModel
     LaunchedEffect(currentRoute) {
@@ -77,7 +78,7 @@ private fun SpecialBottomBar(
     if (currentRoute?.startsWith(AppScreens.PropertyDetail.route) == true && propertyId != null) {
         // Usamos el ViewModel para obtener la propiedad en lugar del repositorio directamente
         val propertyViewModel: PropertyDetailViewModel = hiltViewModel()
-        val detailUiState by propertyViewModel.uiState.collectAsState()
+        val detailUiState by propertyViewModel.uiState.collectAsStateWithLifecycle()
 
         LaunchedEffect(propertyId) {
             propertyViewModel.loadProperty(propertyId)

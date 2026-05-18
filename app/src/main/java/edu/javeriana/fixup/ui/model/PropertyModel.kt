@@ -25,5 +25,8 @@ data class PropertyModel(
     @SerializedName("latitude")
     val latitude: Double? = null,
     @SerializedName("longitude")
-    val longitude: Double? = null
+    val longitude: Double? = null,
+    /** Epoch millis. Necesario para ordenar por fecha de publicación en RentScreen. */
+    @SerializedName("created_at")
+    val createdAt: Long? = null
 )

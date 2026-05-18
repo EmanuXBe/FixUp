@@ -152,11 +152,52 @@ class FeedFirestoreDataSourceImpl @Inject constructor(
     }
 
     private fun DocumentSnapshot.toPublicationDto(): PublicationDto {
-        val title = getString("title")
-            ?: getString("titulo")
-            ?: getString("name")
-            ?: getString("nombre")
-            ?: "Sin título"
+        // Candidatos normalizados (lowercase, sin espacios). Cubre typos comunes
+        // detectados en datos reales: "tittle" (doble t) y "tittle " (espacio final).
+        val titleKeysNormalized = setOf(
+            "title", "titulo", "tittle", "titlu", "ttitle",
+            "name", "nombre",
+            "servicename", "productname",
+            "headline", "heading", "label"
+        )
+        val nonTitleKeysNormalized = setOf(
+            "description", "descripcion", "imageurl", "imageurls", "image", "images",
+            "imagenes", "category", "categoria", "ubicacion", "location",
+            "authorid", "userid", "ownerid", "createdat", "tipo", "id", "_id"
+        )
+        val payload = this.data
+        // Construimos un mapa normalizado→original para poder buscar con tolerancia
+        // a espacios/case/typos sin perder el key original (necesario para Log).
+        val normalizedKeys: List<Pair<String, String>> = payload?.keys
+            ?.map { original -> original.trim().lowercase() to original }
+            ?: emptyList()
+
+        // 1) Match exacto contra candidatos conocidos (después de normalizar)
+        val title: String = normalizedKeys
+            .firstOrNull { (norm, _) -> norm in titleKeysNormalized }
+            ?.let { (_, originalKey) -> getString(originalKey)?.trim()?.takeIf { it.isNotBlank() } }
+            // 2) Heurística: cualquier key cuyo nombre normalizado CONTENGA "titul" o "title"
+            ?: normalizedKeys
+                .firstOrNull { (norm, _) -> ("titul" in norm || "title" in norm || "ttle" in norm) }
+                ?.let { (_, originalKey) -> getString(originalKey)?.trim()?.takeIf { it.isNotBlank() } }
+            // 3) Fallback genérico: primer String corto que no sea descripción/URL/id
+            ?: run {
+                if (payload == null) null
+                else payload.entries.asSequence()
+                    .filter { (k, _) ->
+                        val n = k.trim().lowercase()
+                        n !in nonTitleKeysNormalized && "url" !in n && "id" !in n
+                    }
+                    .mapNotNull { (_, v) -> (v as? String)?.trim()?.takeIf { it.isNotBlank() && it.length in 2..120 } }
+                    .firstOrNull()
+                    ?.also {
+                        Log.w(TAG_FEED, "Doc ${this.id}: fallback genérico → '$it'. Keys=${payload.keys}")
+                    }
+            }
+            ?: run {
+                Log.w(TAG_FEED, "Doc ${this.id}: sin título reconocido. Keys=${payload?.keys}")
+                "Sin título"
+            }
         val price = getDouble("precio") ?: getDouble("price")
             ?: getLong("precio")?.toDouble() ?: getLong("price")?.toDouble() ?: 0.0
         val imageUrl = (get("imagenes") as? List<*>)?.firstOrNull() as? String
