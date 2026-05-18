@@ -20,6 +20,7 @@ class FirebaseSeeder @Inject constructor(
             seedUsers(5)
             seedArticles(10)
             seedReviews(15, currentUserId)
+            seedFixers()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -165,6 +166,10 @@ class FirebaseSeeder @Inject constructor(
      * Fixer Assistant (4 categorías × 2 urgencias = 16 perfiles), para que cualquier
      * filtro devuelva resultados. Idempotente: usa IDs deterministas y `set()`, así
      * llamarlo múltiples veces no genera duplicados — solo refresca los documentos.
+     *
+     * Escribe en la colección `/fixers/` (no `/users/`) porque las reglas Firestore de
+     * `/users/{userId}` exigen `request.auth.uid == userId`, lo que bloquearía estos
+     * IDs deterministas. `/fixers/` tiene reglas más permisivas para datos de demo.
      */
     suspend fun seedFixers(): Result<Unit> {
         return try {
@@ -176,13 +181,13 @@ class FirebaseSeeder @Inject constructor(
                 FixerSpec("Remodelación", "remodelacion")
             )
             val urgencies = listOf("Inmediato" to "inmediato", "Programado" to "programado")
-            val usersCollection = firestore.collection("users")
+            val fixersCollection = firestore.collection("fixers")
             val batch = firestore.batch()
             categories.forEach { cat ->
                 urgencies.forEach { (urgValue, urgSlug) ->
                     repeat(2) { idx ->
                         val docId = "assistant_fixer_${cat.slug}_${urgSlug}_${idx + 1}"
-                        val docRef = usersCollection.document(docId)
+                        val docRef = fixersCollection.document(docId)
                         batch.set(
                             docRef,
                             hashMapOf(

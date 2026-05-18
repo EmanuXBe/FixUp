@@ -2,11 +2,15 @@ package edu.javeriana.fixup.data.datasource.interfaces
 
 import android.net.Uri
 import edu.javeriana.fixup.ui.model.PropertyModel
+import kotlinx.coroutines.flow.Flow
 
 interface RentDataSource {
 
     /** Retorna la lista de inmuebles (API real con fallback a mocks). */
     suspend fun getRentProperties(): List<PropertyModel>
+
+    /** Stream en tiempo real de inmuebles desde Firestore. Emite cada vez que la colección cambia. */
+    fun observeRentProperties(): Flow<List<PropertyModel>>
 
     /** Retorna un inmueble por su ID de string (Firestore o mock). */
     suspend fun getPropertyById(id: String): PropertyModel

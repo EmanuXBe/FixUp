@@ -87,6 +87,12 @@ class CreatePropertyViewModel @Inject constructor(
         tipo: String,
         imageUris: List<Uri>
     ) {
+        // Guard idempotente: si ya hay una publicación en vuelo, ignorar.
+        // Por qué: el botón se deshabilita vía recomposición de Compose, que es
+        // asíncrona. Un doble-tap rápido alcanza a entrar dos veces y, sin este
+        // chequeo, se lanzan dos coroutines que escriben dos documentos en Firestore.
+        if (_uiState.value.isLoading) return
+
         // Coordenadas tomadas del estado: el mapa las depositó allí mediante
         // onLocationSelected. Si son null, validateFields rechazará el envío.
         val location = _uiState.value.selectedLocation
@@ -100,11 +106,14 @@ class CreatePropertyViewModel @Inject constructor(
         // En este punto location no puede ser null (validateFields lo garantiza)
         val safeLocation = location!!
 
-        // ─── PASO 2: Iniciar la operación asíncrona ───────────────────────────
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+        // ─── PASO 2: Marcar carga SINCRÓNICAMENTE antes de lanzar el coroutine ──
+        // Setear isLoading aquí (fuera del launch) cierra la ventana de carrera
+        // entre el primer tap y la primera recomposición.
+        _uiState.update { it.copy(isLoading = true, error = null) }
 
-            // ─── PASO 3: Delegar al Repository ────────────────────────────────
+        // ─── PASO 3: Iniciar la operación asíncrona ───────────────────────────
+        viewModelScope.launch {
+            // ─── PASO 4: Delegar al Repository ────────────────────────────────
             rentRepository.createProperty(
                 titulo      = titulo.trim(),
                 ubicacion   = ubicacion.trim(),

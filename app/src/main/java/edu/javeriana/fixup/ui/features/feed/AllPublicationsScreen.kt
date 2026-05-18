@@ -9,8 +9,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -30,7 +30,7 @@ fun AllPublicationsScreen(
     viewModel: FeedViewModel = hiltViewModel(),
     onPublicationClick: (String) -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -59,7 +59,10 @@ fun AllPublicationsScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(uiState.publications) { publication ->
+            items(
+                items = uiState.publications,
+                key = { it.id }
+            ) { publication ->
                 VerticalPublicationItem(
                     imageUrl = publication.imageUrl,
                     title = publication.title,
